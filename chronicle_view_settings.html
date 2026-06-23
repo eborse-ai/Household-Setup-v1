@@ -1,0 +1,2253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Household General Settings – Setup</title>
+  <link rel="stylesheet" href="household-setup.css" />
+  <style>
+    /* ── Objects card (panel 7 list view) ── */
+    .cv-obj-card { border:1px solid #dddbda; border-radius:8px; overflow:hidden; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    /* SLDS-style tab bar */
+    .cv-tab-bar { display:flex; border-bottom:2px solid #e0e0e0; padding:0 20px; background:#fff; }
+    .cv-tab-item { padding:11px 16px; font-size:13px; font-weight:600; color:#706e6b; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .15s, border-color .15s; display:flex; align-items:center; gap:7px; user-select:none; }
+    .cv-tab-item:hover { color:#0176d3; }
+    .cv-tab-item.active { color:#0176d3; border-bottom-color:#0176d3; }
+    .cv-tab-count { background:#e0e0e0; color:#706e6b; font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px; transition:background .15s, color .15s; }
+    .cv-tab-item.active .cv-tab-count { background:#d4e9ff; color:#0050a0; }
+    /* Table toolbar */
+    .cv-tbl-toolbar { display:flex; align-items:center; justify-content:space-between; padding:9px 20px; border-bottom:1px solid #f3f2f2; }
+    .cv-tbl-count { font-size:12px; color:#3e3e3c; font-weight:600; }
+    .cv-tbl-search { position:relative; display:flex; align-items:center; }
+    .cv-tbl-search-icon { position:absolute; left:8px; color:#a9a7a4; pointer-events:none; }
+    .cv-tbl-search input { padding:5px 10px 5px 28px; border:1px solid #dddbda; border-radius:4px; font-size:12px; color:#3e3e3c; outline:none; width:190px; background:#fff; }
+    .cv-tbl-search input:focus { border-color:#0176d3; box-shadow:0 0 0 2px rgba(1,118,211,.15); }
+    /* Table inside card — override generic table styles */
+    .cv-obj-card .cv-obj-table { margin:0; }
+    .cv-obj-card .cv-obj-table th { padding:8px 20px; background:#fafafa; font-size:11px; }
+    .cv-obj-card .cv-obj-table td { padding:12px 20px; border-bottom:1px solid #f3f2f2; }
+    .cv-obj-card .cv-obj-table tr:last-child td { border-bottom:none; }
+    .cv-obj-card .cv-obj-table tr:hover td { background:#f0f9ff; }
+    .cv-row-num-th { width:28px; text-align:center; color:#a9a7a4 !important; }
+    .cv-row-num-td { text-align:center; color:#a9a7a4; font-size:11px; width:28px; }
+    /* CSS counter for auto row numbering */
+    #cv-obj-tbody { counter-reset:cv-obj-row; }
+    #cv-obj-tbody tr:not([hidden]) { counter-increment:cv-obj-row; }
+    #cv-obj-tbody .cv-row-num-td::before { content:counter(cv-obj-row); }
+    /* Drag handle column */
+    .cv-grip-th  { width:20px; padding:8px 4px 8px 14px !important; }
+    .cv-grip-td  { padding:12px 4px 12px 14px !important; width:20px; }
+    .cv-row-grip { color:#c9c7c5; cursor:grab; font-size:15px; line-height:1; display:inline-block; opacity:0; transition:opacity .12s; user-select:none; }
+    .cv-row-grip:active { cursor:grabbing; }
+    #cv-obj-tbody tr:hover .cv-row-grip { opacity:1; }
+    /* Drag states */
+    #cv-obj-tbody tr[draggable] { transition:opacity .15s; }
+    #cv-obj-tbody tr.cv-row--dragging { opacity:.35; }
+    #cv-obj-tbody tr.cv-row--drag-over { background:#e8f4ff !important; box-shadow:inset 0 2px 0 #0176d3; }
+    /* Card footer */
+    .cv-obj-card-footer { padding:12px 20px; border-top:1px solid #f3f2f2; background:#fafafa; }
+    /* Data model badges (still used in table cells) */
+    .cv-dm-badge-pkg  { display:inline-block; background:#fff3cd; color:#856404; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:4px; vertical-align:middle; }
+    .cv-dm-badge-core { display:inline-block; background:#d1fae5; color:#065f46; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:4px; vertical-align:middle; }
+    /* Objects table */
+    .cv-obj-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px; }
+    .cv-obj-table th { text-align:left; font-size:10px; font-weight:700; color:#706e6b; text-transform:uppercase; letter-spacing:.4px; padding:6px 10px; border-bottom:2px solid #e0e0e0; }
+    .cv-obj-table td { padding:10px; border-bottom:1px solid #f3f2f2; vertical-align:middle; }
+    .cv-obj-table tr:hover td { background:#fafafa; }
+    .cv-obj-color-dot { width:12px; height:12px; border-radius:50%; display:inline-block; flex-shrink:0; }
+    .cv-obj-label-cell { display:flex; align-items:center; gap:8px; font-weight:600; font-size:12px; }
+    .cv-obj-date { font-family:monospace; font-size:11px; color:#706e6b; }
+    /* Row actions dropdown */
+    .cv-row-actions { position:relative; display:inline-flex; }
+    .cv-row-actions-btn { background:none; border:1px solid transparent; border-radius:4px; padding:5px 8px; cursor:pointer; color:#a9a7a4; display:flex; align-items:center; justify-content:center; transition:all .12s; }
+    .cv-row-actions-btn:hover { border-color:#dddbda; color:#3e3e3c; background:#f3f2f2; }
+    .cv-row-actions-btn[aria-expanded="true"] { border-color:#0176d3; color:#0176d3; background:#eaf4ff; }
+    .cv-row-menu { position:absolute; right:0; top:calc(100% + 4px); background:#fff; border:1px solid #dddbda; border-radius:6px; box-shadow:0 4px 20px rgba(0,0,0,.14); min-width:168px; z-index:100; padding:4px 0; }
+    .cv-row-menu-item { display:flex; align-items:center; gap:9px; padding:8px 14px; font-size:12px; font-weight:600; color:#3e3e3c; cursor:pointer; background:none; border:none; width:100%; text-align:left; transition:background .1s; }
+    .cv-row-menu-item:hover { background:#f0f9ff; color:#0176d3; }
+    .cv-row-menu-item--danger { color:#706e6b; }
+    .cv-row-menu-item--danger:hover { background:#fff4f4; color:#c23934; }
+    .cv-row-menu-divider { height:1px; background:#e8e8e8; margin:3px 0; }
+    .cv-obj-add-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border:1px solid #0176d3; border-radius:4px; background:#fff; color:#0176d3; font-size:12px; font-weight:600; cursor:pointer; margin-top:2px; }
+    .cv-obj-add-btn:hover { background:#e8f4ff; }
+    /* SLDS toggle */
+    .cv-tog { display:inline-flex; width:34px; height:18px; border-radius:9px; background:#c9c7c5; position:relative; cursor:pointer; transition:background .2s; flex-shrink:0; }
+    .cv-tog.on { background:#0176d3; }
+    .cv-tog::after { content:''; position:absolute; width:14px; height:14px; background:#fff; border-radius:50%; top:2px; left:2px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+    .cv-tog.on::after { left:18px; }
+
+    /* ── Full-panel view switch ── */
+    .cv-list-view  { display:flex; flex-direction:column; gap:0; }
+    .cv-form-view  { display:flex; flex-direction:column; }
+
+    /* Breadcrumb back nav */
+    .cv-bc-bar { display:flex; align-items:center; gap:6px; padding-bottom:14px; margin-bottom:20px; border-bottom:1px solid #e8e8e8; }
+    .cv-bc-back { background:none; border:none; color:#0176d3; font-size:12px; font-weight:600; cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:5px; }
+    .cv-bc-back:hover { text-decoration:underline; }
+    .cv-bc-sep   { color:#c9c7c5; font-size:13px; user-select:none; }
+    .cv-bc-title { font-size:12px; font-weight:600; color:#3e3e3c; }
+
+    /* Full-width horizontal stepper */
+    .cv-fstepper { display:flex; align-items:flex-start; margin-bottom:28px; }
+    .cv-fstep { display:flex; flex-direction:column; align-items:center; gap:5px; min-width:80px; cursor:default; }
+    .cv-fstep-num  { width:32px; height:32px; border-radius:50%; background:#e8e8e8; color:#706e6b; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; transition:background .2s, color .2s; flex-shrink:0; }
+    .cv-fstep.active .cv-fstep-num { background:#0176d3; color:#fff; box-shadow:0 0 0 3px rgba(1,118,211,.18); }
+    .cv-fstep.done   .cv-fstep-num { background:#2e844a; color:#fff; }
+    .cv-fstep-label  { font-size:11px; font-weight:600; color:#706e6b; white-space:nowrap; text-align:center; }
+    .cv-fstep.active .cv-fstep-label { color:#0176d3; }
+    .cv-fstep.done   .cv-fstep-label { color:#2e844a; }
+    .cv-fstep-line   { flex:1; height:2px; background:#e0e0e0; margin:0 4px; margin-top:15px; }
+    .cv-fstep.done + .cv-fstep-line { background:#2e844a; }
+
+    /* Form body (scrollable) and fields (max-width for readability) */
+    .cv-form-body   { flex:1; overflow-y:auto; }
+    .cv-form-fields { max-width:500px; }
+
+    /* Two-column field grid for wider viewport */
+    .cv-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 20px; max-width:500px; }
+    .cv-field-grid .cv-form-row { margin-bottom:14px; }
+    .cv-field-grid .cv-form-row--full { grid-column:1/-1; }
+
+    /* Sticky form footer */
+    .cv-form-footer { display:flex; align-items:center; gap:8px; padding-top:14px; margin-top:16px; border-top:1px solid #e8e8e8; flex-shrink:0; }
+    .cv-form-footer-spacer { flex:1; }
+    .cv-btn-secondary { padding:6px 16px; border:1px solid #dddbda; border-radius:4px; background:#fff; font-size:12px; font-weight:600; cursor:pointer; color:#3e3e3c; }
+    .cv-btn-secondary:hover { background:#f3f2f2; }
+    .cv-btn-primary { padding:6px 16px; border:1px solid #0176d3; border-radius:4px; background:#0176d3; font-size:12px; font-weight:600; cursor:pointer; color:#fff; }
+    .cv-btn-primary:hover { background:#0160ae; border-color:#0160ae; }
+
+    /* Form primitives */
+    .cv-form-row { margin-bottom:14px; }
+    .cv-form-lbl { font-size:11px; font-weight:700; color:#444; margin-bottom:4px; display:flex; align-items:center; gap:5px; }
+    .cv-form-lbl span { color:#e53935; margin-left:2px; }
+    /* Info icon tooltip — blue circle, white italic i */
+    .cv-info-icon { width:16px; height:16px; border-radius:50%; background:#0176d3 !important; color:#fff !important; font-size:10px; font-weight:700; font-style:italic; font-family:Georgia,serif; display:inline-flex; align-items:center; justify-content:center; cursor:default; position:relative; flex-shrink:0; line-height:1; }
+    .cv-info-icon:hover .cv-info-tip, .cv-info-icon:focus .cv-info-tip { display:block; }
+    .cv-info-tip { display:none; position:absolute; left:50%; bottom:calc(100% + 6px); transform:translateX(-50%); background:#1d1d1d; color:#fff !important; font-size:10px; font-weight:400; font-style:normal; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; padding:6px 9px; border-radius:5px; z-index:300; pointer-events:none; line-height:1.5; min-width:160px; max-width:220px; white-space:normal; }
+    .cv-info-tip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:4px solid transparent; border-top-color:#1d1d1d; }
+
+    /* ── Split Object + Color input ── */
+    .cv-split-input { display:flex; border:1px solid #dddbda; border-radius:4px; overflow:visible; position:relative; background:#fff; }
+    .cv-split-input:focus-within { border-color:#0176d3; box-shadow:0 0 0 2px rgba(1,118,211,.15); }
+    .cv-split-color { display:flex; align-items:center; gap:7px; padding:8px 10px; border-right:1px solid #dddbda; cursor:pointer; flex-shrink:0; position:relative; background:none; border-top:none; border-bottom:none; border-left:none; border-radius:4px 0 0 4px; user-select:none; }
+    .cv-split-color:hover { background:#f8f8f8; }
+    .cv-split-color-dot { width:18px; height:18px; border-radius:50%; flex-shrink:0; border:2px solid rgba(0,0,0,.1); transition:background .12s; }
+    .cv-split-chevron { width:8px; height:8px; opacity:.5; flex-shrink:0; }
+    .cv-split-sel { flex:1; border:none; outline:none; padding:8px 28px 8px 10px; font-size:12px; color:#1d1d1d; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23706e6b'/%3E%3C/svg%3E") no-repeat right 10px center; appearance:none; border-radius:0 4px 4px 0; min-width:0; }
+    .cv-split-sel:focus { outline:none; }
+    /* Color popup */
+    .cv-color-popup { position:absolute; top:calc(100% + 5px); left:0; background:#fff; border:1px solid #dddbda; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.15); padding:10px; display:grid; grid-template-columns:repeat(4,1fr); gap:7px; z-index:400; min-width:130px; }
+    .cv-color-opt { width:24px; height:24px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:transform .1s, border-color .1s; }
+    .cv-color-opt:hover { transform:scale(1.15); }
+    .cv-color-opt.cv-color-active { border-color:#1d1d1d; box-shadow:0 0 0 2px #fff inset; }
+    .cv-form-inp { width:100%; padding:8px 10px; border:1px solid #dddbda; border-radius:4px; font-size:12px; color:#1d1d1d; outline:none; box-sizing:border-box; }
+    .cv-form-inp:focus { border-color:#0176d3; box-shadow:0 0 0 2px rgba(1,118,211,.15); }
+    .cv-form-sel { width:100%; padding:8px 28px 8px 10px; border:1px solid #dddbda; border-radius:4px; font-size:12px; color:#1d1d1d; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23706e6b'/%3E%3C/svg%3E") no-repeat right 10px center; outline:none; appearance:none; box-sizing:border-box; }
+    .cv-form-sel:focus { border-color:#0176d3; box-shadow:0 0 0 2px rgba(1,118,211,.15); }
+    .cv-form-hint { font-size:10px; color:#706e6b; margin-top:4px; line-height:1.4; }
+    .cv-form-inp:disabled,
+    .cv-form-sel:disabled { background:#f3f3f3; color:#aeaeae; border-color:#e0e0e0; cursor:not-allowed; pointer-events:none; }
+    .cv-form-row--disabled .cv-form-lbl { color:#aeaeae; }
+    .cv-form-row--disabled .cv-form-lbl span { color:#aeaeae; }
+
+    /* Step title & description */
+    .cv-step-title { font-size:17px; font-weight:700; color:#1d1d1d; margin:0 0 8px; line-height:1.25; }
+    .cv-step-desc { margin:0 0 22px; font-size:13px; color:#706e6b; line-height:1.6; }
+
+
+    /* Field Panel tabs (Detail Panel Fields) */
+    .cv-obj-tabs { display:flex; border-bottom:2px solid #e0e0e0; margin-bottom:16px; }
+    .cv-obj-tab  { padding:8px 16px; font-size:12px; font-weight:600; cursor:pointer; color:#706e6b; border-bottom:2px solid transparent; margin-bottom:-2px; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+    .cv-obj-tab .cv-tab-dot { width:9px; height:9px; border-radius:50%; }
+    .cv-obj-tab:hover { color:#444; }
+    .cv-obj-tab.active { color:#0176d3; border-bottom-color:#0176d3; }
+    /* ── SLDS-style fields table (panel 8) ── */
+    .cv-fields-wrap { border:1px solid #dddbda; border-radius:6px; overflow:hidden; margin-top:4px; }
+    .cv-fields-table { width:100%; border-collapse:collapse; }
+    .cv-fields-table thead tr { background:#f8f7f6; }
+    .cv-fields-table th { font-size:11px; font-weight:700; color:#706e6b; text-transform:uppercase; letter-spacing:.4px; padding:9px 12px; border-bottom:2px solid #dddbda; text-align:left; white-space:nowrap; user-select:none; }
+    .cv-fields-table td { padding:9px 12px; border-bottom:1px solid #f0eff0; font-size:12px; color:#3e3e3c; vertical-align:middle; }
+    .cv-fields-table tbody tr:last-child td { border-bottom:none; }
+    .cv-fields-table tbody tr:hover td { background:#f8f7f6; }
+    .cv-ft-grip-th, .cv-ft-grip { width:20px; color:#c9c7c5; cursor:grab; font-size:14px; padding-left:8px; padding-right:0; }
+    .cv-ft-hl-th { width:100px; text-align:center !important; }
+    .cv-ft-hl { text-align:center; }
+    .cv-ft-rm-th, .cv-ft-rm-td { width:36px; text-align:center !important; }
+    .cv-ft-label { font-weight:600; white-space:nowrap; }
+    .cv-ft-api, .cv-ft-api-th { display:none; }
+    .cv-ft-type { font-size:11px; color:#706e6b; white-space:nowrap; }
+    /* Highlight count badge in column header */
+    .cv-hl-badge { display:inline-block; font-size:10px; font-weight:700; padding:1px 7px; border-radius:8px; background:#e8a000; color:#fff; margin-left:4px; vertical-align:middle; }
+    .cv-hl-badge--partial { background:#f59e0b; }
+    .cv-hl-badge--empty   { background:#c9c7c5; }
+
+    /* ── Detail Panel Info Card ── */
+    .cv-dp-info { display:flex; align-items:stretch; background:#f8f7f5; border:1px solid #e8e6e3; border-radius:8px; padding:14px 16px; margin:16px 0 22px; gap:0; }
+    .cv-dp-schematic { flex-shrink:0; width:240px; background:#fff; border:1px solid #e0ddd8; border-radius:6px; overflow:hidden; font-size:9px; display:flex; flex-direction:column; }
+    .cv-dp-sch-zone { flex:1; padding:10px 10px; }
+    .cv-dp-sch-zone + .cv-dp-sch-zone { border-top:1px solid #e0ddd8; }
+    .cv-dp-sch-zone-lbl { display:flex; align-items:center; gap:5px; font-weight:700; font-size:8.5px; letter-spacing:.5px; text-transform:uppercase; color:#706e6b; margin-bottom:8px; }
+    .cv-dp-sch-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .cv-dp-sch-fields { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; }
+    .cv-dp-sch-field { background:#fff8ed; border:1px solid #f0c070; border-radius:4px; padding:5px 4px; font-size:9px; font-weight:600; color:#856404; text-align:center; white-space:nowrap; }
+    .cv-dp-sch-body-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:2px; }
+    .cv-dp-sch-line { height:8px; background:#e8e6e3; border-radius:3px; }
+    .cv-dp-sch-line:nth-child(odd)  { width:100%; }
+    .cv-dp-sch-line:nth-child(even) { width:85%; }
+    /* Dotted connectors */
+    .cv-dp-connectors { display:flex; flex-direction:column; width:28px; flex-shrink:0; }
+    .cv-dp-conn-row { flex:1; display:flex; align-items:center; }
+    .cv-dp-conn-line { width:100%; border:none; border-bottom:1.5px dashed #c9c7c5; }
+    /* Text rows */
+    .cv-dp-info-rows { flex:1; display:flex; flex-direction:column; min-width:0; }
+    .cv-dp-info-row { flex:1; display:flex; align-items:center; padding:4px 0; }
+    .cv-dp-info-row + .cv-dp-info-row { border-top:1px solid #e8e6e3; }
+    .cv-dp-info-row p { margin:0; font-size:12px; color:#3e3e3c; line-height:1.5; }
+    .cv-dp-info-row strong { color:#1d1d1d; }
+    /* Remove button */
+    .cv-field-rm { background:none; border:1px solid #e0e0e0; border-radius:3px; color:#bbb; cursor:pointer; font-size:14px; line-height:1; padding:2px 5px; transition:border-color .12s, color .12s; }
+    .cv-field-rm:hover { border-color:#e53935; color:#e53935; background:#fff5f5; }
+    /* Add-field row */
+    .cv-ft-add-row { display:flex; align-items:center; gap:8px; padding:9px 12px; background:#f8f7f6; border-top:1px solid #dddbda; }
+    .cv-ft-add-label { font-size:11px; color:#706e6b; white-space:nowrap; }
+    .cv-ft-picker { padding:5px 10px; border:1px solid #dddbda; border-radius:4px; font-size:12px; color:#3e3e3c; background:#fff; cursor:pointer; min-width:240px; }
+    .cv-ft-picker:focus { outline:none; border-color:#0176d3; box-shadow:0 0 0 2px rgba(1,118,211,.12); }
+    /* Flash animation for newly added rows */
+    @keyframes cvRowFlash { 0%{background:#fff59d;} 100%{background:transparent;} }
+    .cv-ft-row--flash td { animation:cvRowFlash .55s ease forwards; }
+    /* Info banner */
+    .cv-info-banner { background:#edf5ff; border:1px solid #b3d4f5; border-radius:4px; padding:10px 14px; font-size:11px; color:#0050a0; display:flex; gap:8px; align-items:flex-start; margin-bottom:16px; line-height:1.5; }
+    /* AI toggle rows */
+    .cv-toggle-row { display:flex; align-items:flex-start; gap:12px; margin-bottom:18px; }
+    .cv-toggle-row:last-child { margin-bottom:0; }
+
+    /* ── Add / Edit Object modal ── */
+    .cv-form-modal-overlay {
+      position:fixed; inset:0; z-index:600;
+      background:rgba(0,0,0,.6);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .cv-form-modal-card {
+      background:#fff; border-radius:12px;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+      width:560px; max-width:96vw; max-height:90vh;
+      display:flex; flex-direction:column; overflow:hidden;
+    }
+    /* Centered header — close button pinned to the right absolutely */
+    .cv-form-modal-hdr {
+      position:relative; display:flex; align-items:center; justify-content:center;
+      padding:18px 52px 16px; border-bottom:1px solid #e8e8e8;
+      flex-shrink:0; background:#fff;
+    }
+    .cv-form-modal-title { font-size:17px; font-weight:700; color:#1d1d1d; margin:0; text-align:center; }
+    .cv-form-modal-close {
+      position:absolute; right:16px; top:50%; transform:translateY(-50%);
+      background:none; border:none; cursor:pointer;
+      color:#706e6b; padding:6px; border-radius:4px;
+      display:flex; align-items:center; line-height:1; transition:background .12s,color .12s;
+    }
+    .cv-form-modal-close:hover { color:#1d1d1d; background:#e8e8e8; }
+    .cv-form-modal-body { flex:1; overflow-y:auto; padding:24px 28px 12px; }
+    /* 3-column footer: [Cancel] [dot progress] [Back + Next] */
+    .cv-form-modal-footer {
+      display:flex; justify-content:space-between;
+      align-items:center; gap:16px;
+      padding:16px 24px 20px; border-top:1px solid #e8e8e8; flex-shrink:0;
+    }
+    .cv-footer-right { display:flex; justify-content:flex-end; gap:8px; }
+    /* Dot progress stepper */
+    .cv-step-dots { display:flex; align-items:center; justify-content:center; }
+    .cv-step-dot {
+      width:11px; height:11px; border-radius:50%; background:#c9c7c5;
+      transition:background .2s, width .2s, height .2s; flex-shrink:0;
+    }
+    .cv-step-dot--active { width:14px; height:14px; background:#0176d3; }
+    .cv-step-dot--done   { background:#2e844a; }
+    .cv-step-dot-line    { width:40px; height:2px; background:#c9c7c5; transition:background .2s; flex-shrink:0; }
+    .cv-step-dot-line--done { background:#2e844a; }
+    /* Pill buttons */
+    .cv-btn-pill { padding:8px 22px; border-radius:24px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; line-height:1.2; }
+    .cv-btn-pill--secondary { background:#fff; border:1.5px solid #c9c7c5; color:#3e3e3c; }
+    .cv-btn-pill--secondary:hover { background:#f3f2f2; border-color:#a9a7a4; }
+    .cv-btn-pill--primary { background:#0176d3; border:1.5px solid #0176d3; color:#fff; }
+    .cv-btn-pill--primary:hover { background:#0160ae; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Salesforce Setup page ─────────────────────────────── -->
+  <div class="sf-page" id="sf-page">
+
+    <!-- Top navigation bar -->
+    <header class="sf-topnav" aria-label="Salesforce top navigation">
+      <div class="sf-topnav__left">
+        <div class="sf-topnav__logo" aria-label="Salesforce">
+          <svg width="28" height="20" viewBox="0 0 124 84" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M51.3 9.2a22.3 22.3 0 0 1 15.8-6.6c7.8 0 14.7 4 18.9 10.1a26.4 26.4 0 0 1 11.5-2.7c14.7 0 26.6 12.1 26.6 27s-11.9 27-26.6 27c-1.9 0-3.7-.2-5.5-.6a19.7 19.7 0 0 1-17.5 10.9 19.4 19.4 0 0 1-8.5-1.9A22.5 22.5 0 0 1 46 80.7C33.3 80.7 23 70.2 23 57.3c0-1.2.1-2.4.3-3.5A19.8 19.8 0 0 1 15.5 37a19.9 19.9 0 0 1 19.8-20 19.6 19.6 0 0 1 16 8.2Z" fill="white"/>
+          </svg>
+        </div>
+        <span class="sf-topnav__app-name">Setup</span>
+        <div class="sf-topnav__breadcrumb">
+          <button type="button" class="sf-topnav__breadcrumb-btn">
+            Home
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sf-topnav__center">
+        <div class="sf-topnav__search" role="search">
+          <svg class="sf-topnav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" class="sf-topnav__search-input" placeholder="Search Salesforce" aria-label="Search Salesforce" />
+          <span class="sf-topnav__search-badge" aria-label="All">
+            All
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+      <div class="sf-topnav__right" aria-hidden="true">
+        <button type="button" class="sf-topnav__icon-btn" tabindex="-1" aria-label="Favourites">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+        <button type="button" class="sf-topnav__icon-btn" tabindex="-1" aria-label="New">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button type="button" class="sf-topnav__icon-btn" tabindex="-1" aria-label="Help">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+        <button type="button" class="sf-topnav__icon-btn" tabindex="-1" aria-label="Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        </button>
+        <div class="sf-topnav__avatar" tabindex="-1" aria-label="User profile">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page body: sidebar + content -->
+    <div class="sf-body">
+
+      <!-- Left sidebar -->
+      <aside class="sf-sidebar" aria-label="Setup navigation">
+        <div class="sf-sidebar__search">
+          <svg class="sf-sidebar__search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" class="sf-sidebar__search-input" placeholder="Business Hierarchy" aria-label="Search navigation" />
+        </div>
+
+        <nav class="sf-sidebar__nav" aria-label="Setup sidebar">
+          <!-- Feature Settings -->
+          <div class="sf-nav-group">
+            <button type="button" class="sf-nav-group__toggle" aria-expanded="false">
+              <svg class="sf-nav-group__chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              Feature Settings
+            </button>
+          </div>
+
+          <!-- Household Settings (expanded / active) -->
+          <div class="sf-nav-group sf-nav-group--open">
+            <button type="button" class="sf-nav-group__toggle" aria-expanded="true">
+              <svg class="sf-nav-group__chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              Household Settings
+            </button>
+            <ul class="sf-nav-group__list" role="list">
+              <li class="sf-nav-group__item sf-nav-group__item--active">
+                <a href="#" class="sf-nav-group__link" aria-current="page">Household General Settings</a>
+              </li>
+            </ul>
+          </div>
+
+        </nav>
+      </aside>
+
+      <!-- Main content -->
+      <main class="sf-main" aria-label="Household General Settings">
+        <div class="sf-content">
+          <!-- Page header -->
+          <div class="sf-content__header">
+            <span class="sf-content__eyebrow">SETUP</span>
+            <div class="sf-content__title-row">
+              <div class="sf-content__icon-wrap" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+              </div>
+              <h1 class="sf-content__title">Household General Settings</h1>
+            </div>
+          </div>
+
+          <!-- Next Gen Household toggle row -->
+          <div class="sf-setting-row">
+            <div class="sf-setting-row__body">
+              <p class="sf-setting-row__title">NextGen Household</p>
+              <p class="sf-setting-row__desc">Enable or disable the NextGen Household experience for your org.</p>
+            </div>
+            <div class="sf-setting-row__action">
+              <label class="toggle" aria-label="Toggle Next Gen Household">
+                <input type="checkbox" id="toggle-nextgen-hh" checked />
+                <span class="toggle__ui"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Select Version row (visible when toggle is on) -->
+          <div class="sf-setting-row sf-setting-row--stacked" id="hh-version-row">
+            <div class="sf-setting-row__body">
+              <p class="sf-setting-row__title">Select Next Gen Household Version</p>
+              <p class="sf-setting-row__desc">Choose between package and core</p>
+            </div>
+            <div class="sf-setting-row__radios" role="radiogroup" aria-label="Next Gen Household version">
+              <label class="sf-radio">
+                <input type="radio" name="hh-version" value="managed" id="hh-version-managed" />
+                <span class="sf-radio__label">Managed Package</span>
+              </label>
+              <label class="sf-radio">
+                <input type="radio" name="hh-version" value="standard" id="hh-version-standard" />
+                <span class="sf-radio__label">Standard</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Household Setup launch row (hidden until a version is selected) -->
+          <div class="sf-setting-row" id="hh-setup-row" hidden>
+            <div class="sf-setting-row__body">
+              <p class="sf-setting-row__title">Household Setup</p>
+              <p class="sf-setting-row__desc">Configure AI settings, create households, set up visualizations, and manage household preferences.</p>
+            </div>
+            <div class="sf-setting-row__action">
+              <button type="button" class="btn btn--primary-solid" id="btn-launch-setup">Set Up Household</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    </div><!-- /sf-body -->
+  </div><!-- /sf-page -->
+
+  <!-- ── Setup wizard modal (hidden until launched) ───────── -->
+  <div class="app-backdrop" aria-hidden="true" id="app-backdrop" hidden></div>
+
+  <div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true" id="setup-modal" hidden>
+    <header class="modal__header">
+      <h1 id="modal-title" class="modal__title">Household Setup</h1>
+      <button type="button" class="modal__close" id="btn-close" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </header>
+
+    <div class="modal__body">
+      <nav class="stepper" aria-label="Setup steps">
+        <ol class="stepper__list">
+          <!-- Step 1: Global Preferences -->
+          <li class="stepper__item stepper__item--main stepper__item--has-children is-active" data-step="global-prefs">
+            <div class="stepper__parent">
+              <button type="button" class="stepper__btn" data-nav="0">
+                <span class="stepper__circle" aria-hidden="true">1</span>
+                <span class="stepper__label">Global Preferences</span>
+              </button>
+            </div>
+            <ol class="stepper__sub">
+              <li class="stepper__sub-item is-active">
+                <button type="button" class="stepper__sub-btn" data-nav="0">
+                  <span class="stepper__sub-num">1.1</span>
+                  <span class="stepper__sub-label">Global Settings</span>
+                </button>
+              </li>
+              <li class="stepper__sub-item">
+                <button type="button" class="stepper__sub-btn" data-nav="1">
+                  <span class="stepper__sub-num">1.2</span>
+                  <span class="stepper__sub-label">Set Up the Basics</span>
+                </button>
+              </li>
+              <li class="stepper__sub-item">
+                <button type="button" class="stepper__sub-btn" data-nav="2">
+                  <span class="stepper__sub-num">1.3</span>
+                  <span class="stepper__sub-label">Permission Sets and Access</span>
+                </button>
+              </li>
+              <li class="stepper__sub-item">
+                <button type="button" class="stepper__sub-btn" data-nav="3">
+                  <span class="stepper__sub-num">1.4</span>
+                  <span class="stepper__sub-label">Roles and Relationships</span>
+                </button>
+              </li>
+            </ol>
+          </li>
+
+          <li class="stepper__item stepper__item--main stepper__item--has-children" data-step="create">
+            <div class="stepper__parent">
+              <button type="button" class="stepper__btn" data-nav="4">
+                <span class="stepper__circle" aria-hidden="true">2</span>
+                <span class="stepper__label">Create Household Settings</span>
+              </button>
+            </div>
+            <ol class="stepper__sub">
+              <li class="stepper__sub-item">
+                <button type="button" class="stepper__sub-btn" data-nav="4">
+                  <span class="stepper__sub-num">2.1</span>
+                  <span class="stepper__sub-label">New Member Settings</span>
+                </button>
+              </li>
+              <li class="stepper__sub-item">
+                <button type="button" class="stepper__sub-btn" data-nav="5">
+                  <span class="stepper__sub-num">2.2</span>
+                  <span class="stepper__sub-label">Household Settings</span>
+                </button>
+              </li>
+              <li class="stepper__sub-item">
+                <button type="button" class="stepper__sub-btn" data-nav="6">
+                  <span class="stepper__sub-num">2.3</span>
+                  <span class="stepper__sub-label">Record Type</span>
+                </button>
+              </li>
+            </ol>
+          </li>
+
+          <!-- Step 3: Household Chronicle View Settings -->
+          <li class="stepper__item stepper__item--main stepper__item--has-children" data-step="chronicle">
+            <div class="stepper__parent">
+              <button type="button" class="stepper__btn" data-nav="7">
+                <span class="stepper__circle" aria-hidden="true">3</span>
+                <span class="stepper__label">Chronicle View Settings</span>
+              </button>
+            </div>
+            <ol class="stepper__sub">
+              <li class="stepper__sub-item">
+                <button type="button" class="stepper__sub-btn" data-nav="7">
+                  <span class="stepper__sub-num">3.1</span>
+                  <span class="stepper__sub-label">Objects in Timeline</span>
+                </button>
+              </li>
+              <li class="stepper__sub-item">
+                <button type="button" class="stepper__sub-btn" data-nav="8">
+                  <span class="stepper__sub-num">3.2</span>
+                  <span class="stepper__sub-label">Detail Panel Fields</span>
+                </button>
+              </li>
+            </ol>
+          </li>
+        </ol>
+      </nav>
+
+      <main class="content">
+        <!-- 1.1 Global Settings -->
+        <section class="panel panel--active" data-panel="0" aria-labelledby="heading-global-settings">
+          <h2 id="heading-global-settings" class="content__heading">Turn on Group Membership and Households</h2>
+          <p class="content__lede">
+            Enable the Group Membership and Households feature to start managing household relationships and member data.
+          </p>
+
+          <div class="card">
+            <div class="card__row card__row--toggle-end">
+              <div>
+                <h3 class="card__title">Turn on Group Membership and Households</h3>
+                <a href="#" class="link-external">
+                  See Considerations
+                  <span class="icon-external" aria-hidden="true">↗</span>
+                </a>
+              </div>
+              <div class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" id="toggle-global-hh" />
+                  <span class="toggle__ui"></span>
+                  <span class="sr-only">Toggle Group Membership and Households</span>
+                </label>
+              </div>
+            </div>
+            <div class="card__divider"></div>
+            <div class="card__row card__row--toggle-end">
+              <div>
+                <h3 class="card__title">Turn on Context Definitions</h3>
+              </div>
+              <div class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" id="toggle-context-definitions" />
+                  <span class="toggle__ui"></span>
+                  <span class="sr-only">Toggle Context Definitions</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 1.2 Set Up the Basics -->
+        <section class="panel" data-panel="1" aria-labelledby="heading-basics" hidden>
+          <h2 id="heading-basics" class="content__heading">Set Up the Basics</h2>
+          <p class="content__lede">Complete the required steps to start using this feature.</p>
+
+          <div class="basics-sections-list">
+          <!-- ── 1. Setup Person Accounts ──────────────────────── -->
+          <div class="basics-section" id="basics-pa">
+            <button type="button" class="basics-section__header" aria-expanded="false" aria-controls="basics-pa-body" data-basics-toggle>
+              <svg class="basics-section__chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              Setup Person Accounts
+            </button>
+            <div class="basics-section__body" id="basics-pa-body" hidden>
+
+              <!-- Toggle card -->
+              <div class="basics-toggle-card" id="pa-enable-step">
+                <div class="basics-toggle-card__main">
+                  <div class="basics-toggle-card__text">
+                    <strong class="basics-toggle-card__title">Turn on Person Accounts</strong>
+                    <p class="basics-toggle-card__desc">Enable person accounts to store information about individuals by combining certain account and contact fields into one record.</p>
+                  </div>
+                  <label class="toggle" title="Complete prerequisites to enable">
+                    <input type="checkbox" id="toggle-person-accounts" disabled />
+                    <span class="toggle__ui"></span>
+                    <span class="sr-only">Turn on Person Accounts</span>
+                  </label>
+                </div>
+                <div class="basics-toggle-card__notice basics-toggle-card__notice--warn" id="pa-gate-notice">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Complete the pre-requisites below to enable person accounts.
+                </div>
+              </div>
+
+              <!-- Prerequisites card -->
+              <div class="basics-prereq-card">
+
+                <!-- Org Impact Acknowledgment -->
+                <div class="basics-prereq-row" id="pa-consent-prereq-item">
+                  <div class="basics-prereq-row__body">
+                    <strong class="basics-prereq-row__title">Org Impact Acknowledgment</strong>
+                    <p class="basics-prereq-row__desc">Review the impact of turning-on and using person accounts.</p>
+                    <label class="basics-prereq-row__check-label">
+                      <input type="checkbox" id="pa-consent-prereq-check" name="prereq-consent" />
+                      <span>Review the impact of turning-on and using person accounts</span>
+                    </label>
+                  </div>
+                  <button type="button" class="basics-prereq-row__cta" id="btn-pa-terms">Review Org Impact</button>
+                </div>
+                <div class="basics-prereq-divider"></div>
+
+                <!-- Create Accounts Record Type (sub-accordion) -->
+                <div class="basics-prereq-row basics-prereq-row--expandable">
+                  <div class="basics-prereq-row__body">
+                    <button type="button" class="basics-sub-toggle" id="pa-create-rt-chevron" aria-expanded="false" aria-controls="pa-create-rt-panel">
+                      <svg class="basics-section__chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                      <strong class="basics-prereq-row__title">Create Accounts Record Type</strong>
+                    </button>
+                    <p class="basics-prereq-row__desc" style="padding-left:1.375rem;">To use person accounts, you need at least one record type set up for business accounts. Salesforce creates a record type for person accounts when they are enabled.</p>
+                  </div>
+                </div>
+                <div class="basics-prereq-subpanel" id="pa-create-rt-panel" hidden>
+                  <div class="pa-section">
+                    <p class="field-block__label">Business Record Type Name</p>
+                    <p class="field-block__hint">The system will automatically create a default "Business" record type if one doesn't exist. You can rename it below.</p>
+                    <div style="max-width:22rem;">
+                      <label class="form-row__label" for="pa-rt-name" style="display:block;margin-bottom:0.35rem;">Record Type Name</label>
+                      <input type="text" class="form-row__input" id="pa-rt-name" value="Business" style="width:100%;" />
+                    </div>
+                  </div>
+                  <div class="card__divider"></div>
+                  <div class="pa-section">
+                    <p class="field-block__label">Record Type Profile Assignment</p>
+                    <p class="field-block__hint">Select which active profiles should have access to the new Person Account record type. System Administrator and Standard User are pre-selected.</p>
+                    <div class="dueling-picklist">
+                      <div class="dueling-picklist__col">
+                        <p class="dueling-picklist__col-label">Available Profiles</p>
+                        <select class="dueling-picklist__list" id="pa-dp-available" multiple aria-label="Available profiles">
+                          <option value="Read Only">Read Only</option>
+                          <option value="Solution Manager">Solution Manager</option>
+                          <option value="Contract Manager">Contract Manager</option>
+                          <option value="Marketing User">Marketing User</option>
+                          <option value="Chatter Free User">Chatter Free User</option>
+                        </select>
+                      </div>
+                      <div class="dueling-picklist__controls">
+                        <button type="button" class="btn dueling-picklist__ctrl-btn" id="pa-dp-move-right" aria-label="Move selected to Selected Profiles"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
+                        <button type="button" class="btn dueling-picklist__ctrl-btn" id="pa-dp-move-all-right" aria-label="Move all to Selected Profiles"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 18 11 12 5 6"/><polyline points="13 18 19 12 13 6"/></svg></button>
+                        <button type="button" class="btn dueling-picklist__ctrl-btn" id="pa-dp-move-left" aria-label="Move selected to Available Profiles"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
+                        <button type="button" class="btn dueling-picklist__ctrl-btn" id="pa-dp-move-all-left" aria-label="Move all to Available Profiles"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="19 18 13 12 19 6"/><polyline points="11 18 5 12 11 6"/></svg></button>
+                      </div>
+                      <div class="dueling-picklist__col">
+                        <p class="dueling-picklist__col-label">Selected Profiles</p>
+                        <select class="dueling-picklist__list" id="pa-dp-selected" multiple aria-label="Selected profiles">
+                          <option value="System Administrator">System Administrator</option>
+                          <option value="Standard User">Standard User</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div><!-- /pa-create-rt-panel -->
+                <div class="basics-prereq-divider"></div>
+
+                <!-- Set Read Permissions -->
+                <div class="basics-prereq-row">
+                  <div class="basics-prereq-row__body">
+                    <strong class="basics-prereq-row__title">Set Read Permissions</strong>
+                    <p class="basics-prereq-row__desc">Every profile with Read access on Accounts must also have Read access on Contacts. This ensures Person Account records open without permission errors.</p>
+                    <p class="basics-prereq-row__status basics-prereq-row__status--pass">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                      Permissions are set
+                    </p>
+                  </div>
+                  <a href="#" class="basics-prereq-row__cta" target="_blank" rel="noopener">View Permissions</a>
+                </div>
+                <div class="basics-prereq-divider"></div>
+
+                <!-- Set Organization-Wide Sharing -->
+                <div class="basics-prereq-row">
+                  <div class="basics-prereq-row__body">
+                    <strong class="basics-prereq-row__title">Set Organization-Wide Sharing</strong>
+                    <p class="basics-prereq-row__desc">Contact org-wide default must be set to <strong>Controlled by Parent</strong>, or both Account and Contact OWD set to <strong>Private</strong>. Public Read on Contact is not permitted.</p>
+                    <p class="basics-prereq-row__status basics-prereq-row__status--pass">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                      Organization-wide sharing is set to: <strong>Controlled by Parent</strong> | Current Status: <strong>Done</strong>
+                    </p>
+                  </div>
+                </div>
+
+              </div><!-- /basics-prereq-card -->
+            </div>
+          </div><!-- /basics-pa -->
+
+          <!-- ── 2. Contacts to Multiple Accounts ──────────────── -->
+          <div class="basics-section" id="basics-cma">
+            <button type="button" class="basics-section__header" aria-expanded="false" aria-controls="basics-cma-body" data-basics-toggle>
+              <svg class="basics-section__chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              Contacts to Multiple Accounts
+            </button>
+            <div class="basics-section__body" id="basics-cma-body" hidden>
+              <div class="basics-toggle-card">
+                <div class="basics-toggle-card__main">
+                  <div class="basics-toggle-card__text">
+                    <strong class="basics-toggle-card__title">Turn on Contacts to Multiple Accounts</strong>
+                    <p class="basics-toggle-card__desc">To provide access to the Account Contact Relationship object, turn on contacts to multiple accounts.</p>
+                    <a href="#" class="basics-toggle-card__link">Learn more in help</a>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="toggle-prereq-contacts" />
+                    <span class="toggle__ui"></span>
+                    <span class="sr-only">Turn on Contacts to Multiple Accounts</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div><!-- /basics-cma -->
+
+          </div><!-- /basics-sections-list -->
+
+        </section>
+
+        <!-- 1.3 Permission Sets and Access -->
+        <section class="panel" data-panel="2" aria-labelledby="heading-perm-sets" hidden>
+          <h2 id="heading-perm-sets" class="content__heading">Permission Sets and Access</h2>
+          <p class="content__lede">
+            Review and assign users to the five Financial Services Cloud permission set licenses required for Household access.
+          </p>
+
+          <div class="fsc-viewer card">
+
+            <!-- License picker header -->
+            <div class="fsc-viewer__header">
+              <div class="fsc-viewer__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2z"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </div>
+              <div class="fsc-viewer__header-body">
+                <span class="fsc-viewer__object-label">Permission Set License</span>
+                <div class="fsc-viewer__selector-wrap">
+                  <button type="button" class="fsc-viewer__selector" id="fsc-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+                    <span id="fsc-selector-label">Financial Services Cloud Extension</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <ul class="fsc-viewer__dropdown" id="fsc-selector-dropdown" role="listbox" aria-label="Select permission set license" hidden>
+                    <li class="fsc-viewer__dropdown-item fsc-viewer__dropdown-item--active" role="option" aria-selected="true" data-fsc-key="ext">
+                      <span class="fsc-viewer__dropdown-name">Financial Services Cloud Extension</span>
+                      <span class="fsc-viewer__dropdown-count">2 assigned</span>
+                    </li>
+                    <li class="fsc-viewer__dropdown-item" role="option" aria-selected="false" data-fsc-key="sales">
+                      <span class="fsc-viewer__dropdown-name">FSC Sales</span>
+                      <span class="fsc-viewer__dropdown-count">3 assigned</span>
+                    </li>
+                    <li class="fsc-viewer__dropdown-item" role="option" aria-selected="false" data-fsc-key="svc">
+                      <span class="fsc-viewer__dropdown-name">FSC Service</span>
+                      <span class="fsc-viewer__dropdown-count">1 assigned</span>
+                    </li>
+                    <li class="fsc-viewer__dropdown-item" role="option" aria-selected="false" data-fsc-key="comp">
+                      <span class="fsc-viewer__dropdown-name">Financial Services Cloud Comprehensive</span>
+                      <span class="fsc-viewer__dropdown-count">1 assigned</span>
+                    </li>
+                    <li class="fsc-viewer__dropdown-item" role="option" aria-selected="false" data-fsc-key="found">
+                      <span class="fsc-viewer__dropdown-name">Financial Services Cloud Foundations</span>
+                      <span class="fsc-viewer__dropdown-count">2 assigned</span>
+                    </li>
+                  </ul>
+                </div>
+                <span class="fsc-viewer__meta" id="fsc-viewer-meta">2 assigned &middot; 28 available</span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <p class="fsc-viewer__desc" id="fsc-viewer-desc">Allows the user to access Financial Services Cloud features delivered after Spring '20.</p>
+
+            <!-- User view filter -->
+            <div class="fsc-viewer__filter-bar" role="tablist" aria-label="Filter users">
+              <button type="button" class="fsc-viewer__filter-btn fsc-viewer__filter-btn--active" role="tab" aria-selected="true" data-fsc-filter="assigned">Assigned Users</button>
+              <button type="button" class="fsc-viewer__filter-btn" role="tab" aria-selected="false" data-fsc-filter="all">All Users</button>
+            </div>
+
+            <!-- All Users list header (shown only in All Users mode) -->
+            <div class="fsc-list-header" id="fsc-list-header" hidden>
+              <span class="fsc-list-header__count" id="fsc-list-count">12 items</span>
+              <span class="fsc-list-header__sel-count" id="fsc-selection-count">0 selected</span>
+              <div class="fsc-list-header__actions">
+                <div class="fsc-list-header__search">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="search" id="fsc-list-search" class="fsc-list-header__search-input" placeholder="Search this list…" aria-label="Search users" />
+                </div>
+                <button type="button" class="btn btn--outline-brand fsc-list-header__assign-btn" id="fsc-assign-selected-btn" disabled>Assign Selected</button>
+              </div>
+            </div>
+
+            <!-- Compact user table -->
+            <div class="fsc-viewer__table-wrap">
+              <table class="fsc-viewer__table" id="fsc-viewer-table" aria-label="Users">
+                <thead id="fsc-viewer-thead">
+                  <tr>
+                    <th class="fsc-viewer__th fsc-viewer__th--num">#</th>
+                    <th class="fsc-viewer__th">Full Name</th>
+                    <th class="fsc-viewer__th">Email</th>
+                    <th class="fsc-viewer__th fsc-viewer__th--action"><span class="sr-only">Action</span></th>
+                  </tr>
+                </thead>
+                <tbody id="fsc-viewer-tbody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+
+
+          </div><!-- /fsc-viewer -->
+        </section>
+
+        <!-- 1.4 Roles and Relationships -->
+        <section class="panel" data-panel="3" aria-labelledby="heading-roles-relationships" hidden>
+          <h2 id="heading-roles-relationships" class="content__heading">Roles and Relationships</h2>
+          <p class="content__lede">
+            View and manage the picklist values used for household member roles and party role relationships.
+          </p>
+
+          <div class="member-settings-cards">
+
+            <!-- Card 1: ACR Roles -->
+            <div class="card pv-card" id="acr-roles-card">
+              <div class="pv-card__header">
+                <div class="pv-card__header-text">
+                  <p class="pv-card__title">ACR Roles</p>
+                  <p class="pv-card__desc">Picklist values configured for the <strong>Role</strong> field on Account Contact Relationship. <a href="#" class="link-external" style="font-size:0.75rem;">Learn More ↗</a></p>
+                </div>
+                <div class="pv-card__header-meta">
+                  <span class="pv-count-badge" id="acr-role-count">6 values</span>
+                </div>
+              </div>
+
+              <div class="pv-table-wrap">
+                <table class="pv-table" aria-label="ACR Role picklist values">
+                  <thead>
+                    <tr>
+                      <th class="pv-table__th">Label</th>
+                      <th class="pv-table__th pv-table__th--api">API Name</th>
+                      <th class="pv-table__th pv-table__th--actions"><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="acr-roles-tbody">
+                    <tr class="pv-table__row" data-value="Primary_Member">
+                      <td class="pv-table__td">Primary Member</td>
+                      <td class="pv-table__td pv-table__td--api">Primary_Member</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Primary Member" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Dependent">
+                      <td class="pv-table__td">Dependent</td>
+                      <td class="pv-table__td pv-table__td--api">Dependent</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Dependent" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Spouse">
+                      <td class="pv-table__td">Spouse</td>
+                      <td class="pv-table__td pv-table__td--api">Spouse</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Spouse" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Trustee">
+                      <td class="pv-table__td">Trustee</td>
+                      <td class="pv-table__td pv-table__td--api">Trustee</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Trustee" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Beneficiary">
+                      <td class="pv-table__td">Beneficiary</td>
+                      <td class="pv-table__td pv-table__td--api">Beneficiary</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Beneficiary" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Child">
+                      <td class="pv-table__td">Child</td>
+                      <td class="pv-table__td pv-table__td--api">Child</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Child" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Inline add form -->
+              <div class="pv-add-row" id="acr-role-add-row" hidden>
+                <div class="pv-add-row__fields">
+                  <div class="pv-add-row__field">
+                    <label class="pv-add-row__label" for="acr-role-new-label">Label</label>
+                    <input type="text" class="pv-add-row__input" id="acr-role-new-label" placeholder="e.g. Power of Attorney" autocomplete="off" />
+                  </div>
+                  <div class="pv-add-row__field">
+                    <label class="pv-add-row__label" for="acr-role-new-api">API Name</label>
+                    <input type="text" class="pv-add-row__input pv-add-row__input--api" id="acr-role-new-api" placeholder="Auto-generated" autocomplete="off" />
+                  </div>
+                </div>
+                <div class="pv-add-row__actions">
+                  <button type="button" class="btn btn--primary-solid pv-add-row__confirm" id="acr-role-add-confirm">Add</button>
+                  <button type="button" class="btn btn--neutral pv-add-row__cancel" id="acr-role-add-cancel">Cancel</button>
+                </div>
+              </div>
+
+              <div class="pv-card__footer">
+                <button type="button" class="pv-add-btn" id="acr-role-add-btn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Value
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 2: Party Role Relationships -->
+            <div class="card pv-card" id="prr-card">
+              <div class="pv-card__header">
+                <div class="pv-card__header-text">
+                  <p class="pv-card__title">Party Role Relationships</p>
+                  <p class="pv-card__desc">Existing Party Role Relationship values. Inverse relationships are created automatically for each pair. <a href="#" class="link-external" style="font-size:0.75rem;">Learn More ↗</a></p>
+                </div>
+                <div class="pv-card__header-meta">
+                  <span class="pv-count-badge" id="prr-count">15 values</span>
+                </div>
+              </div>
+
+              <div class="pv-table-wrap">
+                <table class="pv-table" aria-label="Party Role Relationship values">
+                  <thead>
+                    <tr>
+                      <th class="pv-table__th">Label</th>
+                      <th class="pv-table__th pv-table__th--type">Type</th>
+                      <th class="pv-table__th pv-table__th--inverse">Inverse Label</th>
+                      <th class="pv-table__th pv-table__th--actions"><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="prr-tbody">
+                    <tr class="pv-table__row pv-table__row--group-head" data-group="CCR"><td colspan="4" class="pv-table__group-label">Contact–Contact (CCR)</td></tr>
+                    <tr class="pv-table__row" data-value="Husband">
+                      <td class="pv-table__td">Husband</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Wife</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Husband–Wife" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Spouse">
+                      <td class="pv-table__td">Spouse</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Spouse</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Spouse–Spouse" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Brother">
+                      <td class="pv-table__td">Brother</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Sister</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Brother–Sister" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Grandparent">
+                      <td class="pv-table__td">Grandparent</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Grandchild</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Grandparent–Grandchild" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Lawyer">
+                      <td class="pv-table__td">Lawyer</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Client</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Lawyer–Client" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Accountant">
+                      <td class="pv-table__td">Accountant</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Client</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Accountant–Client" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Trustee">
+                      <td class="pv-table__td">Trustee</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Beneficiary</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Trustee–Beneficiary" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Grantor">
+                      <td class="pv-table__td">Grantor</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Trustee</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Grantor–Trustee" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Guardian">
+                      <td class="pv-table__td">Guardian</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Ward</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Guardian–Ward" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Executor">
+                      <td class="pv-table__td">Executor</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--ccr">CCR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Heir</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Executor–Heir" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row pv-table__row--group-head" data-group="AAR"><td colspan="4" class="pv-table__group-label">Account–Account (AAR)</td></tr>
+                    <tr class="pv-table__row" data-value="Owner">
+                      <td class="pv-table__td">Owner</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--aar">AAR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Holding</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Owner–Holding" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Parent_Company">
+                      <td class="pv-table__td">Parent Company</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--aar">AAR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Subsidiary</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Parent Company–Subsidiary" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Trust">
+                      <td class="pv-table__td">Trust</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--aar">AAR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Related Business</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Trust–Related Business" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Household">
+                      <td class="pv-table__td">Household</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--aar">AAR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Family Office</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Household–Family Office" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="pv-table__row" data-value="Lender">
+                      <td class="pv-table__td">Lender</td>
+                      <td class="pv-table__td"><span class="pv-type-badge pv-type-badge--aar">AAR</span></td>
+                      <td class="pv-table__td pv-table__td--muted">Borrower</td>
+                      <td class="pv-table__td pv-table__td--actions">
+                        <button type="button" class="pv-delete-btn" aria-label="Delete Lender–Borrower" data-pv-delete>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Inline add form -->
+              <div class="pv-add-row" id="prr-add-row" hidden>
+                <div class="pv-add-row__fields">
+                  <div class="pv-add-row__field">
+                    <label class="pv-add-row__label" for="prr-new-label">Label</label>
+                    <input type="text" class="pv-add-row__input" id="prr-new-label" placeholder="e.g. Donor" autocomplete="off" />
+                  </div>
+                  <div class="pv-add-row__field">
+                    <label class="pv-add-row__label" for="prr-new-inverse">Inverse Label</label>
+                    <input type="text" class="pv-add-row__input" id="prr-new-inverse" placeholder="e.g. Recipient" autocomplete="off" />
+                  </div>
+                  <div class="pv-add-row__field pv-add-row__field--type">
+                    <label class="pv-add-row__label" for="prr-new-type">Type</label>
+                    <select class="pv-add-row__select" id="prr-new-type">
+                      <option value="CCR">CCR — Contact–Contact</option>
+                      <option value="AAR">AAR — Account–Account</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="pv-add-row__actions">
+                  <button type="button" class="btn btn--primary-solid pv-add-row__confirm" id="prr-add-confirm">Add</button>
+                  <button type="button" class="btn btn--neutral pv-add-row__cancel" id="prr-add-cancel">Cancel</button>
+                </div>
+              </div>
+
+              <div class="pv-card__footer">
+                <button type="button" class="pv-add-btn" id="prr-add-btn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Value
+                </button>
+              </div>
+            </div>
+
+          </div><!-- /member-settings-cards -->
+        </section>
+
+        <!-- 2.1 Member and Account Settings -->
+        <section class="panel" data-panel="4" aria-labelledby="heading-member-account-settings-2" hidden>
+          <h2 id="heading-member-account-settings-2" class="content__heading">New Member Settings</h2>
+          <p class="content__lede">
+            Choose which inputs appear when user creates a new member or a new account during household creation.
+          </p>
+          <div id="search-member-fields" class="member-settings-cards">
+            <div class="card card--accordion">
+              <div class="accordion__section is-open">
+                <button type="button" class="accordion__header" id="accordion-card-new-trigger" aria-expanded="true" aria-controls="accordion-card-new-panel">
+                  <span class="accordion__chevron" aria-hidden="true"></span>
+                  <span class="accordion__title">Create new member or contact during Household creation</span>
+                </button>
+                <div class="accordion__panel" id="accordion-card-new-panel" role="region" aria-labelledby="accordion-card-new-trigger">
+                  <div class="accordion__inner">
+                    <p class="field-block__label" id="label-new-member-fields">Configure Input Fields</p>
+                    <p class="field-block__hint" id="hint-new-member-fields">Choose which fields to show at runtime. Users will fill in these inputs when they create a new member or contact during household creation or update.</p>
+                    <div class="field-source-row">
+                      <span class="field-source-row__label">Object</span>
+                      <span class="field-source-row__object">
+                        <svg class="field-source-row__object-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h20" stroke="currentColor" stroke-width="1.6"/><path d="M7 13h4M7 16h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                        Contact
+                      </span>
+                    </div>
+                    <div class="multiselect" data-multiselect-root>
+                      <button type="button" class="multiselect__trigger" id="new-member-multiselect-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="new-member-multiselect-listbox" aria-label="Select input fields for new member or contact" aria-describedby="hint-new-member-fields">
+                        <span class="multiselect__summary" data-multiselect-summary>0 options selected</span>
+                        <span class="multiselect__caret" aria-hidden="true"></span>
+                      </button>
+                      <div class="multiselect__dropdown" id="new-member-multiselect-listbox" role="group" aria-label="Available contact fields" hidden data-multiselect-dropdown>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="salutation" data-label="Salutation" checked /><span class="multiselect__option-content"><span class="option__field-label">Salutation</span><span class="option__api-name">Contact.Salutation</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="first-name" data-label="First Name" checked /><span class="multiselect__option-content"><span class="option__field-label">First Name</span><span class="option__api-name">Contact.FirstName</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="last-name" data-label="Last Name" checked /><span class="multiselect__option-content"><span class="option__field-label">Last Name</span><span class="option__api-name">Contact.LastName</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="phone" data-label="Phone" checked /><span class="multiselect__option-content"><span class="option__field-label">Phone</span><span class="option__api-name">Contact.Phone</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="email" data-label="Email" /><span class="multiselect__option-content"><span class="option__field-label">Email</span><span class="option__api-name">Contact.Email</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="account-name" data-label="Account Name" /><span class="multiselect__option-content"><span class="option__field-label">Account Name</span><span class="option__api-name">Contact.AccountId</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="mobile-phone" data-label="Mobile Phone" /><span class="multiselect__option-content"><span class="option__field-label">Mobile Phone</span><span class="option__api-name">Contact.MobilePhone</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="birthdate" data-label="Birthdate" /><span class="multiselect__option-content"><span class="option__field-label">Birthdate</span><span class="option__api-name">Contact.Birthdate</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="title" data-label="Title" /><span class="multiselect__option-content"><span class="option__field-label">Title</span><span class="option__api-name">Contact.Title</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="department" data-label="Department" /><span class="multiselect__option-content"><span class="option__field-label">Department</span><span class="option__api-name">Contact.Department</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="mailing-street" data-label="Mailing Street" /><span class="multiselect__option-content"><span class="option__field-label">Mailing Street</span><span class="option__api-name">Contact.MailingStreet</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="new-member-field" value="mailing-city" data-label="Mailing City" /><span class="multiselect__option-content"><span class="option__field-label">Mailing City</span><span class="option__api-name">Contact.MailingCity</span></span></label>
+                      </div>
+                      <div class="pill-list" data-multiselect-pills aria-label="Selected contact fields"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Members -->
+            <div class="card card--accordion">
+              <div class="accordion__section is-open">
+                <button type="button" class="accordion__header" id="accordion-rel-members-trigger" aria-expanded="true" aria-controls="accordion-rel-members-panel">
+                  <span class="accordion__chevron" aria-hidden="true"></span>
+                  <span class="accordion__title">Define member relationship</span>
+                </button>
+                <div class="accordion__panel" id="accordion-rel-members-panel" role="region" aria-labelledby="accordion-rel-members-trigger">
+                  <div class="accordion__inner">
+                    <p class="field-block__label">Configure input fields for member addition to household</p>
+                    <p class="field-block__hint" id="hint-ad-members">Fields shown in the Members section of the household visualization.</p>
+                    <div class="field-source-row">
+                      <span class="field-source-row__label">Object</span>
+                      <span class="field-source-row__object">
+                        <svg class="field-source-row__object-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h20" stroke="currentColor" stroke-width="1.6"/></svg>
+                        Account Contact Relationship
+                      </span>
+                    </div>
+                    <div class="multiselect" data-multiselect-root>
+                      <button type="button" class="multiselect__trigger" id="ad-ms-members-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="ad-ms-members-listbox" aria-label="Select fields for members" aria-describedby="hint-ad-members"><span class="multiselect__summary" data-multiselect-summary>0 options selected</span><span class="multiselect__caret" aria-hidden="true"></span></button>
+                      <div class="multiselect__dropdown" id="ad-ms-members-listbox" role="group" aria-label="Available fields" hidden data-multiselect-dropdown>
+                        <label class="multiselect__option"><input type="checkbox" name="ad-members-field" value="account" data-label="Account" checked /><span class="multiselect__option-content"><span class="option__field-label">Account</span><span class="option__api-name">AccountContactRelation.AccountId</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="ad-members-field" value="contact" data-label="Contact" checked /><span class="multiselect__option-content"><span class="option__field-label">Contact</span><span class="option__api-name">AccountContactRelation.ContactId</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="ad-members-field" value="role" data-label="Role" checked /><span class="multiselect__option-content"><span class="option__field-label">Role</span><span class="option__api-name">AccountContactRelation.Roles</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="ad-members-field" value="is-primary" data-label="Is Primary" /><span class="multiselect__option-content"><span class="option__field-label">Is Primary</span><span class="option__api-name">AccountContactRelation.IsPrimary</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="ad-members-field" value="start-date" data-label="Start Date" /><span class="multiselect__option-content"><span class="option__field-label">Start Date</span><span class="option__api-name">AccountContactRelation.StartDate</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="ad-members-field" value="end-date" data-label="End Date" /><span class="multiselect__option-content"><span class="option__field-label">End Date</span><span class="option__api-name">AccountContactRelation.EndDate</span></span></label>
+                      </div>
+                      <div class="pill-list" data-multiselect-pills aria-label="Selected fields"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2.2 Household Settings -->
+        <section class="panel" data-panel="5" aria-labelledby="heading-household-settings-2" hidden>
+          <h2 id="heading-household-settings-2" class="content__heading">Household Settings</h2>
+          <p class="content__lede">
+            Choose which account and party relationship group (PRG) fields appear when user creates or edits a household.
+          </p>
+          <div class="member-settings-cards" id="household-settings-cards">
+
+            <!-- Account Fields on Household -->
+            <div class="card card--accordion">
+              <div class="accordion__section is-open">
+                <button type="button" class="accordion__header" id="accordion-hh-account-trigger" aria-expanded="true" aria-controls="accordion-hh-account-panel">
+                  <span class="accordion__chevron" aria-hidden="true"></span>
+                  <span class="accordion__title">Account Fields on Household</span>
+                </button>
+                <div class="accordion__panel" id="accordion-hh-account-panel" role="region" aria-labelledby="accordion-hh-account-trigger">
+                  <div class="accordion__inner">
+                    <p class="field-block__label" id="label-hh-account-fields">Account Fields to display</p>
+                    <p class="field-block__hint" id="hint-hh-account-fields">Select the input type shown on the household creation.</p>
+                    <div class="field-source-row">
+                      <span class="field-source-row__label">Object</span>
+                      <span class="field-source-row__object">
+                        <svg class="field-source-row__object-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h20" stroke="currentColor" stroke-width="1.6"/><path d="M7 13h4M7 16h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                        Account
+                      </span>
+                    </div>
+                    <div class="multiselect" data-multiselect-root>
+                      <button type="button" class="multiselect__trigger" id="hh-runtime-fields-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="hh-runtime-fields-listbox" aria-label="Select account fields for household" aria-describedby="hint-hh-account-fields">
+                        <span class="multiselect__summary" data-multiselect-summary>0 options selected</span>
+                        <span class="multiselect__caret" aria-hidden="true"></span>
+                      </button>
+                      <div class="multiselect__dropdown" id="hh-runtime-fields-listbox" role="group" aria-label="Available account fields" hidden data-multiselect-dropdown>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="name" data-label="Name" checked /><span class="multiselect__option-content"><span class="option__field-label">Name</span><span class="option__api-name">Account.Name</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="phone" data-label="Phone" /><span class="multiselect__option-content"><span class="option__field-label">Phone</span><span class="option__api-name">Account.Phone</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="billing-street" data-label="Billing Street" /><span class="multiselect__option-content"><span class="option__field-label">Billing Street</span><span class="option__api-name">Account.BillingStreet</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="billing-city" data-label="Billing City" /><span class="multiselect__option-content"><span class="option__field-label">Billing City</span><span class="option__api-name">Account.BillingCity</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="billing-state" data-label="Billing State" /><span class="multiselect__option-content"><span class="option__field-label">Billing State</span><span class="option__api-name">Account.BillingState</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="billing-zip" data-label="Billing Zip" /><span class="multiselect__option-content"><span class="option__field-label">Billing Zip</span><span class="option__api-name">Account.BillingPostalCode</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="annual-revenue" data-label="Annual Revenue" /><span class="multiselect__option-content"><span class="option__field-label">Annual Revenue</span><span class="option__api-name">Account.AnnualRevenue</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="type" data-label="Type" /><span class="multiselect__option-content"><span class="option__field-label">Type</span><span class="option__api-name">Account.Type</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-runtime-field" value="description" data-label="Description" /><span class="multiselect__option-content"><span class="option__field-label">Description</span><span class="option__api-name">Account.Description</span></span></label>
+                      </div>
+                      <div class="pill-list" data-multiselect-pills aria-label="Selected account fields for household"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PRG Fields on Household -->
+            <div class="card card--accordion">
+              <div class="accordion__section is-open">
+                <button type="button" class="accordion__header" id="accordion-hh-prg-trigger" aria-expanded="true" aria-controls="accordion-hh-prg-panel">
+                  <span class="accordion__chevron" aria-hidden="true"></span>
+                  <span class="accordion__title">PRG Fields on Household</span>
+                </button>
+                <div class="accordion__panel" id="accordion-hh-prg-panel" role="region" aria-labelledby="accordion-hh-prg-trigger">
+                  <div class="accordion__inner">
+                    <p class="field-block__label" id="label-hh-prg-fields">PRG Fields to display</p>
+                    <p class="field-block__hint" id="hint-hh-prg-fields">Select the input type shown on the household creation.</p>
+                    <div class="field-source-row">
+                      <span class="field-source-row__label">Object</span>
+                      <span class="field-source-row__object">
+                        <svg class="field-source-row__object-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h20" stroke="currentColor" stroke-width="1.6"/><path d="M7 13h4M7 16h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                        Party relationship Group
+                      </span>
+                    </div>
+                    <div class="multiselect" data-multiselect-root>
+                      <button type="button" class="multiselect__trigger" id="hh-prg-runtime-fields-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="hh-prg-runtime-fields-listbox" aria-label="Select PRG fields for household" aria-describedby="hint-hh-prg-fields">
+                        <span class="multiselect__summary" data-multiselect-summary>0 options selected</span>
+                        <span class="multiselect__caret" aria-hidden="true"></span>
+                      </button>
+                      <div class="multiselect__dropdown" id="hh-prg-runtime-fields-listbox" role="group" aria-label="Available PRG fields" hidden data-multiselect-dropdown>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-prg-field" value="group-name" data-label="Group Name" /><span class="multiselect__option-content"><span class="option__field-label">Group Name</span><span class="option__api-name">PartyRelationshipGroup.Name</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-prg-field" value="group-type" data-label="Group Type" /><span class="multiselect__option-content"><span class="option__field-label">Group Type</span><span class="option__api-name">PartyRelationshipGroup.Type</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-prg-field" value="primary-account" data-label="Primary Account" /><span class="multiselect__option-content"><span class="option__field-label">Primary Account</span><span class="option__api-name">PartyRelationshipGroup.PrimaryAccountId</span></span></label>
+                        <label class="multiselect__option"><input type="checkbox" name="hh-prg-field" value="status" data-label="Status" /><span class="multiselect__option-content"><span class="option__field-label">Status</span><span class="option__api-name">PartyRelationshipGroup.Status</span></span></label>
+                      </div>
+                      <div class="pill-list" data-multiselect-pills aria-label="Selected PRG fields for household"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- 2.3 Record Type -->
+        <section class="panel" data-panel="6" aria-labelledby="heading-record-type-2" hidden>
+          <h2 id="heading-record-type-2" class="content__heading">Select Record Type</h2>
+          <p class="content__lede">
+            Choose the account record type used when creating or linking household members. Your org's available record types apply at runtime.
+          </p>
+          <div class="card record-type-card">
+            <div class="naming-field record-type-field">
+              <label class="naming-field__label" for="household-record-type">Select Record Type</label>
+              <select id="household-record-type" class="select-field select-field--record-type" name="household-record-type">
+                <option value="business" selected>Business Account</option>
+                <option value="person">Person Account</option>
+                <option value="household">Household Account</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════════
+             STEP 3 — Household Chronicle View Settings
+             ════════════════════════════════════════════════════════ -->
+
+        <!-- 3.1 Objects in Timeline -->
+        <section class="panel" data-panel="7" aria-labelledby="heading-cv-objects" hidden>
+
+          <!-- ── VIEW A: Objects list ── -->
+          <div id="cv-list-view" class="cv-list-view">
+            <h2 id="heading-cv-objects" class="content__heading">Objects in Timeline</h2>
+            <p class="content__lede">Choose which Salesforce objects appear as events on the Chronicle View timeline. Each object gets its own color, date field, and field mapping.</p>
+
+            <div class="cv-obj-card">
+
+
+              <!-- Table toolbar: count + search -->
+              <div class="cv-tbl-toolbar">
+                <span class="cv-tbl-count" id="cv-obj-count">4 objects</span>
+                <div class="cv-tbl-search">
+                  <svg class="cv-tbl-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="search" id="cv-obj-search" placeholder="Search this list…" oninput="cvFilterObjTable(this.value)" aria-label="Search objects" />
+                </div>
+              </div>
+
+              <!-- Table -->
+              <table class="cv-obj-table" aria-label="Objects in Timeline">
+                <thead>
+                  <tr>
+                    <th class="cv-grip-th" aria-hidden="true"></th>
+                    <th class="cv-row-num-th" aria-label="Row number">#</th>
+                    <th>Object</th>
+                    <th>Visible</th>
+                    <th><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="cv-obj-tbody">
+                  <tr draggable="true" ondragstart="cvDragStart(event,this)" ondragover="cvDragOver(event,this)" ondrop="cvDragDrop(event,this)" ondragend="cvDragEnd(event,this)" ondragleave="cvDragLeave(event,this)">
+                    <td class="cv-grip-td"><span class="cv-row-grip" title="Drag to reorder">⠿</span></td>
+                    <td class="cv-row-num-td"></td>
+                    <td><div class="cv-obj-label-cell"><span class="cv-obj-color-dot" style="background:#0891b2;"></span>Life Event</div></td>
+                    <td><div class="cv-tog on" onclick="this.classList.toggle('on')" aria-label="Toggle Life Event visibility"></div></td>
+                    <td><div class="cv-row-actions"><button type="button" class="cv-row-actions-btn" onclick="cvToggleRowMenu(this)" aria-haspopup="true" aria-expanded="false" aria-label="Actions for Life Event"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button><div class="cv-row-menu" hidden role="menu"><button class="cv-row-menu-item" role="menuitem" onclick="cvOpenObjEditor('life-event');cvCloseRowMenus()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button><div class="cv-row-menu-divider" role="separator"></div><button class="cv-row-menu-item cv-row-menu-item--danger" role="menuitem" onclick="cvRemoveObjRow(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Remove</button></div></div></td>
+                  </tr>
+                  <tr draggable="true" ondragstart="cvDragStart(event,this)" ondragover="cvDragOver(event,this)" ondrop="cvDragDrop(event,this)" ondragend="cvDragEnd(event,this)" ondragleave="cvDragLeave(event,this)">
+                    <td class="cv-grip-td"><span class="cv-row-grip" title="Drag to reorder">⠿</span></td>
+                    <td class="cv-row-num-td"></td>
+                    <td><div class="cv-obj-label-cell"><span class="cv-obj-color-dot" style="background:#E8690B;"></span>Financial Goal</div></td>
+                    <td><div class="cv-tog on" onclick="this.classList.toggle('on')" aria-label="Toggle Financial Goal visibility"></div></td>
+                    <td><div class="cv-row-actions"><button type="button" class="cv-row-actions-btn" onclick="cvToggleRowMenu(this)" aria-haspopup="true" aria-expanded="false" aria-label="Actions for Financial Goal"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button><div class="cv-row-menu" hidden role="menu"><button class="cv-row-menu-item" role="menuitem" onclick="cvOpenObjEditor('goal');cvCloseRowMenus()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button><div class="cv-row-menu-divider" role="separator"></div><button class="cv-row-menu-item cv-row-menu-item--danger" role="menuitem" onclick="cvRemoveObjRow(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Remove</button></div></div></td>
+                  </tr>
+                  <tr draggable="true" ondragstart="cvDragStart(event,this)" ondragover="cvDragOver(event,this)" ondrop="cvDragDrop(event,this)" ondragend="cvDragEnd(event,this)" ondragleave="cvDragLeave(event,this)">
+                    <td class="cv-grip-td"><span class="cv-row-grip" title="Drag to reorder">⠿</span></td>
+                    <td class="cv-row-num-td"></td>
+                    <td><div class="cv-obj-label-cell"><span class="cv-obj-color-dot" style="background:#059669;"></span>Financial Product</div></td>
+                    <td><div class="cv-tog on" onclick="this.classList.toggle('on')" aria-label="Toggle Financial Product visibility"></div></td>
+                    <td><div class="cv-row-actions"><button type="button" class="cv-row-actions-btn" onclick="cvToggleRowMenu(this)" aria-haspopup="true" aria-expanded="false" aria-label="Actions for Financial Product"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button><div class="cv-row-menu" hidden role="menu"><button class="cv-row-menu-item" role="menuitem" onclick="cvOpenObjEditor('product');cvCloseRowMenus()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button><div class="cv-row-menu-divider" role="separator"></div><button class="cv-row-menu-item cv-row-menu-item--danger" role="menuitem" onclick="cvRemoveObjRow(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Remove</button></div></div></td>
+                  </tr>
+                  <tr draggable="true" ondragstart="cvDragStart(event,this)" ondragover="cvDragOver(event,this)" ondrop="cvDragDrop(event,this)" ondragend="cvDragEnd(event,this)" ondragleave="cvDragLeave(event,this)">
+                    <td class="cv-grip-td"><span class="cv-row-grip" title="Drag to reorder">⠿</span></td>
+                    <td class="cv-row-num-td"></td>
+                    <td><div class="cv-obj-label-cell"><span class="cv-obj-color-dot" style="background:#7c3aed;"></span>Opportunity</div></td>
+                    <td><div class="cv-tog" onclick="this.classList.toggle('on')" aria-label="Toggle Opportunity visibility"></div></td>
+                    <td><div class="cv-row-actions"><button type="button" class="cv-row-actions-btn" onclick="cvToggleRowMenu(this)" aria-haspopup="true" aria-expanded="false" aria-label="Actions for Opportunity"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button><div class="cv-row-menu" hidden role="menu"><button class="cv-row-menu-item" role="menuitem" onclick="cvOpenObjEditor('opportunity');cvCloseRowMenus()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button><div class="cv-row-menu-divider" role="separator"></div><button class="cv-row-menu-item cv-row-menu-item--danger" role="menuitem" onclick="cvRemoveObjRow(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Remove</button></div></div></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Card footer -->
+              <div class="cv-obj-card-footer">
+                <button type="button" class="cv-obj-add-btn" onclick="cvOpenAddObject()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Object
+                </button>
+              </div>
+
+            </div><!-- /cv-obj-card -->
+          </div>
+
+          <!-- ── MODAL: Add / Edit Object ── -->
+          <div id="cv-form-view" class="cv-form-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="cv-bc-title">
+            <div class="cv-form-modal-card">
+
+              <!-- Modal header -->
+              <div class="cv-form-modal-hdr">
+                <h2 class="cv-form-modal-title" id="cv-bc-title">Add Object</h2>
+                <button type="button" class="cv-form-modal-close" onclick="cvShowListView()" aria-label="Close">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+
+              <!-- Single-page form content -->
+              <div class="cv-form-modal-body">
+                <div id="cv-oe-page-1" class="cv-form-fields">
+                  <div class="cv-field-grid">
+
+                    <!-- Object + Pill Color (split input) -->
+                    <div class="cv-form-row">
+                      <label class="cv-form-lbl" for="cv-oe-object">Object <span>*</span></label>
+                      <div class="cv-split-input">
+                        <!-- Left: colour picker -->
+                        <div class="cv-split-color" id="cv-split-color-btn" onclick="cvToggleColorMenu(event)" role="button" aria-label="Choose pill colour" tabindex="0">
+                          <span class="cv-split-color-dot" id="cv-oe-color-dot" style="background:#a8a29e;"></span>
+                          <svg class="cv-split-chevron" viewBox="0 0 10 6" fill="#706e6b" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+                          <!-- Colour popup -->
+                          <div class="cv-color-popup" id="cv-color-popup" hidden onclick="event.stopPropagation()">
+                            <div class="cv-color-opt" style="background:#0891b2" data-color="#0891b2" onclick="cvPickColor('#0891b2')" title="Cyan"></div>
+                            <div class="cv-color-opt" style="background:#E8690B" data-color="#E8690B" onclick="cvPickColor('#E8690B')" title="Orange"></div>
+                            <div class="cv-color-opt" style="background:#059669" data-color="#059669" onclick="cvPickColor('#059669')" title="Green"></div>
+                            <div class="cv-color-opt" style="background:#7c3aed" data-color="#7c3aed" onclick="cvPickColor('#7c3aed')" title="Purple"></div>
+                            <div class="cv-color-opt" style="background:#0176d3" data-color="#0176d3" onclick="cvPickColor('#0176d3')" title="Blue"></div>
+                            <div class="cv-color-opt" style="background:#b45309" data-color="#b45309" onclick="cvPickColor('#b45309')" title="Amber"></div>
+                            <div class="cv-color-opt" style="background:#374151" data-color="#374151" onclick="cvPickColor('#374151')" title="Slate"></div>
+                          </div>
+                        </div>
+                        <!-- Right: object select -->
+                        <select class="cv-split-sel" id="cv-oe-object" onchange="cvOnObjectSelect(this)">
+                          <option value="">— Choose a Salesforce object —</option>
+                          <option value="FinServ__LifeEvent__c"        data-label="Life Event">Life Event</option>
+                          <option value="FinServ__FinancialGoal__c"    data-label="Financial Goal">Financial Goal</option>
+                          <option value="FinServ__FinancialAccount__c" data-label="Financial Account">Financial Account</option>
+                          <option value="Opportunity"  data-label="Opportunity">Opportunity</option>
+                          <option value="Case"         data-label="Case">Case</option>
+                          <option value="Asset"        data-label="Asset">Asset</option>
+                          <option value="Contact"      data-label="Contact">Contact</option>
+                          <option value="Task"         data-label="Task">Task</option>
+                          <option value="Event"        data-label="Event">Event</option>
+                          <option value="Lead"         data-label="Lead">Lead</option>
+                          <option value="Order"        data-label="Order">Order</option>
+                          <option value="__custom__"   data-label="">Custom Object…</option>
+                        </select>
+                      </div>
+                      <input type="hidden" id="cv-oe-color-val" value="">
+                    </div>
+
+                    <!-- Object API Name (auto-filled or manual for custom) -->
+                    <div class="cv-form-row">
+                      <label class="cv-form-lbl" for="cv-oe-api">Object API Name <span>*</span></label>
+                      <input type="text" class="cv-form-inp" id="cv-oe-api" placeholder="e.g. FinServ__LifeEvent__c" autocomplete="off" readonly style="background:#f3f3f3;color:#706e6b;cursor:default;" />
+                    </div>
+
+                    <!-- Date Field -->
+                    <div class="cv-form-row cv-form-row--disabled" id="cv-oe-date-row">
+                      <label class="cv-form-lbl" for="cv-oe-date">Date Field <span>*</span><span class="cv-info-icon" tabindex="0">i<span class="cv-info-tip">Anchors the event to the timeline axis.</span></span></label>
+                      <select class="cv-form-sel" id="cv-oe-date" disabled>
+                        <option value="">— Select a date field —</option>
+                        <option value="EventDate">EventDate</option>
+                        <option value="TargetDate">TargetDate</option>
+                        <option value="OpenDate">OpenDate</option>
+                        <option value="CloseDate">CloseDate</option>
+                        <option value="BirthDate">BirthDate</option>
+                        <option value="CreatedDate">CreatedDate</option>
+                      </select>
+                    </div>
+
+                    <!-- Member Relationship Field -->
+                    <div class="cv-form-row cv-form-row--disabled" id="cv-oe-rel-row">
+                      <label class="cv-form-lbl" for="cv-oe-rel">Member Relationship Field<span class="cv-info-icon" tabindex="0">i<span class="cv-info-tip">Lookup that routes this event to the correct member row.</span></span></label>
+                      <select class="cv-form-sel" id="cv-oe-rel" disabled>
+                        <option value="">— Select a relationship field —</option>
+                        <option value="AccountId">AccountId — Account</option>
+                        <option value="ContactId">ContactId — Contact</option>
+                        <option value="OwnerId">OwnerId — Owner</option>
+                      </select>
+                    </div>
+
+                    <!-- Visible by default -->
+                    <div class="cv-form-row" style="display:flex;align-items:flex-start;gap:10px;grid-column:1/-1;">
+                      <div class="cv-tog on" id="cv-oe-visible-tog" onclick="this.classList.toggle('on')" style="margin-top:2px;flex-shrink:0;" aria-label="Toggle default visibility"></div>
+                      <div>
+                        <label class="cv-form-lbl" style="margin:0;cursor:pointer;" onclick="document.getElementById('cv-oe-visible-tog').classList.toggle('on')">Visible by default</label>
+                        <div class="cv-form-hint">Show this object type on the timeline when advisors first open it.</div>
+                      </div>
+                    </div>
+
+                  </div><!-- /cv-field-grid -->
+                </div>
+              </div><!-- /cv-form-modal-body -->
+
+              <!-- Modal footer: Cancel | Save -->
+              <div class="cv-form-modal-footer">
+                <div>
+                  <button type="button" class="cv-btn-pill cv-btn-pill--secondary" onclick="cvShowListView()">Cancel</button>
+                </div>
+                <div class="cv-footer-right">
+                  <button type="button" class="cv-btn-pill cv-btn-pill--primary" id="cv-oe-save-btn" onclick="cvSaveObjEditor()">Save</button>
+                </div>
+              </div>
+
+            </div><!-- /cv-form-modal-card -->
+          </div><!-- /cv-form-view modal -->
+        </section>
+
+        <!-- 3.2 Detail Panel Fields -->
+        <section class="panel" data-panel="8" aria-labelledby="heading-cv-fields" hidden>
+          <h2 id="heading-cv-fields" class="content__heading">Detail Panel Fields</h2>
+          <p class="content__lede">Choose which fields appear when an advisor opens an event's detail panel. Select up to 4 fields to feature them as highlight cards at the top — all other fields render as labelled rows below.</p>
+
+          <!-- ── Detail Panel Info Card ── -->
+          <div class="cv-dp-info">
+            <!-- Schematic diagram -->
+            <div class="cv-dp-schematic" aria-hidden="true">
+              <div class="cv-dp-sch-zone">
+                <div class="cv-dp-sch-zone-lbl">
+                  <span class="cv-dp-sch-dot" style="background:#e8a000;"></span>Highlights
+                </div>
+                <div class="cv-dp-sch-fields">
+                  <div class="cv-dp-sch-field">Field 1</div>
+                  <div class="cv-dp-sch-field">Field 2</div>
+                  <div class="cv-dp-sch-field">Field 3</div>
+                  <div class="cv-dp-sch-field">Field 4</div>
+                </div>
+              </div>
+              <div class="cv-dp-sch-zone">
+                <div class="cv-dp-sch-zone-lbl">
+                  <span class="cv-dp-sch-dot" style="background:#c9c7c5;"></span>Body Fields
+                </div>
+                <div class="cv-dp-sch-body-grid">
+                  <div class="cv-dp-sch-line"></div>
+                  <div class="cv-dp-sch-line"></div>
+                  <div class="cv-dp-sch-line"></div>
+                  <div class="cv-dp-sch-line"></div>
+                  <div class="cv-dp-sch-line"></div>
+                  <div class="cv-dp-sch-line"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Dotted connectors -->
+            <div class="cv-dp-connectors" aria-hidden="true">
+              <div class="cv-dp-conn-row"><div class="cv-dp-conn-line"></div></div>
+              <div class="cv-dp-conn-row"><div class="cv-dp-conn-line"></div></div>
+            </div>
+            <!-- Text rows -->
+            <div class="cv-dp-info-rows">
+              <div class="cv-dp-info-row"><p><strong>Highlights</strong> — the first 4 selected fields render as prominent cards at the top of the detail panel.</p></div>
+              <div class="cv-dp-info-row"><p><strong>Body Fields</strong> — all remaining fields render as labelled rows below.</p></div>
+            </div>
+          </div>
+
+          <!-- Object type tabs -->
+          <div class="cv-obj-tabs" id="cv-field-tabs">
+            <div class="cv-obj-tab active" onclick="cvSwitchFieldTab('life-event', this)">
+              <span class="cv-tab-dot" style="background:#0891b2;"></span>Life Event
+            </div>
+            <div class="cv-obj-tab" onclick="cvSwitchFieldTab('goal', this)">
+              <span class="cv-tab-dot" style="background:#E8690B;"></span>Financial Goal
+            </div>
+            <div class="cv-obj-tab" onclick="cvSwitchFieldTab('product', this)">
+              <span class="cv-tab-dot" style="background:#059669;"></span>Financial Product
+            </div>
+          </div>
+
+          <!-- ── Life Event ── -->
+          <div id="cv-fields-life-event" class="cv-fields-wrap">
+            <table class="cv-fields-table" aria-label="Life Event detail panel fields">
+              <thead><tr>
+                <th class="cv-ft-grip-th" aria-hidden="true"></th>
+                <th>Field Label</th>
+                <th class="cv-ft-api-th">API Name</th>
+                <th>Data Type</th>
+                <th class="cv-ft-hl-th">Highlight <span class="cv-hl-badge" id="cv-hl-badge-life-event">4 / 4</span></th>
+                <th class="cv-ft-rm-th" aria-hidden="true"></th>
+              </tr></thead>
+              <tbody id="cv-tbody-life-event">
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Event Type</td><td class="cv-ft-api">EventType</td><td class="cv-ft-type">Picklist</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'life-event')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'life-event')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Event Date</td><td class="cv-ft-api">EventDate</td><td class="cv-ft-type">Date/Time</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'life-event')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'life-event')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Description</td><td class="cv-ft-api">EventDescription</td><td class="cv-ft-type">Long Text Area</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'life-event')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'life-event')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Primary Person</td><td class="cv-ft-api">PrimaryPersonId</td><td class="cv-ft-type">Master-Detail(Contact)</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'life-event')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'life-event')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Owner</td><td class="cv-ft-api">OwnerId</td><td class="cv-ft-type">Lookup(User)</td><td class="cv-ft-hl"><div class="cv-tog" onclick="cvToggleHl(this,'life-event')" role="switch" aria-checked="false" title="Add to Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'life-event')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Event Location</td><td class="cv-ft-api">EventLocation</td><td class="cv-ft-type">Address</td><td class="cv-ft-hl"><div class="cv-tog" onclick="cvToggleHl(this,'life-event')" role="switch" aria-checked="false" title="Add to Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'life-event')" aria-label="Remove">×</button></td></tr>
+              </tbody>
+            </table>
+            <div class="cv-ft-add-row">
+              <span class="cv-ft-add-label">Add field:</span>
+              <select class="cv-ft-picker" onchange="cvPickField(this,'life-event')" aria-label="Add a field to Life Event">
+                <option value="">Choose a field…</option>
+                <option value="Event Name|Name|Text(255)">Event Name</option>
+                <option value="Event Date|EventDate|Date/Time">Event Date</option>
+                <option value="Event Type|EventType|Picklist">Event Type</option>
+                <option value="Description|EventDescription|Long Text Area">Description</option>
+                <option value="Event Location|EventLocation|Address">Event Location</option>
+                <option value="Expiration Date|ExpirationDate|Date/Time">Expiration Date</option>
+                <option value="Expired|IsExpired|Checkbox">Expired</option>
+                <option value="Owner|OwnerId|Lookup(User)">Owner</option>
+                <option value="Primary Person|PrimaryPersonId|Master-Detail(Contact)">Primary Person</option>
+                <option value="Related Person|RelatedPersonId|Lookup(Contact)">Related Person</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ── Financial Goal ── -->
+          <div id="cv-fields-goal" class="cv-fields-wrap" style="display:none;">
+            <table class="cv-fields-table" aria-label="Financial Goal detail panel fields">
+              <thead><tr>
+                <th class="cv-ft-grip-th" aria-hidden="true"></th>
+                <th>Field Label</th>
+                <th class="cv-ft-api-th">API Name</th>
+                <th>Data Type</th>
+                <th class="cv-ft-hl-th">Highlight <span class="cv-hl-badge" id="cv-hl-badge-goal">4 / 4</span></th>
+                <th class="cv-ft-rm-th" aria-hidden="true"></th>
+              </tr></thead>
+              <tbody id="cv-tbody-goal">
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Target Date</td><td class="cv-ft-api">FinServ__TargetDate__c</td><td class="cv-ft-type">Date/Time</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'goal')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'goal')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Target Amount</td><td class="cv-ft-api">FinServ__TargetValue__c</td><td class="cv-ft-type">Currency</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'goal')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'goal')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Status</td><td class="cv-ft-api">FinServ__Status__c</td><td class="cv-ft-type">Picklist</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'goal')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'goal')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Progress %</td><td class="cv-ft-api">ProgressPercentage__c</td><td class="cv-ft-type">Percent</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'goal')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'goal')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Goal Type</td><td class="cv-ft-api">FinServ__GoalType__c</td><td class="cv-ft-type">Picklist</td><td class="cv-ft-hl"><div class="cv-tog" onclick="cvToggleHl(this,'goal')" role="switch" aria-checked="false" title="Add to Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'goal')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Priority</td><td class="cv-ft-api">FinServ__Priority__c</td><td class="cv-ft-type">Picklist</td><td class="cv-ft-hl"><div class="cv-tog" onclick="cvToggleHl(this,'goal')" role="switch" aria-checked="false" title="Add to Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'goal')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Owner</td><td class="cv-ft-api">OwnerId</td><td class="cv-ft-type">Lookup(User)</td><td class="cv-ft-hl"><div class="cv-tog" onclick="cvToggleHl(this,'goal')" role="switch" aria-checked="false" title="Add to Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'goal')" aria-label="Remove">×</button></td></tr>
+              </tbody>
+            </table>
+            <div class="cv-ft-add-row">
+              <span class="cv-ft-add-label">Add field:</span>
+              <select class="cv-ft-picker" onchange="cvPickField(this,'goal')" aria-label="Add a field to Financial Goal">
+                <option value="">Choose a field…</option>
+                <option value="Target Date|FinServ__TargetDate__c|Date/Time">Target Date</option>
+                <option value="Target Amount|FinServ__TargetValue__c|Currency">Target Amount</option>
+                <option value="Status|FinServ__Status__c|Picklist">Status</option>
+                <option value="Progress %|ProgressPercentage__c|Percent">Progress %</option>
+                <option value="Goal Type|FinServ__GoalType__c|Picklist">Goal Type</option>
+                <option value="Priority|FinServ__Priority__c|Picklist">Priority</option>
+                <option value="Owner|OwnerId|Lookup(User)">Owner</option>
+                <option value="Description|Description|Long Text Area">Description</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ── Financial Product ── -->
+          <div id="cv-fields-product" class="cv-fields-wrap" style="display:none;">
+            <table class="cv-fields-table" aria-label="Financial Product detail panel fields">
+              <thead><tr>
+                <th class="cv-ft-grip-th" aria-hidden="true"></th>
+                <th>Field Label</th>
+                <th class="cv-ft-api-th">API Name</th>
+                <th>Data Type</th>
+                <th class="cv-ft-hl-th">Highlight <span class="cv-hl-badge" id="cv-hl-badge-product">4 / 4</span></th>
+                <th class="cv-ft-rm-th" aria-hidden="true"></th>
+              </tr></thead>
+              <tbody id="cv-tbody-product">
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Open Date</td><td class="cv-ft-api">FinServ__OpenDate__c</td><td class="cv-ft-type">Date/Time</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'product')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'product')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Status</td><td class="cv-ft-api">FinServ__Status__c</td><td class="cv-ft-type">Picklist</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'product')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'product')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Product Type</td><td class="cv-ft-api">FinServ__FinancialAccountType__c</td><td class="cv-ft-type">Picklist</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'product')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'product')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Balance</td><td class="cv-ft-api">FinServ__Balance__c</td><td class="cv-ft-type">Currency</td><td class="cv-ft-hl"><div class="cv-tog on" onclick="cvToggleHl(this,'product')" role="switch" aria-checked="true" title="Remove from Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'product')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Provider</td><td class="cv-ft-api">FinServ__Provider__c</td><td class="cv-ft-type">Text(255)</td><td class="cv-ft-hl"><div class="cv-tog" onclick="cvToggleHl(this,'product')" role="switch" aria-checked="false" title="Add to Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'product')" aria-label="Remove">×</button></td></tr>
+                <tr draggable="true"><td class="cv-ft-grip">⠿</td><td class="cv-ft-label">Owner</td><td class="cv-ft-api">OwnerId</td><td class="cv-ft-type">Lookup(User)</td><td class="cv-ft-hl"><div class="cv-tog" onclick="cvToggleHl(this,'product')" role="switch" aria-checked="false" title="Add to Highlights"></div></td><td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,'product')" aria-label="Remove">×</button></td></tr>
+              </tbody>
+            </table>
+            <div class="cv-ft-add-row">
+              <span class="cv-ft-add-label">Add field:</span>
+              <select class="cv-ft-picker" onchange="cvPickField(this,'product')" aria-label="Add a field to Financial Product">
+                <option value="">Choose a field…</option>
+                <option value="Open Date|FinServ__OpenDate__c|Date/Time">Open Date</option>
+                <option value="Status|FinServ__Status__c|Picklist">Status</option>
+                <option value="Product Type|FinServ__FinancialAccountType__c|Picklist">Product Type</option>
+                <option value="Balance|FinServ__Balance__c|Currency">Balance</option>
+                <option value="Provider|FinServ__Provider__c|Text(255)">Provider</option>
+                <option value="Owner|OwnerId|Lookup(User)">Owner</option>
+                <option value="Description|Description|Long Text Area">Description</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- Completion panel (no stepper step — navigated to programmatically) -->
+        <section class="panel" data-panel="10" aria-labelledby="heading-setup-complete" hidden>
+          <!-- Hidden nav trigger so the Save & Next JS can navigate here -->
+          <button type="button" data-nav="10" hidden aria-hidden="true" tabindex="-1" style="display:none"></button>
+
+          <div class="setup-complete">
+            <div class="setup-complete__icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="20" fill="#2e844a" fill-opacity="0.1"/>
+                <circle cx="20" cy="20" r="14" fill="#2e844a"/>
+                <polyline points="13,20 18,25 27,15" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </div>
+            <h2 id="heading-setup-complete" class="setup-complete__heading">You're all set!</h2>
+            <p class="setup-complete__sub">Household Setup is complete. Your preferences, member settings, and household structure have been saved and are ready to use.</p>
+
+            <div class="setup-complete__summary">
+              <div class="setup-complete__summary-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2e844a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Global Preferences configured</span>
+              </div>
+              <div class="setup-complete__summary-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2e844a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Household Settings configured</span>
+              </div>
+              <div class="setup-complete__summary-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2e844a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Record Type selected</span>
+              </div>
+              <div class="setup-complete__summary-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2e844a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Chronicle View configured</span>
+              </div>
+            </div>
+
+            <div class="setup-complete__actions">
+              <a href="#" class="btn btn--primary-solid setup-complete__cta">
+                Go to Households
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+              <button type="button" class="btn btn--neutral" id="btn-setup-done">Done</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <footer class="modal__footer">
+      <button type="button" class="btn btn--brand" id="btn-next">Save &amp; Next</button>
+    </footer>
+  </div>
+
+  <!-- Person Accounts — Org Impact Acknowledgement modal -->
+  <div class="modal-nested-layer" id="pa-terms-modal" hidden>
+    <div class="modal-nested-backdrop" id="pa-terms-backdrop"></div>
+    <div class="modal-nested" role="dialog" aria-labelledby="pa-terms-modal-title" aria-modal="true">
+      <header class="modal-nested__header modal-nested__header--with-subtitle">
+        <h2 id="pa-terms-modal-title" class="modal-nested__title">Org Impact Acknowledgement</h2>
+        <p class="modal-nested__subtitle">Read and acknowledge the permanent changes associated with enabling person accounts. Review the changes with any stakeholders before proceeding.</p>
+        <button type="button" class="modal-nested__close" id="btn-pa-terms-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-nested__body">
+        <p style="font-size:0.875rem;line-height:1.6;margin:0 0 0.875rem;">After Person Accounts is enabled, it can't be disabled. We strongly recommend that you create a sandbox to preview how Person Accounts affect your Salesforce org before enabling the feature.</p>
+        <p style="font-size:0.875rem;line-height:1.6;margin:0 0 0.875rem;">We also recommend reviewing the impacts of turning on person accounts with all stakeholders before enabling the feature. See the Salesforce Help for a full list of considerations related to enabling person accounts. <a href="#" class="link-external">Go to Help ↗</a></p>
+        <p style="font-size:0.875rem;font-weight:600;margin:0 0 0.5rem;">Some major implications include:</p>
+        <ul class="edu-list" style="margin-bottom:0;">
+          <li>Person Accounts count against both account and contact storage, because each person account consists of one account and one contact.</li>
+          <li>Person Accounts can't be included in account hierarchies, contact hierarchies, or have direct relationships with other accounts or contacts. However, you can use Contacts to Multiple Accounts to create indirect relationships between a person account and another person account, business account, or contact.</li>
+          <li>Creating or editing a person account triggers account workflow rules.</li>
+          <li>Contact fields from person accounts will continue to be exposed on account list views and reports even if your org stops using person accounts.</li>
+        </ul>
+      </div>
+      <footer class="modal-nested__footer">
+        <button type="button" class="btn btn--primary-solid" id="btn-pa-terms-close-footer">Close</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="household-setup.js"></script>
+  <script src="page-1-global-preferences.js"></script>
+
+  <!-- ── Chronicle View Settings — interactive JS ── -->
+  <script>
+  (function () {
+
+    /* ── Data model switcher ── */
+    var cvCurModel = 'pkg';
+
+    window.cvSetDataModel = function (model) {
+      cvCurModel = model;
+
+      /* Tab bar active state */
+      var tabPkg  = document.getElementById('cv-tab-pkg');
+      var tabCore = document.getElementById('cv-tab-core');
+      if (tabPkg)  { tabPkg.classList.toggle('active',  model === 'pkg');  tabPkg.setAttribute('aria-selected',  String(model === 'pkg'));  tabPkg.tabIndex  = model === 'pkg'  ? 0 : -1; }
+      if (tabCore) { tabCore.classList.toggle('active', model === 'core'); tabCore.setAttribute('aria-selected', String(model === 'core')); tabCore.tabIndex = model === 'core' ? 0 : -1; }
+
+      /* Card subtitle */
+      var sub = document.getElementById('cv-card-sub');
+      if (sub) {
+        var modelLabel = model === 'pkg' ? 'Package (FinServ)' : 'Core / Standard';
+        var rowCount   = document.querySelectorAll('#cv-obj-tbody tr:not([hidden])').length;
+        sub.textContent = rowCount + ' object' + (rowCount !== 1 ? 's' : '') + ' configured\u00a0·\u00a0Data model: ' + modelLabel;
+      }
+
+      /* Update all data-model-sensitive values */
+      document.querySelectorAll('.cv-dm-val').forEach(function (el) {
+        el.textContent = el.dataset[model] || el.dataset.pkg;
+      });
+      document.querySelectorAll('.cv-dm-badge-pkg').forEach(function (b) {
+        b.style.display = model === 'pkg' ? '' : 'none';
+      });
+      document.querySelectorAll('.cv-dm-badge-core').forEach(function (b) {
+        b.style.display = model === 'core' ? '' : 'none';
+      });
+    };
+
+    /* ── Row actions dropdown ── */
+    window.cvCloseRowMenus = function () {
+      document.querySelectorAll('.cv-row-menu').forEach(function (m) { m.hidden = true; });
+      document.querySelectorAll('.cv-row-actions-btn').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+    };
+
+    window.cvToggleRowMenu = function (btn) {
+      var menu   = btn.nextElementSibling;
+      var isOpen = !menu.hidden;
+      cvCloseRowMenus();
+      if (!isOpen) {
+        menu.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+        /* Close when clicking anywhere outside */
+        setTimeout(function () {
+          document.addEventListener('click', function onOutside(e) {
+            if (!menu.contains(e.target) && e.target !== btn) {
+              cvCloseRowMenus();
+              document.removeEventListener('click', onOutside);
+            }
+          });
+        }, 0);
+      }
+    };
+
+    /* ── HTML5 drag-to-reorder for object rows ── */
+    var cvDragSrcRow = null;
+
+    window.cvDragStart = function (e, row) {
+      cvDragSrcRow = row;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', '');      /* slight delay so the ghost doesn't show the dim state */
+      setTimeout(function () { row.classList.add('cv-row--dragging'); }, 0);
+    };
+
+    window.cvDragOver = function (e, row) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (row !== cvDragSrcRow) {
+        document.querySelectorAll('#cv-obj-tbody tr').forEach(function (r) { r.classList.remove('cv-row--drag-over'); });
+        row.classList.add('cv-row--drag-over');
+      }
+    };
+
+    window.cvDragLeave = function (e, row) {
+      row.classList.remove('cv-row--drag-over');
+    };
+
+    window.cvDragDrop = function (e, row) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (cvDragSrcRow && row !== cvDragSrcRow) {
+        var tbody   = row.parentNode;
+        var srcIdx  = Array.from(tbody.children).indexOf(cvDragSrcRow);
+        var tgtIdx  = Array.from(tbody.children).indexOf(row);
+        if (srcIdx < tgtIdx) {
+          tbody.insertBefore(cvDragSrcRow, row.nextSibling);
+        } else {
+          tbody.insertBefore(cvDragSrcRow, row);
+        }
+      }
+      row.classList.remove('cv-row--drag-over');
+    };
+
+    window.cvDragEnd = function (e, row) {
+      document.querySelectorAll('#cv-obj-tbody tr').forEach(function (r) {
+        r.classList.remove('cv-row--dragging', 'cv-row--drag-over');
+      });
+      cvDragSrcRow = null;
+    };
+
+    window.cvRemoveObjRow = function (btn) {
+      var row   = btn.closest('tr');
+      var tbody = row.closest('tbody');
+      row.remove();
+      /* Refresh count */
+      var countEl = document.getElementById('cv-obj-count');
+      var subEl   = document.getElementById('cv-card-sub');
+      if (tbody && countEl) {
+        var total      = tbody.querySelectorAll('tr:not([hidden])').length;
+        var countText  = total + ' object' + (total !== 1 ? 's' : '');
+        countEl.textContent = countText;
+        if (subEl) subEl.textContent = countText + ' configured\u00a0·\u00a0Data model: ' + (cvCurModel === 'pkg' ? 'Package (FinServ)' : 'Core / Standard');
+      }
+    };
+
+    /* ── Object table search filter ── */
+    window.cvFilterObjTable = function (query) {
+      var q = query.trim().toLowerCase();
+      var rows = document.querySelectorAll('#cv-obj-tbody tr');
+      var visible = 0;
+      rows.forEach(function (row) {
+        var text = row.textContent.toLowerCase();
+        var show = !q || text.indexOf(q) !== -1;
+        row.hidden = !show;
+        if (show) visible++;
+      });
+      /* Update toolbar count */
+      var countEl = document.getElementById('cv-obj-count');
+      if (countEl) countEl.textContent = visible + ' object' + (visible !== 1 ? 's' : '') + (q ? ' found' : '');
+    };
+
+    /* ── Object data by model ── */
+    var CV_OBJ_DATA = {
+      pkg: {
+        'life-event':  { label:'Life Event',        api:'FinServ__LifeEvent__c',        date:'FinServ__EventDate__c',  name:'Name', year:'derived', rel:'FinServ__PrimaryOwner__c', color:'#0891b2' },
+        'goal':        { label:'Financial Goal',     api:'FinServ__FinancialGoal__c',    date:'FinServ__TargetDate__c', name:'Name', year:'derived', rel:'FinServ__PrimaryOwner__c', color:'#E8690B' },
+        'product':     { label:'Financial Product',  api:'FinServ__FinancialAccount__c', date:'FinServ__OpenDate__c',   name:'Name', year:'derived', rel:'FinServ__PrimaryOwner__c', color:'#059669' },
+        'opportunity': { label:'Opportunity',        api:'Opportunity',                  date:'CloseDate',              name:'Name', year:'derived', rel:'AccountId',                color:'#7c3aed' }
+      },
+      core: {
+        'life-event':  { label:'Life Event',        api:'LifeEvent',        date:'EventDate',  name:'Name', year:'derived', rel:'PrimaryOwner', color:'#0891b2' },
+        'goal':        { label:'Financial Goal',    api:'FinancialGoal',    date:'TargetDate', name:'Name', year:'derived', rel:'PrimaryOwner', color:'#E8690B' },
+        'product':     { label:'Financial Product', api:'FinancialAccount', date:'OpenDate',   name:'Name', year:'derived', rel:'PrimaryOwner', color:'#059669' },
+        'opportunity': { label:'Opportunity',       api:'Opportunity',      date:'CloseDate',  name:'Name', year:'derived', rel:'AccountId',    color:'#7c3aed' }
+      }
+    };
+
+    function cvGetData(key) { return (CV_OBJ_DATA[cvCurModel] || {})[key] || {}; }
+
+    /* ── Editor state ── */
+    var cvEditorMode = 'edit';
+    window.cvEditorStep = 1;
+
+    function cvSetField(id, val) {
+      var el = document.getElementById(id);
+      if (el) el.value = val || '';
+    }
+
+    /* ── Modal show / hide (list view always stays visible underneath) ── */
+    window.cvShowListView = function () {
+      var fv = document.getElementById('cv-form-view');
+      if (fv) fv.setAttribute('hidden', '');
+    };
+
+    function cvShowFormView(mode, title) {
+      var fv = document.getElementById('cv-form-view');
+      if (fv) fv.removeAttribute('hidden');
+      var bcTitle = document.getElementById('cv-bc-title');
+      if (bcTitle) bcTitle.textContent = title || (mode === 'add' ? 'Add Object' : 'Edit Object');
+    }
+
+    /* ── Enable/disable dependent fields based on object selection ── */
+    function cvToggleDependentFields(enabled) {
+      var dateEl  = document.getElementById('cv-oe-date');
+      var relEl   = document.getElementById('cv-oe-rel');
+      var dateRow = document.getElementById('cv-oe-date-row');
+      var relRow  = document.getElementById('cv-oe-rel-row');
+      if (dateEl)  dateEl.disabled  = !enabled;
+      if (relEl)   relEl.disabled   = !enabled;
+      if (dateRow) dateRow.classList.toggle('cv-form-row--disabled', !enabled);
+      if (relRow)  relRow.classList.toggle('cv-form-row--disabled',  !enabled);
+    }
+
+    /* ── Color popup toggle ── */
+    window.cvToggleColorMenu = function (e) {
+      e.stopPropagation();
+      var popup = document.getElementById('cv-color-popup');
+      if (!popup) return;
+      popup.hidden = !popup.hidden;
+    };
+
+    /* ── Pick a colour from the popup ── */
+    window.cvPickColor = function (hex) {
+      var dot    = document.getElementById('cv-oe-color-dot');
+      var hidden = document.getElementById('cv-oe-color-val');
+      var popup  = document.getElementById('cv-color-popup');
+      if (dot)    dot.style.background = hex;
+      if (hidden) hidden.value = hex;
+      if (popup)  popup.hidden = true;
+      document.querySelectorAll('.cv-color-opt').forEach(function (o) {
+        o.classList.toggle('cv-color-active', o.dataset.color === hex);
+      });
+    };
+
+    /* ── Set colour programmatically (auto-assign or edit load) ── */
+    function cvSetColor(hex) {
+      var dot    = document.getElementById('cv-oe-color-dot');
+      var hidden = document.getElementById('cv-oe-color-val');
+      if (dot)    dot.style.background = hex || '#a8a29e';
+      if (hidden) hidden.value = hex || '';
+      document.querySelectorAll('.cv-color-opt').forEach(function (o) {
+        o.classList.toggle('cv-color-active', !!hex && o.dataset.color === hex);
+      });
+    }
+
+    /* ── Close colour popup when clicking outside ── */
+    document.addEventListener('click', function () {
+      var popup = document.getElementById('cv-color-popup');
+      if (popup) popup.hidden = true;
+    });
+
+    /* ── Auto-fill API name when an object is selected ── */
+    window.cvOnObjectSelect = function (sel) {
+      var apiInput = document.getElementById('cv-oe-api');
+      if (!apiInput) return;
+      var val = sel.value;
+      apiInput.value = (val && val !== '__custom__') ? val : '';
+      if (val === '__custom__') { apiInput.focus(); }
+      cvToggleDependentFields(!!val);
+      if (val && !document.getElementById('cv-oe-color-val').value) {
+        var AUTO_COLORS = ['#0891b2','#E8690B','#059669','#7c3aed','#0176d3','#b45309','#374151'];
+        var existingRows = document.querySelectorAll('#cv-obj-tbody tr').length;
+        cvSetColor(AUTO_COLORS[existingRows % AUTO_COLORS.length]);
+      } else if (!val) {
+        cvSetColor('');
+      }
+    };
+
+    /* ── Open editor: Edit mode ── */
+    window.cvOpenObjEditor = function (key) {
+      cvEditorMode = 'edit';
+      var d = cvGetData(key);
+      cvShowFormView('edit', 'Edit');
+      /* Lock Object + colour picker in edit mode */
+      var splitBtn = document.getElementById('cv-split-color-btn');
+      var objSel = document.getElementById('cv-oe-object');
+      if (splitBtn) { splitBtn.style.pointerEvents = 'none'; splitBtn.style.opacity = '.6'; }
+      if (objSel)   { objSel.disabled = true; }
+      /* Try to match label to a select option, fall back to custom */
+      if (objSel) {
+        var matched = false;
+        for (var i = 0; i < objSel.options.length; i++) {
+          if (objSel.options[i].value === d.api) { objSel.selectedIndex = i; matched = true; break; }
+        }
+        if (!matched) { objSel.value = '__custom__'; }
+      }
+      cvSetField('cv-oe-api',  d.api);
+      cvToggleDependentFields(true);
+      cvSetField('cv-oe-date', d.date);
+      cvSetField('cv-oe-rel',  d.rel);
+      cvSetColor(d.color || '#0891b2');
+      var useDateTog = document.getElementById('cv-oe-use-date');
+      if (useDateTog) { if (d.useDate === false) useDateTog.classList.remove('on'); else useDateTog.classList.add('on'); }
+      document.getElementById('cv-oe-save-btn').textContent = 'Save Changes';
+    };
+
+    /* ── Open editor: Add mode (single page, no stepper) ── */
+    window.cvOpenAddObject = function () {
+      cvEditorMode = 'add';
+      cvShowFormView('add', 'Add Object');
+      /* Unlock Object + colour picker for add mode */
+      var splitBtn = document.getElementById('cv-split-color-btn');
+      var objSel = document.getElementById('cv-oe-object');
+      if (splitBtn) { splitBtn.style.pointerEvents = ''; splitBtn.style.opacity = ''; }
+      if (objSel)   { objSel.disabled = false; objSel.selectedIndex = 0; }
+      cvSetField('cv-oe-api',  '');
+      cvSetField('cv-oe-date', '');
+      cvSetField('cv-oe-rel',  '');
+      cvSetColor('');
+      cvToggleDependentFields(false);
+      var objSel2 = document.getElementById('cv-oe-object');
+      if (objSel2) objSel2.value = '';
+      var useDateTog = document.getElementById('cv-oe-use-date');
+      if (useDateTog) useDateTog.classList.add('on');
+      document.getElementById('cv-oe-save-btn').textContent = 'Add Object';
+    };
+
+
+    /* ── Save: append new row and return to list ── */
+    window.cvSaveObjEditor = function () {
+      if (cvEditorMode === 'add') {
+        var objSel = document.getElementById('cv-oe-object');
+        var label  = (objSel && objSel.selectedIndex > 0 && objSel.value !== '__custom__')
+                       ? objSel.options[objSel.selectedIndex].text
+                       : ((document.getElementById('cv-oe-api') || {}).value || 'New Object');
+        var api      = (document.getElementById('cv-oe-api')   || {}).value || '—';
+        var date     = (document.getElementById('cv-oe-date')  || {}).value || '—';
+        var useDateTog = document.getElementById('cv-oe-use-date');
+        var yearDisp = (!useDateTog || useDateTog.classList.contains('on')) ? '(auto)' : '—';
+        var colorHidden = document.getElementById('cv-oe-color-val');
+        var color = (colorHidden && colorHidden.value) ? colorHidden.value : '#0891b2';
+        var tbody    = document.getElementById('cv-obj-tbody');
+        if (tbody) {
+          var menuHtml =
+            '<div class="cv-row-actions">' +
+              '<button type="button" class="cv-row-actions-btn" onclick="cvToggleRowMenu(this)" aria-haspopup="true" aria-expanded="false" aria-label="Actions for ' + label + '">' +
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>' +
+              '</button>' +
+              '<div class="cv-row-menu" hidden role="menu">' +
+                '<button class="cv-row-menu-item" role="menuitem" onclick="cvCloseRowMenus()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>' +
+                '<div class="cv-row-menu-divider" role="separator"></div>' +
+                '<button class="cv-row-menu-item cv-row-menu-item--danger" role="menuitem" onclick="cvRemoveObjRow(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Remove</button>' +
+              '</div>' +
+            '</div>';
+          var tr = document.createElement('tr');
+          tr.setAttribute('draggable', 'true');
+          tr.setAttribute('ondragstart', 'cvDragStart(event,this)');
+          tr.setAttribute('ondragover',  'cvDragOver(event,this)');
+          tr.setAttribute('ondrop',      'cvDragDrop(event,this)');
+          tr.setAttribute('ondragend',   'cvDragEnd(event,this)');
+          tr.setAttribute('ondragleave', 'cvDragLeave(event,this)');
+          tr.innerHTML =
+            '<td class="cv-grip-td"><span class="cv-row-grip" title="Drag to reorder">⠿</span></td>' +
+            '<td class="cv-row-num-td"></td>' +
+            '<td><div class="cv-obj-label-cell"><span class="cv-obj-color-dot" style="background:' + color + ';"></span>' + label + '</div></td>' +
+            '<td><div class="cv-tog on" onclick="this.classList.toggle(\'on\')" aria-label="Toggle ' + label + ' visibility"></div></td>' +
+            '<td>' + menuHtml + '</td>';
+          tbody.appendChild(tr);
+          /* Refresh count in toolbar */
+          var countEl = document.getElementById('cv-obj-count');
+          if (countEl) {
+            var total = tbody.querySelectorAll('tr:not([hidden])').length;
+            countEl.textContent = total + ' object' + (total !== 1 ? 's' : '');
+          }
+        }
+      }
+      cvShowListView();
+    };
+
+    /* ── Detail Panel field tabs ── */
+    window.cvSwitchFieldTab = function (type, tabEl) {
+      document.querySelectorAll('.cv-obj-tab').forEach(function (t) { t.classList.remove('active'); });
+      tabEl.classList.add('active');
+      ['life-event', 'goal', 'product'].forEach(function (t) {
+        var el = document.getElementById('cv-fields-' + t);
+        if (el) el.style.display = t === type ? 'block' : 'none';
+      });
+    };
+
+    /* ── Detail Panel Fields — SLDS table with star-highlight toggle ── */
+
+    var HL_MAX = 4;
+
+    /* Count "on" toggles (= highlighted fields) in a given object key */
+    function cvHlCount(key) {
+      var tbody = document.getElementById('cv-tbody-' + key);
+      return tbody ? tbody.querySelectorAll('.cv-tog.on').length : 0;
+    }
+
+    /* Refresh the badge and dim/lock off-toggles when at cap */
+    function cvUpdateHlBadge(key) {
+      var n     = cvHlCount(key);
+      var badge = document.getElementById('cv-hl-badge-' + key);
+      if (badge) {
+        badge.textContent = n + ' / ' + HL_MAX;
+        badge.className   = 'cv-hl-badge' + (n === 0 ? ' cv-hl-badge--empty' : n < HL_MAX ? ' cv-hl-badge--partial' : '');
+      }
+      var atCap = n >= HL_MAX;
+      var tbody = document.getElementById('cv-tbody-' + key);
+      if (!tbody) return;
+      tbody.querySelectorAll('.cv-tog').forEach(function (tog) {
+        var isOn = tog.classList.contains('on');
+        tog.style.opacity      = (!isOn && atCap) ? '0.35' : '';
+        tog.style.pointerEvents = (!isOn && atCap) ? 'none'  : '';
+        tog.title = isOn
+          ? 'Remove from Highlights'
+          : (atCap ? 'Highlights full (' + HL_MAX + ' / ' + HL_MAX + '). Turn off another first.' : 'Add to Highlights');
+        tog.setAttribute('aria-checked', isOn ? 'true' : 'false');
+      });
+    }
+
+    /* Toggle the highlight state on a row */
+    window.cvToggleHl = function (tog, key) {
+      if (!tog.classList.contains('on') && cvHlCount(key) >= HL_MAX) return;
+      tog.classList.toggle('on');
+      cvUpdateHlBadge(key);
+    };
+
+    /* Remove a row and restore its option in the picker */
+    window.cvRemoveField = function (btn, key) {
+      var row   = btn.closest('tr');
+      var api   = row.querySelector('.cv-ft-api') ? row.querySelector('.cv-ft-api').textContent : '';
+      row.remove();
+      cvUpdateHlBadge(key);
+      /* Re-show the option in the picker */
+      var picker = document.querySelector('#cv-fields-' + key + ' .cv-ft-picker');
+      if (picker && api) {
+        Array.from(picker.options).forEach(function (opt) {
+          if (opt.value.split('|')[1] === api) opt.hidden = false;
+        });
+      }
+    };
+
+    /* Add a field row from the picker selection */
+    window.cvPickField = function (sel, key) {
+      var val = sel.value;
+      if (!val) return;
+      var parts = val.split('|');
+      var label = parts[0], api = parts[1], type = parts[2];
+      var tbody = document.getElementById('cv-tbody-' + key);
+      if (!tbody) { sel.value = ''; return; }
+
+      var atCap  = cvHlCount(key) >= HL_MAX;
+      var togStyle = atCap ? ' style="opacity:.35;pointer-events:none"' : '';
+      var togTitle = atCap ? 'Highlights full (' + HL_MAX + ' / ' + HL_MAX + '). Turn off another first.' : 'Add to Highlights';
+      var starHtml = '<div class="cv-tog" onclick="cvToggleHl(this,\'' + key + '\')" role="switch" aria-checked="false" title="' + togTitle + '"' + togStyle + '></div>';
+
+      var tr = document.createElement('tr');
+      tr.draggable = true;
+      tr.innerHTML =
+        '<td class="cv-ft-grip">\u2807</td>' +
+        '<td class="cv-ft-label">' + label + '</td>' +
+        '<td class="cv-ft-api">' + api + '</td>' +
+        '<td class="cv-ft-type">' + type + '</td>' +
+        '<td class="cv-ft-hl">' + starHtml + '</td>' +
+        '<td class="cv-ft-rm-td"><button type="button" class="cv-field-rm" onclick="cvRemoveField(this,\'' + key + '\')" aria-label="Remove">\u00d7</button></td>';
+      tbody.appendChild(tr);
+
+      /* Hide option so it can't be added twice */
+      sel.options[sel.selectedIndex].hidden = true;
+      sel.value = '';
+
+      /* Flash the new row */
+      tr.classList.add('cv-ft-row--flash');
+      tr.addEventListener('animationend', function () { tr.classList.remove('cv-ft-row--flash'); }, { once: true });
+
+      cvUpdateHlBadge(key);
+    };
+
+    /* On load: hide picker options already present in each table */
+    function cvInitFieldPickers() {
+      ['life-event', 'goal', 'product'].forEach(function (key) {
+        var tbody  = document.getElementById('cv-tbody-' + key);
+        var picker = document.querySelector('#cv-fields-' + key + ' .cv-ft-picker');
+        if (!tbody || !picker) return;
+        var usedApis = Array.from(tbody.querySelectorAll('.cv-ft-api')).map(function (td) { return td.textContent.trim(); });
+        Array.from(picker.options).forEach(function (opt) {
+          if (!opt.value) return;
+          opt.hidden = usedApis.indexOf(opt.value.split('|')[1]) !== -1;
+        });
+        cvUpdateHlBadge(key);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', cvInitFieldPickers);
+
+  }());
+  </script>
+</body>
+</html>

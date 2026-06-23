@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chronicle View — Household</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f3f2f2; color:#1d1d1d; font-size:13px; }
+
+/* ── Nav ── */
+.global-nav { background:#fff; height:50px; border-bottom:1px solid #dddbda; display:flex; align-items:center; padding:0 16px; gap:16px; }
+.logo { display:flex; align-items:center; gap:6px; text-decoration:none; }
+.logo-cloud { color:#1589ee; font-size:26px; line-height:1; }
+.logo-text { display:flex; flex-direction:column; line-height:1.1; }
+.logo-name { font-size:13px; font-weight:900; color:#032D60; }
+.logo-bank { font-size:8px; font-weight:700; letter-spacing:2px; color:#1589ee; }
+.nav-search { flex:1; max-width:380px; margin:0 auto; position:relative; }
+.nav-search input { width:100%; padding:7px 14px 7px 34px; border:1px solid #dddbda; border-radius:20px; font-size:13px; background:#f3f2f2; outline:none; }
+.nav-search::before { content:'🔍'; position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:12px; pointer-events:none; }
+.nav-icons { display:flex; gap:14px; align-items:center; color:#706e6b; font-size:16px; cursor:pointer; }
+.nav-avatar { background:#5867e8; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; }
+
+/* ── Tab bar ── */
+.tab-bar { background:#fff; border-bottom:1px solid #dddbda; display:flex; align-items:stretch; padding:0 8px; gap:2px; }
+.tab { display:flex; align-items:center; padding:0 14px; gap:6px; font-size:12px; cursor:pointer; border-bottom:3px solid transparent; color:#706e6b; white-space:nowrap; height:36px; }
+.tab .close { font-size:9px; color:#bbb; margin-left:2px; }
+.tab.active { color:#0176d3; border-bottom-color:#0176d3; font-weight:600; }
+.tab-appname { font-size:12px; padding:0 10px; color:#444; display:flex; align-items:center; gap:6px; }
+
+/* ── Page ── */
+.page { padding:16px; }
+
+/* ── View toggle ── */
+.view-toggle { display:flex; margin-bottom:14px; border-radius:24px; overflow:hidden; border:2px solid #0176d3; width:fit-content; }
+.view-btn { padding:7px 22px; font-size:13px; font-weight:600; cursor:pointer; background:#fff; color:#0176d3; border:none; transition:all .15s; }
+.view-btn.active { background:#0176d3; color:#fff; }
+.view-btn:hover:not(.active) { background:#e8f4ff; }
+
+/* ── Timeline card ── */
+.timeline-card { background:#fff; border-radius:4px; border:1px solid #dddbda; overflow:hidden; }
+
+/* Card header */
+.card-header { padding:10px 16px; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.card-title-block .title { font-size:15px; font-weight:700; }
+.card-title-block .subtitle { font-size:11px; color:#706e6b; margin-top:2px; }
+.card-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+/* Toggle */
+.toggle-wrap { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; }
+.toggle-track { width:38px; height:20px; border-radius:10px; background:#c9c7c5; position:relative; transition:background .2s; flex-shrink:0; }
+.toggle-track.on { background:#0176d3; }
+.toggle-thumb { position:absolute; width:16px; height:16px; background:#fff; border-radius:50%; top:2px; left:2px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+.toggle-track.on .toggle-thumb { left:20px; }
+
+/* Zoom control */
+.zoom-ctrl { display:flex; align-items:center; gap:4px; border:1px solid #dddbda; border-radius:4px; overflow:hidden; }
+.zoom-btn { width:26px; height:26px; background:#fff; border:none; cursor:pointer; font-size:16px; font-weight:700; color:#444; display:flex; align-items:center; justify-content:center; }
+.zoom-btn:hover { background:#f3f2f2; }
+.zoom-val { font-size:11px; color:#706e6b; padding:0 6px; white-space:nowrap; min-width:54px; text-align:center; }
+
+/* Dropdown */
+.dd-wrap { position:relative; }
+.dd-btn { display:flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid #dddbda; border-radius:4px; background:#fff; font-size:12px; cursor:pointer; white-space:nowrap; user-select:none; }
+.dd-btn:hover { background:#f3f2f2; }
+.dd-menu { position:absolute; top:calc(100% + 4px); left:0; background:#fff; border:1px solid #dddbda; border-radius:4px; box-shadow:0 4px 16px rgba(0,0,0,.12); min-width:195px; z-index:200; display:none; }
+.dd-menu.open { display:block; }
+.dd-item { padding:9px 14px; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:10px; }
+.dd-item:hover { background:#f3f2f2; }
+.dd-check { color:#0176d3; font-size:12px; width:14px; }
+.dd-item:not(.sel) .dd-check { visibility:hidden; }
+.btn-new { display:flex; align-items:center; gap:4px; padding:5px 14px; background:#fff; border:1px solid #dddbda; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; }
+.btn-new:hover { background:#f3f2f2; }
+.btn-icon-sm { width:28px; height:28px; border:1px solid #dddbda; border-radius:4px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; }
+.btn-icon-sm:hover { background:#f3f2f2; }
+
+/* ── Timeline body ── */
+.tl-body { display:flex; border-top:1px solid #f0f0f0; }
+
+/* Members sidebar */
+.members-col { width:215px; min-width:215px; border-right:1px solid #e0e0e0; flex-shrink:0; }
+.members-hdr { height:56px; display:flex; align-items:center; padding:0 12px; background:#f8f7f6; border-bottom:1px solid #e0e0e0; font-size:11px; font-weight:700; color:#3e3e3c; }
+.member-cell { height:110px; display:flex; align-items:center; padding:0 12px; border-bottom:1px solid #f3f2f2; gap:9px; }
+.avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:12px; flex-shrink:0; }
+.member-info .name { font-size:12px; font-weight:700; }
+.member-info .meta { font-size:10px; color:#706e6b; line-height:1.7; }
+.star { color:#f4bc25; }
+
+/* Grid scroll */
+.grid-scroll { flex:1; overflow-x:auto; overflow-y:visible; cursor:grab; }
+.grid-scroll:active { cursor:grabbing; }
+.grid-inner { position:relative; }
+
+/* Phase strip */
+.phase-strip { height:18px; display:flex; border-bottom:1px solid #e8e8e8; }
+.phase-seg { height:100%; display:flex; align-items:center; padding:0 6px; font-size:9px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; overflow:hidden; white-space:nowrap; flex-shrink:0; }
+.phase-seg.p1  { background:#fef9ee; color:#b07800; border-right:1px dashed #ddd; }
+.phase-seg.p2  { background:#f0faf4; color:#1a7a46; border-right:1px dashed #ddd; }
+.phase-seg.p3  { background:#fff3ed; color:#c44a00; border-right:1px dashed #ddd; }
+.phase-seg.p4  { background:#edf5ff; color:#0050a0; border-right:1px dashed #ddd; }
+.phase-seg.pfut{ background:#f5f0ff; color:#5a2db0; }
+
+/* Year header */
+.yr-hdr { height:38px; position:relative; background:#f8f7f6; border-bottom:1px solid #e0e0e0; }
+.yr-label { position:absolute; transform:translateX(-50%); top:50%; margin-top:-7px; font-size:11px; font-weight:600; color:#3e3e3c; }
+.yr-tick  { position:absolute; bottom:0; width:1px; background:#d0d0d0; height:6px; transform:translateX(-50%); }
+.today-badge { position:absolute; transform:translateX(-50%); top:5px; }
+.today-badge span { background:#0176d3; color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; }
+
+/* Today line */
+.today-line { position:absolute; width:1.5px; background:#0176d3; z-index:5; pointer-events:none; }
+
+/* Timeline rows */
+.tl-row { height:110px; position:relative; border-bottom:1px solid #f0f0f0; overflow:visible; }
+.tl-track { position:absolute; top:50%; left:0; right:0; height:1px; background:#d0cece; }
+
+/* Events — pill is centered on the computed midline point */
+.ev {
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:10;
+  transform:translate(-50%, -50%);
+  /* top/left set by JS: top = rowMid + laneOffset */
+}
+.ev:hover { z-index:40; }
+.ev-pill {
+  padding:5px 11px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:600;
+  white-space:nowrap;
+  text-align:center;
+  line-height:1.45;
+  box-shadow:0 2px 5px rgba(0,0,0,.18);
+  position:relative;
+  min-width:72px;
+  transition:box-shadow .15s, transform .1s;
+}
+.ev:hover .ev-pill { box-shadow:0 4px 12px rgba(0,0,0,.28); transform:translateY(-1px); }
+
+/* Type colors */
+.ev-pill.life-event  { background:#0891b2; color:#fff; }   /* cyan-700 — warm, human, distinct from SF chrome */
+.ev-pill.goal        { background:#E8690B; color:#fff; }
+.ev-pill.product     { background:#059669; color:#fff; }
+.ev-pill.shared      { background:#0891b2; color:#fff; }   /* same as life-event — connector carries the "shared" signal */
+/* past class kept for data tracking but no visual change — Today line is the separator */
+/* AI dashed ring */
+.ev-pill.ai-tag { box-shadow:0 2px 5px rgba(0,0,0,.18), inset 0 0 0 1.5px rgba(255,255,255,.6); }
+
+.ev-name { font-size:10px; font-weight:700; }
+.ev-sub  { font-size:9px; opacity:.85; }
+.crit-dot { position:absolute; top:-4px; right:-3px; width:9px; height:9px; background:#e53935; border-radius:50%; border:1.5px solid #fff; }
+
+.sparkle { font-size:9px; margin-right:1px; }
+
+/* Shared connector — dashed line works for adjacent and non-adjacent rows alike */
+.ev-connector {
+  position:absolute; width:2px; z-index:4; transform:translateX(-50%);
+  background:repeating-linear-gradient(
+    to bottom,
+    #7c3aed 0px, #7c3aed 6px,
+    transparent 6px, transparent 11px
+  );
+  opacity:.75;
+}
+
+/* "Shared with" strip inside each shared event pill */
+.ev-shared-with {
+  display:flex; align-items:center; gap:3px;
+  margin-top:3px; padding-top:3px;
+  border-top:1px solid rgba(255,255,255,.25);
+}
+.ev-shared-with-lbl { font-size:7px; font-weight:600; opacity:.8; flex-shrink:0; }
+.shared-member-chip {
+  width:13px; height:13px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:7px; font-weight:800; color:#fff;
+  border:1.5px solid rgba(255,255,255,.85);
+  margin-left:-3px; flex-shrink:0;
+}
+.shared-member-chip:first-child { margin-left:0; }
+
+/* Legend */
+.legend { display:flex; align-items:center; justify-content:flex-end; gap:18px; padding:10px 16px; border-top:1px solid #f0f0f0; background:#fafafa; flex-wrap:wrap; }
+.leg-item { display:flex; align-items:center; gap:5px; font-size:11px; color:#444; }
+.leg-dot { width:10px; height:10px; border-radius:50%; }
+
+/* ── Detail panel ── */
+.pop-overlay { display:none; position:fixed; inset:0; z-index:100; }
+.pop-overlay.open { display:block; }
+.popover {
+  display:none; position:fixed; background:#fff;
+  border:1px solid #dddbda; border-radius:8px;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+  width:480px; z-index:300;
+}
+.popover.open { display:block; }
+
+/* Panel header */
+.pop-hdr { padding:18px 20px 16px; border-bottom:1px solid #e8e8e8; }
+.pop-hdr-top { display:flex; align-items:flex-start; gap:14px; }
+.pop-icon-wrap { width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.pop-type-badge { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:#706e6b; }
+.pop-title { font-size:18px; font-weight:700; display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:3px 0 2px; line-height:1.25; }
+.pop-subtitle { font-size:12px; color:#706e6b; line-height:1.45; margin-top:1px; }
+.pop-title-link { color:inherit; text-decoration:none; }
+.pop-title-link:hover { color:#0176d3; text-decoration:underline; cursor:pointer; }
+.pop-close { background:none; border:none; font-size:17px; font-weight:700; color:#0176d3; cursor:pointer; line-height:1; flex-shrink:0; padding:2px; }
+.pop-close:hover { color:#0050a0; }
+.pop-shared-badge { display:inline-flex; align-items:center; gap:5px; background:#ede9fe; color:#5b21b6; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px; }
+
+/* Stats strip */
+.pop-highlights { display:flex; gap:0; border-bottom:1px solid #e8e8e8; background:#fff; }
+.pop-hl { flex:1; padding:12px 16px; border-right:1px solid #e8e8e8; }
+.pop-hl:last-child { border-right:none; }
+.pop-hl-lbl { font-size:11px; color:#706e6b; margin-bottom:4px; }
+.pop-hl-val { font-size:14px; font-weight:700; color:#1d1d1d; }
+.pop-hl-val.green  { color:#059669; }
+.pop-hl-val.orange { color:#E8690B; }
+.pop-hl-val.red    { color:#e53935; }
+
+/* AI insight — floating card */
+.pop-ai-box {
+  margin:14px 20px 4px;
+  background:#ede9fe;
+  border-radius:10px;
+  padding:14px 16px;
+  font-size:12px; color:#1e0c5c;
+  display:flex; flex-direction:column; gap:12px;
+  line-height:1.6;
+}
+
+/* Field grid */
+.pop-fields { padding:12px 16px; display:grid; grid-template-columns:1fr 1fr; gap:0; }
+.pop-field { padding:8px 0; border-bottom:1px solid #f0f0f0; padding-right:12px; }
+.pop-field:nth-child(even) { padding-right:0; padding-left:12px; border-left:1px solid #f0f0f0; }
+.pop-field-lbl { font-size:10px; font-weight:700; color:#444; margin-bottom:2px; }
+.pop-field-val { font-size:12px; color:#1d1d1d; display:flex; align-items:center; justify-content:space-between; }
+.pop-field-val a { color:#0176d3; text-decoration:none; }
+.pop-field-val a:hover { text-decoration:underline; }
+/* Emphasized highlight fields (top N of the single configurable list) */
+/* View record link */
+.pop-viewrec { display:flex; align-items:center; gap:10px; padding:8px 16px; border-top:1px solid #f0f0f0; }
+.pop-viewrec a { color:#0176d3; text-decoration:none; font-size:12px; font-weight:600; }
+.pop-viewrec a:hover { text-decoration:underline; }
+.pop-viewrec-hint { font-size:11px; color:#969492; }
+.pop-edit-icon { color:#bbb; font-size:11px; cursor:pointer; flex-shrink:0; }
+.pop-edit-icon:hover { color:#0176d3; }
+
+/* Footer actions */
+.pop-footer { padding:10px 16px; border-top:1px solid #e8e8e8; display:flex; align-items:center; justify-content:space-between; gap:8px; background:#fafafa; }
+/* Outline pill CTA inside AI card */
+.pop-action-primary { display:inline-flex; align-items:center; gap:6px; padding:8px 20px; background:#fff; border:1.5px solid #2d0f8f; border-radius:24px; color:#1e0c5c; font-size:12px; font-weight:700; cursor:pointer; }
+.pop-action-primary:hover { background:#f0ebff; }
+.pop-actions-dd { position:relative; }
+.pop-actions-btn { display:inline-flex; align-items:center; gap:5px; padding:6px 12px; background:#fff; border:1px solid #dddbda; border-radius:4px; color:#444; font-size:12px; font-weight:600; cursor:pointer; }
+.pop-actions-btn:hover { background:#f3f2f2; }
+.pop-actions-menu { position:fixed; background:#fff; border:1px solid #dddbda; border-radius:4px; box-shadow:0 4px 16px rgba(0,0,0,.12); min-width:200px; z-index:400; display:none; }
+.pop-actions-menu.open { display:block; }
+.pop-action-item { padding:10px 14px; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:10px; color:#1d1d1d; border-bottom:1px solid #f5f5f5; }
+.pop-action-item:last-child { border-bottom:none; }
+.pop-action-item:hover { background:#f3f2f2; }
+.pop-action-item:first-child { font-weight:700; background:#eef5ff; color:#0176d3; }
+.pop-action-item:first-child:hover { background:#dceeff; }
+.pop-action-icon { font-size:14px; width:18px; text-align:center; }
+
+/* ── New Record Modal ── */
+.nr-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:700; }
+.nr-overlay.open { display:block; }
+.nr-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:880px; max-width:95vw; max-height:92vh; background:#fff; border-radius:6px; box-shadow:0 20px 60px rgba(0,0,0,.32); z-index:800; flex-direction:column; overflow:hidden; }
+.nr-modal.open { display:flex; }
+.nr-hdr { display:flex; align-items:center; justify-content:center; padding:14px 56px; border-bottom:1px solid #e0e0e0; background:#fff; flex-shrink:0; position:relative; }
+.nr-hdr-title { font-size:16px; font-weight:500; color:#1d1d1d; }
+.nr-close { position:absolute; right:16px; top:50%; transform:translateY(-50%); background:#fff; border:1.5px solid #0176d3; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#0176d3; font-size:17px; line-height:1; }
+.nr-close:hover { background:#0176d3; color:#fff; }
+.nr-required-note { text-align:right; padding:6px 20px; font-size:11px; color:#706e6b; flex-shrink:0; }
+.nr-required-note span { color:#c23934; }
+.nr-body { flex:1; overflow-y:auto; }
+.nr-section-hdr { padding:8px 20px; background:#f8f7f6; border-top:1px solid #e8e8e8; border-bottom:1px solid #e8e8e8; font-size:13px; font-weight:600; color:#3e3e3c; }
+.nr-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; padding:16px 20px; }
+.nr-full { grid-column:1/-1; }
+.nr-field { display:flex; flex-direction:column; gap:3px; }
+.nr-label { font-size:12px; font-weight:700; color:#3e3e3c; }
+.nr-req { color:#c23934; margin-right:1px; }
+.nr-input, .nr-select, .nr-textarea { border:1px solid #dddbda; border-radius:4px; padding:6px 10px; font-size:13px; color:#1d1d1d; font-family:inherit; background:#fff; width:100%; }
+.nr-input:focus, .nr-select:focus, .nr-textarea:focus { outline:none; border-color:#0176d3; box-shadow:0 0 0 2px rgba(1,118,211,.14); }
+.nr-textarea { resize:vertical; min-height:74px; }
+.nr-date-pair { display:grid; grid-template-columns:3fr 2fr; gap:8px; }
+.nr-date-pair .nr-sub-label { font-size:11px; color:#706e6b; margin-bottom:3px; font-weight:600; }
+.nr-input-icon { position:relative; }
+.nr-input-icon .nr-input { padding-right:30px; }
+.nr-input-icon .nr-ico { position:absolute; right:9px; top:50%; transform:translateY(-50%); color:#706e6b; pointer-events:none; }
+.nr-lookup-val { display:flex; align-items:center; gap:7px; border:1px solid #dddbda; border-radius:4px; padding:5px 10px; background:#fff; }
+.nr-lookup-pill { width:24px; height:24px; border-radius:4px; background:#7047d1; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.nr-lookup-pill svg { color:#fff; }
+.nr-lookup-text { flex:1; font-size:13px; color:#1d1d1d; }
+.nr-lookup-clear { background:none; border:none; font-size:18px; color:#706e6b; cursor:pointer; line-height:1; }
+.nr-lookup-clear:hover { color:#333; }
+.nr-lookup-search { position:relative; }
+.nr-lookup-search .nr-input { padding-right:30px; }
+.nr-lookup-search .nr-ico { position:absolute; right:9px; top:50%; transform:translateY(-50%); color:#706e6b; pointer-events:none; }
+.nr-checkbox-wrap { display:flex; align-items:center; gap:7px; padding-top:22px; }
+.nr-checkbox-wrap input[type=checkbox] { width:15px; height:15px; cursor:pointer; accent-color:#0176d3; }
+.nr-checkbox-wrap label { font-size:12px; font-weight:700; color:#3e3e3c; cursor:pointer; }
+.nr-subsection-hdr { grid-column:1/-1; font-size:13px; font-weight:600; color:#3e3e3c; padding-bottom:4px; border-bottom:1px solid #e0e0e0; margin-top:4px; }
+.nr-addr-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin-top:6px; }
+.nr-footer { padding:12px 20px; border-top:1px solid #e0e0e0; display:flex; justify-content:flex-end; gap:8px; flex-shrink:0; background:#fff; }
+.nr-btn { padding:7px 20px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid #dddbda; background:#fff; color:#3e3e3c; transition:background .12s; }
+.nr-btn:hover { background:#f3f2f2; }
+.nr-btn--brand { background:#0176d3; border-color:#0176d3; color:#fff; border-radius:20px; }
+.nr-btn--brand:hover { background:#005fb2; border-color:#005fb2; }
+/* ── Setup Modal ── */
+.setup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; }
+.setup-overlay.open { display:block; }
+.setup-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:940px; max-width:96vw; height:82vh; max-height:720px; background:#fff; border-radius:8px; box-shadow:0 16px 48px rgba(0,0,0,.28); z-index:600; flex-direction:column; overflow:hidden; }
+.setup-modal.open { display:flex; }
+.setup-hdr { padding:14px 20px; border-bottom:1px solid #e0e0e0; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; background:#f8f7f6; }
+.setup-hdr-left { display:flex; align-items:center; gap:12px; }
+.setup-hdr-icon { font-size:22px; }
+.setup-hdr-title { font-size:15px; font-weight:700; color:#1d1d1d; }
+.setup-hdr-sub { font-size:11px; color:#706e6b; margin-top:1px; }
+.setup-close { background:none; border:none; font-size:22px; color:#706e6b; cursor:pointer; line-height:1; }
+.setup-close:hover { color:#333; }
+.setup-body { display:flex; flex:1; overflow:hidden; }
+.setup-nav { width:192px; min-width:192px; border-right:1px solid #e0e0e0; padding:12px 0; background:#f8f7f6; overflow-y:auto; flex-shrink:0; }
+.setup-nav-section { padding:6px 16px 4px; font-size:10px; font-weight:700; color:#706e6b; letter-spacing:.6px; text-transform:uppercase; }
+.setup-nav-item { display:flex; align-items:center; gap:9px; padding:9px 16px; font-size:12px; color:#3e3e3c; cursor:pointer; border-left:3px solid transparent; }
+.setup-nav-item:hover { background:#eee; }
+.setup-nav-item.active { background:#e8f4ff; color:#0176d3; font-weight:600; border-left-color:#0176d3; }
+.setup-nav-icon { font-size:14px; width:18px; text-align:center; }
+.setup-content-wrap { position:relative; flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.setup-section { display:none; flex:1; flex-direction:column; overflow:hidden; }
+.setup-section.active { display:flex; }
+.setup-section-hdr { padding:16px 20px 12px; border-bottom:1px solid #f0f0f0; flex-shrink:0; }
+.setup-section-title { font-size:14px; font-weight:700; margin-bottom:2px; }
+.setup-section-desc { font-size:11px; color:#706e6b; }
+.setup-section-body { padding:16px 20px; flex:1; overflow-y:auto; }
+.obj-table { width:100%; border-collapse:collapse; font-size:12px; }
+.obj-table th { text-align:left; font-size:10px; font-weight:700; color:#706e6b; text-transform:uppercase; letter-spacing:.4px; padding:6px 10px; border-bottom:2px solid #e0e0e0; }
+.obj-table td { padding:10px 10px; border-bottom:1px solid #f3f2f2; vertical-align:middle; }
+.obj-table tr:hover td { background:#fafafa; }
+.obj-color-swatch { width:13px; height:13px; border-radius:50%; display:inline-block; flex-shrink:0; }
+.obj-label-cell { display:flex; align-items:center; gap:8px; font-weight:600; }
+.obj-api { font-family:monospace; font-size:11px; color:#444; }
+.obj-date-field { font-family:monospace; font-size:11px; color:#706e6b; }
+.obj-edit-btn { padding:4px 12px; border:1px solid #dddbda; border-radius:4px; background:#fff; font-size:11px; cursor:pointer; color:#0176d3; font-weight:600; }
+.obj-edit-btn:hover { background:#e8f4ff; }
+.obj-add-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border:1px solid #0176d3; border-radius:4px; background:#fff; color:#0176d3; font-size:12px; font-weight:600; cursor:pointer; margin-top:14px; }
+.obj-add-btn:hover { background:#e8f4ff; }
+.tog { display:inline-flex; width:34px; height:18px; border-radius:9px; background:#c9c7c5; position:relative; cursor:pointer; transition:background .2s; flex-shrink:0; }
+.tog.on { background:#0176d3; }
+.tog::after { content:''; position:absolute; width:14px; height:14px; background:#fff; border-radius:50%; top:2px; left:2px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+.tog.on::after { left:18px; }
+.obj-editor { position:absolute; right:0; top:0; bottom:0; width:350px; background:#fff; border-left:1px solid #e0e0e0; display:flex; flex-direction:column; z-index:10; box-shadow:-4px 0 16px rgba(0,0,0,.1); transform:translateX(100%); transition:transform .2s; }
+.obj-editor.open { transform:translateX(0); }
+.obj-editor-hdr { padding:12px 16px; border-bottom:1px solid #e0e0e0; display:flex; align-items:center; justify-content:space-between; background:#f8f7f6; flex-shrink:0; }
+.obj-editor-title { font-size:13px; font-weight:700; }
+.obj-editor-body { flex:1; overflow-y:auto; padding:14px 16px; }
+.obj-editor-footer { padding:10px 16px; border-top:1px solid #e0e0e0; display:flex; justify-content:flex-end; gap:8px; background:#fafafa; flex-shrink:0; }
+.form-row { margin-bottom:14px; }
+.form-lbl { font-size:11px; font-weight:700; color:#444; margin-bottom:4px; }
+.form-lbl span { color:#e53935; margin-left:2px; }
+.form-inp { width:100%; padding:6px 10px; border:1px solid #dddbda; border-radius:4px; font-size:12px; color:#1d1d1d; outline:none; }
+.form-inp:focus { border-color:#0176d3; box-shadow:0 0 0 2px rgba(1,118,211,.15); }
+.form-select { width:100%; padding:6px 28px 6px 10px; border:1px solid #dddbda; border-radius:4px; font-size:12px; color:#1d1d1d; background:#fff; outline:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23706e6b'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; }
+.form-select:focus { border-color:#0176d3; }
+.form-hint { font-size:10px; color:#706e6b; margin-top:3px; line-height:1.4; }
+.color-swatches { display:flex; gap:7px; flex-wrap:wrap; margin-top:4px; }
+.color-sw { width:22px; height:22px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:border-color .12s; }
+.color-sw.selected { border-color:#1d1d1d; box-shadow:0 0 0 2px #fff inset; }
+.obj-tabs { display:flex; border-bottom:2px solid #e0e0e0; margin-bottom:16px; }
+.obj-tab { padding:8px 16px; font-size:12px; font-weight:600; cursor:pointer; color:#706e6b; border-bottom:2px solid transparent; margin-bottom:-2px; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+.obj-tab .tab-dot { width:9px; height:9px; border-radius:50%; }
+.obj-tab:hover { color:#444; }
+.obj-tab.active { color:#0176d3; border-bottom-color:#0176d3; }
+.field-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:#706e6b; margin-bottom:8px; margin-top:16px; display:flex; align-items:center; justify-content:space-between; }
+.field-section-title:first-child { margin-top:0; }
+.field-cap { font-size:10px; color:#bbb; font-weight:400; text-transform:none; }
+.field-list { border:1px solid #e0e0e0; border-radius:4px; overflow:hidden; margin-bottom:6px; }
+.field-row { display:flex; align-items:center; gap:8px; padding:9px 12px; border-bottom:1px solid #f3f2f2; background:#fff; font-size:12px; }
+.field-divider { display:flex; align-items:center; justify-content:center; padding:4px 0; }
+.field-divider span { font-size:9px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:#a9a7a4; background:#f0eff0; border:1px dashed #d4d2d0; border-radius:10px; padding:2px 10px; }
+.field-row:last-child { border-bottom:none; }
+.field-row:hover { background:#fafafa; }
+.field-grip { color:#c0c0c0; cursor:grab; font-size:13px; }
+.field-label { font-weight:600; min-width:110px; }
+.field-api { font-family:monospace; font-size:11px; color:#706e6b; flex:1; }
+.field-color-rule { font-size:10px; color:#444; border:1px solid #e0e0e0; border-radius:3px; padding:2px 6px; background:#f8f7f6; white-space:nowrap; }
+.field-remove { color:#bbb; cursor:pointer; font-size:16px; margin-left:4px; }
+.field-remove:hover { color:#e53935; }
+.field-add-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border:1px dashed #dddbda; border-radius:4px; background:#fff; color:#706e6b; font-size:11px; cursor:pointer; margin-top:4px; }
+.field-add-btn:hover { border-color:#0176d3; color:#0176d3; }
+.action-row { display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #f3f2f2; background:#fff; font-size:12px; }
+.action-row:last-child { border-bottom:none; }
+.action-row:hover { background:#fafafa; }
+.action-icon-cell { font-size:16px; width:24px; text-align:center; }
+.action-label { flex:1; font-weight:600; }
+.action-default { font-size:10px; color:#1a7a46; background:#f0faf4; border-radius:3px; padding:2px 6px; }
+.action-custom { font-size:10px; color:#706e6b; background:#f3f2f2; border-radius:3px; padding:2px 6px; }
+.action-add-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border:1px dashed #dddbda; border-radius:4px; background:#fff; color:#706e6b; font-size:11px; cursor:pointer; margin-top:10px; }
+.action-add-btn:hover { border-color:#0176d3; color:#0176d3; }
+.info-banner { background:#edf5ff; border:1px solid #b3d4f5; border-radius:4px; padding:10px 14px; font-size:11px; color:#0050a0; display:flex; gap:8px; align-items:flex-start; margin-bottom:16px; line-height:1.5; }
+.setup-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#2e7d32; color:#fff; padding:10px 22px; border-radius:20px; font-size:13px; font-weight:600; z-index:9999; opacity:0; transition:opacity .3s; pointer-events:none; box-shadow:0 4px 16px rgba(0,0,0,.2); }
+.setup-toast.show { opacity:1; }
+/* Stepper */
+.oe-step { display:flex; align-items:center; gap:5px; cursor:pointer; opacity:.45; transition:opacity .15s; }
+.oe-step.active { opacity:1; }
+.oe-step.done { opacity:.75; }
+.oe-step-num { width:20px; height:20px; border-radius:50%; background:#dddbda; color:#3e3e3c; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .15s, color .15s; }
+.oe-step.active .oe-step-num { background:#0176d3; color:#fff; }
+.oe-step.done .oe-step-num { background:#2e7d32; color:#fff; }
+.oe-step-lbl { font-size:10px; font-weight:600; color:#3e3e3c; white-space:nowrap; }
+.oe-step-line { flex:1; height:1px; background:#dddbda; min-width:14px; margin:0 4px; }
+/* Data model switcher */
+.dm-switch { display:flex; align-items:center; border:1px solid #dddbda; border-radius:20px; overflow:hidden; font-size:11px; font-weight:600; flex-shrink:0; }
+.dm-btn { padding:5px 14px; cursor:pointer; background:#fff; color:#706e6b; border:none; transition:all .15s; white-space:nowrap; }
+.dm-btn.active { background:#032D60; color:#fff; }
+.dm-btn:hover:not(.active) { background:#f3f2f2; }
+.dm-badge-pkg  { display:inline-block; background:#fff3cd; color:#856404; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:4px; vertical-align:middle; }
+.dm-badge-core { display:inline-block; background:#d1fae5; color:#065f46; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:4px; vertical-align:middle; }
+</style>
+</head>
+<body>
+
+<!-- ── Prototype viewer bar (not part of the product UI) ────────────────── -->
+<div id="viewer-bar" style="display:flex;align-items:center;gap:12px;justify-content:flex-end;padding:6px 18px;background:#1b1b2f;color:#cfd2ff;font:600 12px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;border-bottom:1px solid #2d2d44;">
+  <span style="opacity:.7;font-weight:500;">Prototype scope</span>
+  <span id="scope-label">264</span>
+  <div class="toggle-wrap" onclick="toggleReleaseScope()" style="cursor:pointer;">
+    <div class="toggle-track" id="scope-track"><div class="toggle-thumb"></div></div>
+  </div>
+  <span style="opacity:.55;font-weight:500;">OFF = 264 only · ON = 264 + Roadmap</span>
+</div>
+
+<nav class="global-nav">
+  <a class="logo" href="#">
+    <span class="logo-cloud">☁</span>
+    <div class="logo-text"><span class="logo-name">Cumulus</span><span class="logo-bank">BANK</span></div>
+  </a>
+  <div class="nav-search"><input type="text" placeholder="Search..."/></div>
+  <div class="nav-icons">
+    <span>🔔</span><span>❓</span><span>⚙</span>
+    <div class="nav-avatar">NK</div>
+  </div>
+</nav>
+
+<div class="tab-bar">
+  <div class="tab-appname">⋮⋮⋮ Lightning Service...</div>
+  <div class="tab">Home <span class="close">✕</span></div>
+  <div class="tab">Accounts... <span class="close">✕</span></div>
+  <div class="tab active">⚡ Marcel House... <span class="close">✕</span></div>
+</div>
+
+<div class="page">
+  <div class="view-toggle">
+    <button class="view-btn" id="btn-hh360" onclick="switchView('hh360')">Household 360</button>
+    <button class="view-btn active" id="btn-tl" onclick="switchView('timeline')">Chronicle</button>
+  </div>
+
+  <div id="view-hh360" style="display:none;">
+    <div style="background:#fff;border:1px solid #dddbda;border-radius:4px;padding:80px;text-align:center;color:#706e6b;">
+      <div style="font-size:40px;margin-bottom:12px;">🏠</div>
+      <div style="font-size:16px;font-weight:600;color:#444;">Household 360 View</div>
+    </div>
+  </div>
+
+  <div id="view-tl" class="timeline-card">
+    <div class="card-header">
+      <div class="card-title-block">
+        <div class="title">Chronicle View</div>
+        <div class="subtitle" id="item-count">— Items</div>
+      </div>
+      <div class="card-controls">
+        <!-- Zoom -->
+        <div class="zoom-ctrl">
+          <button class="zoom-btn" id="zoom-out-btn" onclick="adjustZoom(-1)" title="Zoom out" disabled>−</button>
+          <span class="zoom-val" id="zoom-val">Normal</span>
+          <button class="zoom-btn" id="zoom-in-btn"  onclick="adjustZoom(+1)" title="Zoom in">+</button>
+        </div>
+
+        <!-- AI toggle (hidden when AI Suggested is out of the active release scope) -->
+        <div class="toggle-wrap" id="ai-header-toggle" data-feature="ai-suggested" onclick="toggleAI()">
+          Show AI Suggested
+          <div class="toggle-track on" id="ai-track"><div class="toggle-thumb"></div></div>
+        </div>
+
+        <!-- Filter -->
+        <div class="dd-wrap">
+          <div class="dd-btn" onclick="toggleDD('filter-dd')"><span id="filter-lbl">Show All</span> ▾</div>
+          <div class="dd-menu" id="filter-dd">
+            <div class="dd-item sel" onclick="setFilter('all','Show All',this)"><span class="dd-check">✓</span>Show All</div>
+            <div class="dd-item" onclick="setFilter('life-event','Life Event',this)"><span class="dd-check">✓</span>Life Event</div>
+            <div class="dd-item" onclick="setFilter('goal','Goal',this)"><span class="dd-check">✓</span>Goal</div>
+            <div class="dd-item" onclick="setFilter('product','Financial Product',this)"><span class="dd-check">✓</span>Financial Product</div>
+          </div>
+        </div>
+
+        <!-- New -->
+        <div class="dd-wrap">
+          <button class="btn-new" onclick="toggleDD('new-dd')">New ▾</button>
+          <div class="dd-menu" id="new-dd" style="left:auto;right:0;">
+            <div class="dd-item" onclick="closeAll();openNewModal('life-event')"><span class="dd-check" style="visibility:hidden">✓</span>Life Event</div>
+            <div class="dd-item" onclick="closeAll();openNewModal('goal')"><span class="dd-check" style="visibility:hidden">✓</span>Goal</div>
+            <div class="dd-item" onclick="closeAll();openNewModal('product')"><span class="dd-check" style="visibility:hidden">✓</span>Financial Product</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="tl-body">
+      <!-- Members sidebar — heights match ROW_HEIGHT (110px) -->
+      <div class="members-col">
+        <div class="members-hdr">Members (4)</div>
+        <div class="member-cell">
+          <div class="avatar" style="background:#5867e8;">MG</div>
+          <div class="member-info">
+            <div class="name">Marcel Green</div>
+            <div class="meta">Member Type: Primary <span class="star">★</span></div>
+            <div class="meta">Role: Decision Maker</div>
+          </div>
+        </div>
+        <div class="member-cell">
+          <div class="avatar" style="background:#8b5cf6;">RG</div>
+          <div class="member-info">
+            <div class="name">Rachel Green</div>
+            <div class="meta">Relationship: Wife</div>
+            <div class="meta">Role: Dependent</div>
+          </div>
+        </div>
+        <div class="member-cell">
+          <div class="avatar" style="background:#3b82f6;">MG</div>
+          <div class="member-info">
+            <div class="name">Michael Green</div>
+            <div class="meta">Relationship: Son</div>
+            <div class="meta">Role: Dependent</div>
+          </div>
+        </div>
+        <div class="member-cell">
+          <div class="avatar" style="background:#10b981;">B</div>
+          <div class="member-info">
+            <div class="name">Bonnie Green</div>
+            <div class="meta">Relationship: Daughter</div>
+            <div class="meta">Role: Dependent</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable grid -->
+      <div class="grid-scroll" id="grid-scroll">
+        <div class="grid-inner" id="grid-inner">
+          <div class="phase-strip" id="phase-strip" data-feature="phase-strip"></div>
+          <div class="yr-hdr" id="yr-hdr"></div>
+          <!-- Today line and marriage connector injected by JS -->
+          <div class="today-line" id="today-line"></div>
+          <!-- 4 member rows -->
+          <div class="tl-row" id="row-0"><div class="tl-track"></div></div>
+          <div class="tl-row" id="row-1"><div class="tl-track"></div></div>
+          <div class="tl-row" id="row-2"><div class="tl-track"></div></div>
+          <div class="tl-row" id="row-3"><div class="tl-track"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#0891b2"></div>Life Event</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#E8690B"></div>Goal</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#059669"></div>Financial Product</div>
+      <div class="leg-item" style="color:#888;font-size:11px;"><span data-feature="ai-suggested">✦ = AI Suggested &nbsp;|&nbsp; </span><span style="color:#e53935;">●</span> = Critical &nbsp;|&nbsp; <span style="color:#7c3aed;font-weight:700;">│</span> = Shared (bridging both members)</div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail panel -->
+<div class="pop-overlay" id="pop-overlay" onclick="closePop()"></div>
+<div class="popover" id="popover">
+  <!-- Header -->
+  <div class="pop-hdr">
+    <div class="pop-hdr-top">
+      <div class="pop-icon-wrap" id="pop-icon-wrap">
+        <span id="pop-icon"></span>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="pop-type-badge" id="pop-type"></div>
+        <div class="pop-title" id="pop-title"></div>
+        <div class="pop-subtitle" id="pop-subtitle" style="display:none;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px;">
+        <span id="pop-shared-badge" class="pop-shared-badge" style="display:none;">👥 Shared</span>
+        <button class="pop-close" onclick="closePop()">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key stats strip -->
+  <div class="pop-highlights" id="pop-highlights"></div>
+
+  <!-- AI insight + CTA (floating card) -->
+  <div class="pop-ai-box" id="pop-ai-box" style="display:none;">
+    <div style="display:flex;gap:10px;align-items:flex-start;">
+      <span style="font-size:16px;flex-shrink:0;margin-top:1px;">✦</span>
+      <span id="pop-ai-text"></span>
+    </div>
+    <button class="pop-action-primary" id="pop-primary-btn" onclick="closePop()">
+      <span style="font-size:13px;">✦</span><span id="pop-primary-text">Review</span>
+    </button>
+  </div>
+
+  <!-- Detail fields (same configurable list; these are the non-emphasized fields) -->
+  <div class="pop-fields" id="pop-fields"></div>
+
+  <!-- Footer -->
+  <div class="pop-footer" style="justify-content:flex-end;">
+    <div class="pop-actions-dd">
+      <button class="pop-actions-btn" onclick="toggleActionsMenu()">Actions ▾</button>
+      <div class="pop-actions-menu" id="pop-actions-menu">
+        <div class="pop-action-item" onclick="closePop()"><span class="pop-action-icon">📋</span>New Action Plan</div>
+        <div class="pop-action-item" onclick="closePop()"><span class="pop-action-icon">👑</span>New Opportunity</div>
+        <div class="pop-action-item" onclick="closePop()"><span class="pop-action-icon">✅</span>New Task</div>
+        <div class="pop-action-item" onclick="closePop()"><span class="pop-action-icon">📅</span>New Event</div>
+        <div class="pop-action-item" onclick="closePop()"><span class="pop-action-icon">✉️</span>Email</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     NEW RECORD MODALS  (Life Event · Goal · Financial Product)
+     ═══════════════════════════════════════════════════════ -->
+<div class="nr-overlay" id="nr-overlay" onclick="closeNewModal()"></div>
+
+<!-- ── New Life Event ── -->
+<div class="nr-modal" id="nr-modal-life-event">
+  <div class="nr-hdr">
+    <span class="nr-hdr-title">New Person Life Event</span>
+    <button class="nr-close" onclick="closeNewModal()" aria-label="Close">×</button>
+  </div>
+  <div class="nr-required-note"><span>*</span> = Required Information</div>
+  <div class="nr-body">
+    <div class="nr-section-hdr">Information</div>
+    <div class="nr-grid">
+
+      <!-- Event Name -->
+      <div class="nr-field">
+        <label class="nr-label"><span class="nr-req">*</span>Event Name</label>
+        <input type="text" class="nr-input" autofocus />
+      </div>
+
+      <!-- Event Type -->
+      <div class="nr-field">
+        <label class="nr-label"><span class="nr-req">*</span>Event Type</label>
+        <select class="nr-select">
+          <option value="">--None--</option>
+          <option>Birth</option><option>Graduation</option><option>Job</option>
+          <option>Home</option><option>Marriage</option><option>Relocation</option>
+          <option>Car</option><option>Baby</option><option>Diagnosis</option>
+          <option>Retirement</option><option>CUSTOM EVENT</option>
+        </select>
+      </div>
+
+      <!-- Event Date -->
+      <div class="nr-field">
+        <label class="nr-label">Event Date</label>
+        <div class="nr-date-pair">
+          <div><div class="nr-sub-label"><span class="nr-req">*</span>Date</div>
+            <div class="nr-input-icon"><input type="date" class="nr-input" /><svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          </div>
+          <div><div class="nr-sub-label"><span class="nr-req">*</span>Time</div>
+            <div class="nr-input-icon"><input type="time" class="nr-input" /><svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Description -->
+      <div class="nr-field">
+        <label class="nr-label">Event Description</label>
+        <textarea class="nr-textarea"></textarea>
+      </div>
+
+      <!-- Primary Person -->
+      <div class="nr-field">
+        <label class="nr-label"><span class="nr-req">*</span>Primary Person</label>
+        <div class="nr-lookup-val">
+          <div class="nr-lookup-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <span class="nr-lookup-text">Lisa Anderson</span>
+          <button type="button" class="nr-lookup-clear" aria-label="Clear">×</button>
+        </div>
+      </div>
+
+      <!-- Related Person -->
+      <div class="nr-field">
+        <label class="nr-label">Related Person</label>
+        <div class="nr-lookup-search">
+          <input type="text" class="nr-input" placeholder="Search Contacts…" />
+          <svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+      </div>
+
+      <!-- Tentative -->
+      <div class="nr-checkbox-wrap">
+        <input type="checkbox" id="le-tentative" />
+        <label for="le-tentative" class="nr-label">Tentative</label>
+      </div>
+
+      <!-- Expired -->
+      <div class="nr-checkbox-wrap">
+        <input type="checkbox" id="le-expired" />
+        <label for="le-expired" class="nr-label">Expired</label>
+      </div>
+
+      <!-- Expiration Date -->
+      <div class="nr-field">
+        <label class="nr-label">Expiration Date</label>
+        <div class="nr-date-pair">
+          <div><div class="nr-sub-label">Date</div>
+            <div class="nr-input-icon"><input type="date" class="nr-input" /><svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          </div>
+          <div><div class="nr-sub-label">Time</div>
+            <div class="nr-input-icon"><input type="time" class="nr-input" /><svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiration Description -->
+      <div class="nr-field">
+        <label class="nr-label">Expiration Description</label>
+        <textarea class="nr-textarea"></textarea>
+      </div>
+
+      <!-- Event Location (full width) -->
+      <div class="nr-full nr-field" style="margin-top:4px;">
+        <div class="nr-subsection-hdr">Event Location</div>
+        <div style="margin-top:10px;">
+          <label class="nr-label" style="margin-bottom:3px;">Address Search</label>
+          <div class="nr-lookup-search">
+            <input type="text" class="nr-input" placeholder="Search Address" />
+            <svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+        </div>
+        <div class="nr-addr-grid" style="margin-top:10px;">
+          <div class="nr-field" style="grid-column:1/-1;"><label class="nr-label">Event Location Street</label><textarea class="nr-textarea" style="min-height:52px;"></textarea></div>
+          <div class="nr-field"><label class="nr-label">Event Location City</label><input type="text" class="nr-input" /></div>
+          <div class="nr-field"><label class="nr-label">Event Location State</label><input type="text" class="nr-input" /></div>
+          <div class="nr-field"><label class="nr-label">Event Location Postal Code</label><input type="text" class="nr-input" /></div>
+          <div class="nr-field"><label class="nr-label">Event Location Country</label><input type="text" class="nr-input" /></div>
+        </div>
+      </div>
+
+    </div><!-- /.nr-grid -->
+  </div><!-- /.nr-body -->
+  <div class="nr-footer">
+    <button class="nr-btn" onclick="closeNewModal()">Cancel</button>
+    <button class="nr-btn">Save &amp; New</button>
+    <button class="nr-btn nr-btn--brand">Save</button>
+  </div>
+</div>
+
+<!-- ── New Goal ── -->
+<div class="nr-modal" id="nr-modal-goal">
+  <div class="nr-hdr">
+    <span class="nr-hdr-title">New Financial Goal</span>
+    <button class="nr-close" onclick="closeNewModal()" aria-label="Close">×</button>
+  </div>
+  <div class="nr-required-note"><span>*</span> = Required Information</div>
+  <div class="nr-body">
+    <div class="nr-section-hdr">Information</div>
+    <div class="nr-grid">
+
+      <div class="nr-field">
+        <label class="nr-label"><span class="nr-req">*</span>Goal Name</label>
+        <input type="text" class="nr-input" />
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label"><span class="nr-req">*</span>Goal Type</label>
+        <select class="nr-select">
+          <option value="">--None--</option>
+          <option>Education</option><option>Emergency Fund</option>
+          <option>Home Purchase</option><option>Retirement</option>
+          <option>Debt Paydown</option><option>Travel</option>
+          <option>Investment</option><option>Other</option>
+        </select>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Target Date</label>
+        <div class="nr-input-icon">
+          <input type="date" class="nr-input" />
+          <svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Target Amount</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#706e6b;font-size:13px;">$</span>
+          <input type="number" class="nr-input" style="padding-left:22px;" placeholder="0.00" min="0" step="0.01" />
+        </div>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Status</label>
+        <select class="nr-select">
+          <option value="">--None--</option>
+          <option>Not Started</option><option>In Progress</option>
+          <option>On Track</option><option>At Risk</option><option>Completed</option>
+        </select>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Progress %</label>
+        <input type="number" class="nr-input" placeholder="0" min="0" max="100" />
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Priority</label>
+        <select class="nr-select">
+          <option value="">--None--</option>
+          <option>High</option><option>Medium</option><option>Low</option>
+        </select>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Owner</label>
+        <div class="nr-lookup-val">
+          <div class="nr-lookup-pill" style="background:#0176d3;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <span class="nr-lookup-text">Lisa Anderson</span>
+          <button type="button" class="nr-lookup-clear" aria-label="Clear">×</button>
+        </div>
+      </div>
+
+      <div class="nr-field nr-full">
+        <label class="nr-label">Description</label>
+        <textarea class="nr-textarea"></textarea>
+      </div>
+
+    </div>
+  </div>
+  <div class="nr-footer">
+    <button class="nr-btn" onclick="closeNewModal()">Cancel</button>
+    <button class="nr-btn">Save &amp; New</button>
+    <button class="nr-btn nr-btn--brand">Save</button>
+  </div>
+</div>
+
+<!-- ── New Financial Product ── -->
+<div class="nr-modal" id="nr-modal-product">
+  <div class="nr-hdr">
+    <span class="nr-hdr-title">New Financial Account</span>
+    <button class="nr-close" onclick="closeNewModal()" aria-label="Close">×</button>
+  </div>
+  <div class="nr-required-note"><span>*</span> = Required Information</div>
+  <div class="nr-body">
+    <div class="nr-section-hdr">Information</div>
+    <div class="nr-grid">
+
+      <div class="nr-field">
+        <label class="nr-label"><span class="nr-req">*</span>Account Name</label>
+        <input type="text" class="nr-input" />
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label"><span class="nr-req">*</span>Account Type</label>
+        <select class="nr-select">
+          <option value="">--None--</option>
+          <option>Checking</option><option>Savings</option><option>Investment</option>
+          <option>Retirement (401k)</option><option>Retirement (IRA)</option>
+          <option>Mortgage</option><option>Auto Loan</option>
+          <option>Credit Card</option><option>Insurance</option><option>Other</option>
+        </select>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Status</label>
+        <select class="nr-select">
+          <option value="">--None--</option>
+          <option>Active</option><option>Inactive</option><option>Closed</option>
+        </select>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Open Date</label>
+        <div class="nr-input-icon">
+          <input type="date" class="nr-input" />
+          <svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Balance</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#706e6b;font-size:13px;">$</span>
+          <input type="number" class="nr-input" style="padding-left:22px;" placeholder="0.00" min="0" step="0.01" />
+        </div>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Provider</label>
+        <input type="text" class="nr-input" placeholder="e.g. Vanguard, Chase…" />
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Owner</label>
+        <div class="nr-lookup-val">
+          <div class="nr-lookup-pill" style="background:#0176d3;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <span class="nr-lookup-text">Lisa Anderson</span>
+          <button type="button" class="nr-lookup-clear" aria-label="Clear">×</button>
+        </div>
+      </div>
+
+      <div class="nr-field">
+        <label class="nr-label">Primary Person</label>
+        <div class="nr-lookup-search">
+          <input type="text" class="nr-input" placeholder="Search Contacts…" />
+          <svg class="nr-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+      </div>
+
+      <div class="nr-field nr-full">
+        <label class="nr-label">Description</label>
+        <textarea class="nr-textarea"></textarea>
+      </div>
+
+    </div>
+  </div>
+  <div class="nr-footer">
+    <button class="nr-btn" onclick="closeNewModal()">Cancel</button>
+    <button class="nr-btn">Save &amp; New</button>
+    <button class="nr-btn nr-btn--brand">Save</button>
+  </div>
+</div>
+
+<!-- Setup overlay + modal -->
+<div class="setup-overlay" id="setup-overlay" onclick="closeSetup()"></div>
+<div class="setup-modal" id="setup-modal">
+  <div class="setup-hdr">
+    <div class="setup-hdr-left">
+      <span class="setup-hdr-icon">⚙️</span>
+      <div>
+        <div class="setup-hdr-title">Chronicle View Setup</div>
+        <div class="setup-hdr-sub">Configure objects, fields, and actions for this timeline</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="font-size:11px;color:#706e6b;white-space:nowrap;">Data Model:</div>
+      <div class="dm-switch">
+        <button class="dm-btn active" id="dm-pkg-btn" onclick="setDataModel('pkg')">📦 Package (FinServ)</button>
+        <button class="dm-btn" id="dm-core-btn" onclick="setDataModel('core')">⚡ Core / Standard</button>
+      </div>
+    </div>
+    <button class="setup-close" onclick="closeSetup()">×</button>
+  </div>
+  <div class="setup-body">
+
+    <!-- Left nav -->
+    <div class="setup-nav">
+      <div class="setup-nav-section">Display</div>
+      <div class="setup-nav-item active" onclick="showSetupSection('objects',this)"><span class="setup-nav-icon">📦</span>Objects in Timeline</div>
+      <div class="setup-nav-section">Detail Panel</div>
+      <div class="setup-nav-item" onclick="showSetupSection('fields',this)"><span class="setup-nav-icon">📋</span>Detail Panel Fields</div>
+      <div class="setup-nav-section" data-feature="ai-suggested">Intelligence</div>
+      <div class="setup-nav-item" data-feature="ai-suggested" onclick="showSetupSection('ai',this)"><span class="setup-nav-icon">✦</span>AI Suggestions</div>
+    </div>
+
+    <!-- Sections -->
+    <div class="setup-content-wrap">
+
+      <!-- 1. Objects -->
+      <div class="setup-section active" id="sec-objects">
+        <div class="setup-section-hdr">
+          <div class="setup-section-title">Objects in Timeline</div>
+          <div class="setup-section-desc">Choose which Salesforce objects appear as events on the timeline. Each object gets its own color and field mapping.</div>
+        </div>
+        <div class="setup-section-body">
+          <table class="obj-table">
+            <thead>
+              <tr>
+                <th>Object</th>
+                <th>API Name</th>
+                <th>Date Field</th>
+                <th>Visible</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="obj-label-cell"><span class="obj-color-swatch" style="background:#0891b2"></span>Life Event</div></td>
+                <td><span class="obj-api dm-val" data-pkg="FinServ__LifeEvent__c" data-core="LifeEvent">FinServ__LifeEvent__c</span><span class="dm-badge-pkg dm-badge">PKG</span></td>
+                <td><span class="obj-date-field dm-val" data-pkg="FinServ__EventDate__c" data-core="EventDate">FinServ__EventDate__c</span></td>
+                <td><div class="tog on" onclick="this.classList.toggle('on')"></div></td>
+                <td><button class="obj-edit-btn" onclick="openObjEditor('life-event')">Edit</button></td>
+              </tr>
+              <tr>
+                <td><div class="obj-label-cell"><span class="obj-color-swatch" style="background:#E8690B"></span>Financial Goal</div></td>
+                <td><span class="obj-api dm-val" data-pkg="FinServ__FinancialGoal__c" data-core="FinancialGoal">FinServ__FinancialGoal__c</span><span class="dm-badge-pkg dm-badge">PKG</span></td>
+                <td><span class="obj-date-field dm-val" data-pkg="FinServ__TargetDate__c" data-core="TargetDate">FinServ__TargetDate__c</span></td>
+                <td><div class="tog on" onclick="this.classList.toggle('on')"></div></td>
+                <td><button class="obj-edit-btn" onclick="openObjEditor('goal')">Edit</button></td>
+              </tr>
+              <tr>
+                <td><div class="obj-label-cell"><span class="obj-color-swatch" style="background:#059669"></span>Financial Product</div></td>
+                <td><span class="obj-api dm-val" data-pkg="FinServ__FinancialAccount__c" data-core="FinancialAccount">FinServ__FinancialAccount__c</span><span class="dm-badge-pkg dm-badge">PKG</span></td>
+                <td><span class="obj-date-field dm-val" data-pkg="FinServ__OpenDate__c" data-core="OpenDate">FinServ__OpenDate__c</span></td>
+                <td><div class="tog on" onclick="this.classList.toggle('on')"></div></td>
+                <td><button class="obj-edit-btn" onclick="openObjEditor('product')">Edit</button></td>
+              </tr>
+              <tr>
+                <td><div class="obj-label-cell"><span class="obj-color-swatch" style="background:#7c3aed"></span>Opportunity</div></td>
+                <td><span class="obj-api dm-val" data-pkg="Opportunity" data-core="Opportunity">Opportunity</span><span class="dm-badge-core dm-badge" style="display:none;">CORE</span></td>
+                <td><span class="obj-date-field dm-val" data-pkg="CloseDate" data-core="CloseDate">CloseDate</span></td>
+                <td><div class="tog" onclick="this.classList.toggle('on')"></div></td>
+                <td><button class="obj-edit-btn" onclick="openObjEditor('opportunity')">Edit</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="obj-add-btn" onclick="openAddObject()">＋ Add Object</button>
+        </div>
+
+        <!-- Slide-in editor panel -->
+        <div class="obj-editor" id="obj-editor">
+          <div class="obj-editor-hdr">
+            <div>
+              <div class="obj-editor-title" id="obj-editor-title">Edit Object</div>
+              <!-- stepper (shown in add mode only) -->
+              <div id="oe-stepper" style="display:none;margin-top:8px;display:none;align-items:center;gap:0;">
+                <div class="oe-step active" id="oe-step-1" onclick="goEditorStep(1)"><span class="oe-step-num">1</span><span class="oe-step-lbl">Basic Info</span></div>
+                <div class="oe-step-line"></div>
+                <div class="oe-step" id="oe-step-2" onclick="goEditorStep(2)"><span class="oe-step-num">2</span><span class="oe-step-lbl">Field Mapping</span></div>
+                <div class="oe-step-line"></div>
+                <div class="oe-step" id="oe-step-3" onclick="goEditorStep(3)"><span class="oe-step-num">3</span><span class="oe-step-lbl">Color & Label</span></div>
+              </div>
+            </div>
+            <button class="setup-close" onclick="closeObjEditor()">×</button>
+          </div>
+          <div class="obj-editor-body">
+
+            <!-- Step 1: Basic Info / Edit mode: all in one -->
+            <div id="oe-page-1">
+              <div class="form-row">
+                <div class="form-lbl">Display Label <span>*</span></div>
+                <input class="form-inp" id="oe-label" type="text" placeholder="e.g. Life Event"/>
+                <div class="form-hint">How this object type appears in the filter dropdown and legend.</div>
+              </div>
+              <div class="form-row">
+                <div class="form-lbl">Object API Name <span>*</span></div>
+                <input class="form-inp" id="oe-api" type="text" placeholder="e.g. FinServ__LifeEvent__c"/>
+                <div class="form-hint">The Salesforce API name of the object to query.</div>
+              </div>
+            </div>
+
+            <!-- Step 2: Field Mapping (add mode) / also shown in edit mode -->
+            <div id="oe-page-2">
+              <div class="form-row">
+                <div class="form-lbl">Date Field <span>*</span></div>
+                <select class="form-select" id="oe-date">
+                  <option value="">— Select a date field —</option>
+                  <optgroup label="Financial Services Cloud (PKG)">
+                    <option value="FinServ__EventDate__c">FinServ__EventDate__c — Event Date</option>
+                    <option value="FinServ__TargetDate__c">FinServ__TargetDate__c — Target Date</option>
+                    <option value="FinServ__OpenDate__c">FinServ__OpenDate__c — Open Date</option>
+                    <option value="FinServ__CloseDate__c">FinServ__CloseDate__c — Close Date</option>
+                    <option value="FinServ__StartDate__c">FinServ__StartDate__c — Start Date</option>
+                  </optgroup>
+                  <optgroup label="Core / Standard Fields">
+                    <option value="EventDate">EventDate</option>
+                    <option value="TargetDate">TargetDate</option>
+                    <option value="OpenDate">OpenDate</option>
+                    <option value="CloseDate">CloseDate</option>
+                    <option value="BirthDate">BirthDate</option>
+                    <option value="CreatedDate">CreatedDate</option>
+                  </optgroup>
+                </select>
+                <div class="form-hint">Anchors the event to the timeline axis.</div>
+              </div>
+              <div class="form-row">
+                <div class="form-lbl">Name Field <span>*</span></div>
+                <input class="form-inp" id="oe-name" type="text" placeholder="e.g. Name"/>
+                <div class="form-hint">Field used as the pill label.</div>
+              </div>
+              <div class="form-row">
+                <div class="form-lbl">Year Selection</div>
+                <select class="form-select" id="oe-year" onchange="updatePreviewPill()">
+                  <option value="derived">Derived from Date Field</option>
+                  <option value="current">Current Year (2026)</option>
+                  <option value="2010">2010</option>
+                  <option value="2011">2011</option>
+                  <option value="2012">2012</option>
+                  <option value="2013">2013</option>
+                  <option value="2014">2014</option>
+                  <option value="2015">2015</option>
+                  <option value="2016">2016</option>
+                  <option value="2017">2017</option>
+                  <option value="2018">2018</option>
+                  <option value="2019">2019</option>
+                  <option value="2020">2020</option>
+                  <option value="2021">2021</option>
+                  <option value="2022">2022</option>
+                  <option value="2023">2023</option>
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026" selected>2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                  <option value="2030">2030</option>
+                  <option value="2031">2031</option>
+                  <option value="2032">2032</option>
+                  <option value="2033">2033</option>
+                  <option value="2034">2034</option>
+                  <option value="2035">2035</option>
+                </select>
+                <div class="form-hint">The year used to position this event on the timeline. "Derived from Date Field" extracts the year automatically from the configured date field.</div>
+              </div>
+              <div class="form-row">
+                <div class="form-lbl">Member Relationship Field</div>
+                <input class="form-inp" id="oe-rel" type="text" placeholder="e.g. FinServ__PrimaryOwner__c"/>
+                <div class="form-hint">Lookup that determines which member row this event appears on. <strong>Shared events are detected automatically</strong> — when one record relates to two or more members, the connector is drawn between their rows. No separate field to configure.</div>
+              </div>
+            </div>
+
+            <!-- Step 3: Color & Label (add mode only) -->
+            <div id="oe-page-3" style="display:none;">
+              <div class="form-row">
+                <div class="form-lbl">Pill Color</div>
+                <div class="color-swatches" id="oe-colors">
+                  <div class="color-sw selected" style="background:#0891b2" data-color="#0891b2" onclick="selectColor(this)"></div>
+                  <div class="color-sw" style="background:#E8690B" data-color="#E8690B" onclick="selectColor(this)"></div>
+                  <div class="color-sw" style="background:#059669" data-color="#059669" onclick="selectColor(this)"></div>
+                  <div class="color-sw" style="background:#7c3aed" data-color="#7c3aed" onclick="selectColor(this)"></div>
+                  <div class="color-sw" style="background:#e53935" data-color="#e53935" onclick="selectColor(this)"></div>
+                  <div class="color-sw" style="background:#0176d3" data-color="#0176d3" onclick="selectColor(this)"></div>
+                  <div class="color-sw" style="background:#b45309" data-color="#b45309" onclick="selectColor(this)"></div>
+                  <div class="color-sw" style="background:#374151" data-color="#374151" onclick="selectColor(this)"></div>
+                </div>
+              </div>
+              <!-- Preview pill -->
+              <div class="form-row">
+                <div class="form-lbl">Preview</div>
+                <div style="margin-top:6px;">
+                  <div id="oe-preview-pill" style="display:inline-flex;flex-direction:column;padding:6px 14px;border-radius:20px;background:#0891b2;color:#fff;font-size:10px;font-weight:700;box-shadow:0 2px 5px rgba(0,0,0,.18);min-width:90px;text-align:center;">
+                    <span id="oe-preview-name" style="font-weight:700;">Object Name</span>
+                    <span id="oe-preview-sub" style="opacity:.85;font-size:9px;">Label · 2028</span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row" style="display:flex;align-items:flex-start;gap:10px;margin-top:4px;">
+                <div class="tog on" id="oe-visible-tog" onclick="this.classList.toggle('on')" style="margin-top:2px;flex-shrink:0;"></div>
+                <div>
+                  <div class="form-lbl" style="margin:0;">Visible by default</div>
+                  <div class="form-hint" style="margin:0;">Show this object on the timeline when advisors first open it.</div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /obj-editor-body -->
+          <div class="obj-editor-footer" id="oe-footer">
+            <button class="obj-edit-btn" id="oe-cancel-btn" onclick="closeObjEditor()">Cancel</button>
+            <button class="obj-edit-btn" id="oe-back-btn" style="display:none;" onclick="goEditorStep(editorStep-1)">← Back</button>
+            <button class="obj-edit-btn" id="oe-next-btn" style="display:none;background:#0176d3;color:#fff;border-color:#0176d3;" onclick="goEditorStep(editorStep+1)">Next →</button>
+            <button class="obj-edit-btn" id="oe-save-btn" style="background:#0176d3;color:#fff;border-color:#0176d3;" onclick="saveObjEditor()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Member rows -->
+      <!-- 3. Stats & Fields -->
+      <div class="setup-section" id="sec-fields">
+        <div class="setup-section-hdr">
+          <div class="setup-section-title">Detail Panel Fields</div>
+          <div class="setup-section-desc">One ordered list of fields shown in the detail panel for each object type. The <strong>first 4 are emphasized as highlights</strong> (the KPI strip at the top of the panel); the rest render as detail fields below. Drag to reorder; the full record (with the complete page layout) is one click away via "View Record". Actions and the alert CTA are driven by the page layout and Run My Day — nothing to configure.</div>
+        </div>
+        <div class="setup-section-body">
+          <div class="obj-tabs" id="field-tabs">
+            <div class="obj-tab active" onclick="switchFieldTab('life-event',this)"><span class="tab-dot" style="background:#0891b2"></span>Life Event</div>
+            <div class="obj-tab" onclick="switchFieldTab('goal',this)"><span class="tab-dot" style="background:#E8690B"></span>Goal</div>
+            <div class="obj-tab" onclick="switchFieldTab('product',this)"><span class="tab-dot" style="background:#059669"></span>Financial Product</div>
+          </div>
+
+          <!-- Life Event -->
+          <div id="fields-life-event">
+            <div class="field-section-title">Detail Panel Fields <span class="field-cap">drag to reorder · first 4 = highlights</span></div>
+            <div class="field-list">
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Year</span><span class="field-api dm-val" data-pkg="FinServ__EventDate__c" data-core="EventDate">FinServ__EventDate__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Phase</span><span class="field-api dm-val" data-pkg="LifePhase__c" data-core="LifePhase">LifePhase__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Members</span><span class="field-api dm-val" data-pkg="RelatedMembers__c" data-core="RelatedMembers">RelatedMembers__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Event Type</span><span class="field-api dm-val" data-pkg="FinServ__EventType__c" data-core="EventType">FinServ__EventType__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-divider"><span>↑ highlights &nbsp;·&nbsp; detail fields ↓</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Date</span><span class="field-api dm-val" data-pkg="FinServ__EventDate__c" data-core="EventDate">FinServ__EventDate__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Notes</span><span class="field-api">Description</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+            </div>
+            <button class="field-add-btn">＋ Add Field</button>
+          </div>
+
+          <!-- Goal -->
+          <div id="fields-goal" style="display:none;">
+            <div class="field-section-title">Detail Panel Fields <span class="field-cap">drag to reorder · first 4 = highlights</span></div>
+            <div class="field-list">
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Target Date</span><span class="field-api dm-val" data-pkg="FinServ__TargetDate__c" data-core="TargetDate">FinServ__TargetDate__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Target Amount</span><span class="field-api dm-val" data-pkg="FinServ__TargetValue__c" data-core="TargetValue">FinServ__TargetValue__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Status</span><span class="field-api dm-val" data-pkg="FinServ__Status__c" data-core="Status">FinServ__Status__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Progress %</span><span class="field-api dm-val" data-pkg="ProgressPercentage__c" data-core="ProgressPercentage">ProgressPercentage__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-divider"><span>↑ highlights &nbsp;·&nbsp; detail fields ↓</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Goal Type</span><span class="field-api dm-val" data-pkg="FinServ__GoalType__c" data-core="GoalType">FinServ__GoalType__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Priority</span><span class="field-api dm-val" data-pkg="FinServ__Priority__c" data-core="Priority">FinServ__Priority__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Actual Amount</span><span class="field-api dm-val" data-pkg="FinServ__ActualValue__c" data-core="ActualValue">FinServ__ActualValue__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Owner</span><span class="field-api">OwnerId</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+            </div>
+            <button class="field-add-btn">＋ Add Field</button>
+          </div>
+
+          <!-- Financial Product -->
+          <div id="fields-product" style="display:none;">
+            <div class="field-section-title">Detail Panel Fields <span class="field-cap">drag to reorder · first 4 = highlights</span></div>
+            <div class="field-list">
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Open Date</span><span class="field-api dm-val" data-pkg="FinServ__OpenDate__c" data-core="OpenDate">FinServ__OpenDate__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Status</span><span class="field-api dm-val" data-pkg="FinServ__Status__c" data-core="Status">FinServ__Status__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Product Type</span><span class="field-api dm-val" data-pkg="FinServ__FinancialAccountType__c" data-core="FinancialAccountType">FinServ__FinancialAccountType__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Balance</span><span class="field-api dm-val" data-pkg="FinServ__Balance__c" data-core="Balance">FinServ__Balance__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-divider"><span>↑ highlights &nbsp;·&nbsp; detail fields ↓</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Provider</span><span class="field-api">FinServ__Provider__c</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+              <div class="field-row"><span class="field-grip">⠿</span><span class="field-label">Owner</span><span class="field-api">OwnerId</span><span class="field-remove" onclick="this.closest('.field-row').remove()">×</span></div>
+            </div>
+            <button class="field-add-btn">＋ Add Field</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Suggestions (Roadmap — 266) -->
+      <div class="setup-section" id="sec-ai" data-feature="ai-suggested">
+        <div class="setup-section-hdr">
+          <div class="setup-section-title">AI Suggestions</div>
+          <div class="setup-section-desc">Control how AI-predicted future events and goal gaps are displayed on the timeline. The underlying predictive model is managed by the Agentforce team.</div>
+        </div>
+        <div class="setup-section-body">
+          <div class="info-banner">ℹ️ Settings here control <strong>display behavior only</strong> — the underlying prediction model is owned and managed by the Agentforce platform.</div>
+          <div class="form-row" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;">
+            <div class="tog on" onclick="this.classList.toggle('on')" style="margin-top:2px;"></div>
+            <div>
+              <div class="form-lbl" style="margin:0;">Show AI Suggested toggle in timeline header</div>
+              <div class="form-hint">When enabled, advisors can show/hide AI suggestions using the toggle. When disabled, all AI suggestions are always visible.</div>
+            </div>
+          </div>
+          <div class="form-row" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;">
+            <div class="tog on" onclick="this.classList.toggle('on')" style="margin-top:2px;"></div>
+            <div>
+              <div class="form-lbl" style="margin:0;">Default state: AI suggestions visible</div>
+              <div class="form-hint">When toggled on, AI suggestions are shown by default when an advisor opens the timeline.</div>
+            </div>
+          </div>
+          <div class="form-row" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;">
+            <div class="tog on" onclick="this.classList.toggle('on')" style="margin-top:2px;"></div>
+            <div>
+              <div class="form-lbl" style="margin:0;">Show Accept / Reject actions on AI suggestions</div>
+              <div class="form-hint">When accepted, Agentforce automatically creates the corresponding record (e.g., Goal, Life Event) with pre-filled data.</div>
+            </div>
+          </div>
+          <div class="form-row" style="display:flex;align-items:flex-start;gap:12px;">
+            <div class="tog" onclick="this.classList.toggle('on')" style="margin-top:2px;"></div>
+            <div>
+              <div class="form-lbl" style="margin:0;">Require advisor reason when rejecting a suggestion</div>
+              <div class="form-hint">Rejection reason is fed back to the model for continuous improvement.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /setup-content-wrap -->
+  </div><!-- /setup-body -->
+
+  <!-- Modal footer -->
+  <div style="padding:12px 20px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;gap:10px;background:#fafafa;flex-shrink:0;">
+    <button class="obj-edit-btn" onclick="closeSetup()">Cancel</button>
+    <button class="obj-edit-btn" style="background:#0176d3;color:#fff;border-color:#0176d3;" onclick="saveSetup()">Save &amp; Apply</button>
+  </div>
+</div>
+
+<div class="setup-toast" id="setup-toast">✓ Timeline configuration saved</div>
+
+<script>
+// ── Constants ──
+const START_YEAR = 2010;
+const END_YEAR   = 2048;
+const ROW_HEIGHT = 110;   // px, matches .member-cell and .tl-row
+const PHASE_H    = 18;
+const YR_H       = 38;
+// HDR_H is the vertical offset above the member rows. It is recomputed per render
+// because the phase strip (18px) is only present when in release scope (Roadmap — 266).
+let HDR_H        = PHASE_H + YR_H;   // 56px with phase strip; 38px without
+const TODAY_YEAR = 2026;
+const PILL_W     = 115;   // approximate max pill width for collision detection
+
+// ── State ──
+let pxPerYear = 75;
+const ZOOM_STEPS = [35, 55, 75, 110, 155, 205, 265];
+const ZOOM_LABELS = ['Overview', 'Compact', 'Normal', 'Comfortable', 'Detailed', 'Very Detailed', 'Max'];
+function zoomStepIndex() { return ZOOM_STEPS.reduce((best,v,i) => Math.abs(v-pxPerYear) < Math.abs(ZOOM_STEPS[best]-pxPerYear) ? i : best, 0); }
+let aiOn      = true;
+let curFilter = 'all';
+
+// ── Release scope ──────────────────────────────────────────────────────────
+// The viewer can show the prototype as it ships in a given release. "264" shows
+// only what's committed for Winter '27 (264); turning the viewer toggle OFF shows
+// "264 + Roadmap" — every feature including those targeted at later releases.
+// Tag any roadmap feature with the release it lands in; anything <= the active
+// scope (or 'all') is shown. Add 266/268 features here as they're built.
+const FEATURE_RELEASE = {
+  'ai-suggested': 266,   // AI Suggested events need the Agentforce predictive model — not in 264
+  'phase-strip':  266,   // Life-phase bands — deriving phases from data needs intelligence/UX not ready for 264
+};
+let releaseScope = 264;  // default matches viewer toggle OFF state; 264 = 264-only, 'all' = 264 + Roadmap
+function featureInScope(feature) {
+  if (releaseScope === 'all') return true;
+  const r = FEATURE_RELEASE[feature];
+  return r === undefined || r <= releaseScope;   // untagged = core, always in scope
+}
+
+// ── Member info (row → avatar) ── used for shared bridge pill chips
+const MEMBER_INFO = [
+  { initials:'MG', color:'#5867e8' },  // row 0: Marcel
+  { initials:'RG', color:'#8b5cf6' },  // row 1: Rachel
+  { initials:'MG', color:'#3b82f6' },  // row 2: Michael
+  { initials:'B',  color:'#10b981' },  // row 3: Bonnie
+];
+
+// ── Event data ──
+// row, year, type, ai, shared, past, critical, key, name, sub
+const EVENTS = [
+  // Marcel (row 0)
+  { row:0, year:2012, type:'life-event', ai:false, shared:false, past:true,  critical:false, key:'marcel-job',    name:'💼 Job Start',         sub:'Life Event' },
+  { row:0, year:2017, type:'life-event', ai:false, shared:true,  past:true,  critical:false, key:'marriage',      name:'💍 Marriage',           sub:'Life Event' },
+  { row:0, year:2018, type:'life-event', ai:false, shared:false, past:true,  critical:false, key:'home',          name:'🏠 Home Purchase',      sub:'Life Event' },
+  { row:0, year:2021, type:'goal',       ai:false, shared:false, past:true,  critical:true,  key:'edu-goal',      name:'🎓 Education Goal',     sub:'Goal'       },
+  { row:0, year:2030, type:'goal',       ai:false, shared:false, past:false, critical:false, key:'mortgage',      name:'🏠 Mortgage Paydown',   sub:'Goal'       },
+  { row:0, year:2034, type:'goal',       ai:false, shared:true,  past:false, critical:false, key:'florida-condo',  name:'🏖️ Florida Condo',      sub:'Goal'       },
+  { row:0, year:2045, type:'goal',       ai:true,  shared:false, past:false, critical:false, key:'retirement',    name:'Retirement',            sub:'Goal'       },
+
+  // Rachel (row 1)
+  { row:1, year:2012, type:'life-event', ai:false, shared:false, past:true,  critical:false, key:'rachel-job',        name:'💼 Job Start',       sub:'Life Event' },
+  { row:1, year:2016, type:'life-event', ai:false, shared:false, past:true,  critical:false, key:'rachel-jobchange',  name:'💼 Job Change',      sub:'Life Event' },
+  { row:1, year:2017, type:'life-event', ai:false, shared:true,  past:true,  critical:false, key:'marriage',          name:'💍 Marriage',        sub:'Life Event' },
+  { row:1, year:2020, type:'life-event', ai:false, shared:false, past:true,  critical:false, key:'rachel-freelance',  name:'💻 Goes Freelance',  sub:'Life Event' },
+  { row:1, year:2023, type:'product',    ai:false, shared:false, past:true,  critical:false, key:'insurance',         name:'📋 Insurance',       sub:'Product'    },
+  { row:1, year:2032, type:'life-event', ai:true,  shared:false, past:false, critical:false, key:'inheritance',       name:'Inheritance',        sub:'Life Event'  },
+  { row:1, year:2034, type:'goal',       ai:false, shared:true,  past:false, critical:false, key:'florida-condo',     name:'🏖️ Florida Condo',   sub:'Goal'        },
+
+  // Michael (row 2)
+  { row:2, year:2019, type:'life-event', ai:false, shared:false, past:true,  critical:false, key:'michael-born',    name:'👶 Born',          sub:'Life Event' },
+  { row:2, year:2024, type:'life-event', ai:false, shared:false, past:true,  critical:false, key:'michael-school',  name:'📚 Starts School', sub:'Life Event' },
+  { row:2, year:2034, type:'goal',       ai:true,  shared:false, past:false, critical:true,  key:'michael-college', name:'College Fund',     sub:'Goal'       },
+
+  // Bonnie (row 3)
+  { row:3, year:2022, type:'life-event', ai:false, shared:false, past:true,  critical:false, key:'bonnie-born',   name:'👶 Born',          sub:'Life Event' },
+  { row:3, year:2025, type:'life-event', ai:false, shared:false, past:false, critical:false, key:'bonnie-school', name:'📚 Starts School', sub:'Life Event' },
+];
+
+// ── Collision-aware lane assignment ──
+// Lanes: 0=center, -1=up, 1=down, -2=far-up, 2=far-down
+// Each lane maps to a top% of the row so the dot sits at that y within the row.
+// The .ev element is positioned with top=laneY. The pill renders above, dot below.
+// We want the dot (bottom of .ev) on the track (row center = ROW_HEIGHT/2).
+// ev total height ≈ pill(~32px) + margin(3px) + dot(7px) = ~42px
+// To put dot center at mid (55px in 110px row): top = 55 - 42/2 - (42/2 - dot_center_offset)
+// Simpler: just use offsets from center per lane.
+const LANE_OFFSETS = { '-2': -38, '-1': -22, '0': 0, '1': 22, '2': 38 }; // px offset from row center
+
+function assignLanes(rowEvents) {
+  const sorted = [...rowEvents].sort((a, b) => a.year - b.year);
+  const lanes  = [-1, 1, -2, 2]; // try away from center first to keep center for isolated events
+  const placed = []; // { x, lane }
+
+  for (const ev of sorted) {
+    const x = (ev.year - START_YEAR) * pxPerYear;
+    // Check center first
+    let assigned = 0;
+    const centerBlocked = placed.some(p => p.lane === 0 && Math.abs(p.x - x) < PILL_W + 4);
+    if (centerBlocked) {
+      for (const lane of lanes) {
+        const blocked = placed.some(p => p.lane === lane && Math.abs(p.x - x) < PILL_W + 4);
+        if (!blocked) { assigned = lane; break; }
+      }
+    }
+    ev._lane = assigned;
+    placed.push({ x, lane: assigned });
+  }
+}
+
+// ── Render ──
+function renderTimeline() {
+  const totalW = (END_YEAR - START_YEAR) * pxPerYear;
+  const gi = document.getElementById('grid-inner');
+  gi.style.width = totalW + 'px';
+
+  // Header height depends on whether the phase strip is in scope (it sits in normal
+  // flow above the rows, so absolutely-positioned pills/line must use the matching offset).
+  const phaseInScope = featureInScope('phase-strip');
+  HDR_H = (phaseInScope ? PHASE_H : 0) + YR_H;
+
+  // Phase strip (Roadmap — 266; only built when in scope)
+  const phaseStripEl = document.getElementById('phase-strip');
+  if (phaseInScope) {
+    const phases = [
+      { label:'Accumulation',          start:2010, end:2016, cls:'p1' },
+      { label:'Transition',            start:2017, end:2018, cls:'p2' },
+      { label:'Responsibility Cluster',start:2019, end:2022, cls:'p3' },
+      { label:'Stabilization',         start:2023, end:2025, cls:'p4' },
+      { label:'Future',                start:2026, end:END_YEAR, cls:'pfut' },
+    ];
+    phaseStripEl.innerHTML = phases.map(p => {
+      const w = (p.end - p.start + 1) * pxPerYear;
+      return `<div class="phase-seg ${p.cls}" style="width:${w}px;">${p.label}</div>`;
+    }).join('');
+  } else {
+    phaseStripEl.innerHTML = '';
+  }
+
+  // Year header — label every N years depending on zoom
+  const labelEvery = pxPerYear >= 80 ? 2 : pxPerYear >= 40 ? 4 : 10;
+  let yrHTML = '';
+  for (let y = START_YEAR; y <= END_YEAR; y++) {
+    const x = (y - START_YEAR) * pxPerYear;
+    if (y === TODAY_YEAR) {
+      yrHTML += `<div class="today-badge" style="left:${x}px"><span>Today</span></div>`;
+      yrHTML += `<span class="yr-tick" style="left:${x}px"></span>`;
+    } else if ((y - START_YEAR) % labelEvery === 0) {
+      yrHTML += `<span class="yr-label" style="left:${x}px">${y}</span>`;
+      yrHTML += `<span class="yr-tick" style="left:${x}px"></span>`;
+    } else if ((y - START_YEAR) % 2 === 0) {
+      yrHTML += `<span class="yr-tick" style="left:${x}px"></span>`;
+    }
+  }
+  document.getElementById('yr-hdr').innerHTML = yrHTML;
+
+  // Today line
+  const todayX = (TODAY_YEAR - START_YEAR) * pxPerYear;
+  const tl = document.getElementById('today-line');
+  tl.style.left   = todayX + 'px';
+  tl.style.top    = HDR_H + 'px';
+  tl.style.height = (ROW_HEIGHT * 4) + 'px';
+
+  // AI Suggested events only appear when that feature is in the active release scope
+  const aiInScope = featureInScope('ai-suggested');
+  const visibleEvents = EVENTS.filter(e => aiInScope || !e.ai);
+
+  // Assign lanes per row
+  const byRow = [[], [], [], []];
+  for (const ev of visibleEvents) byRow[ev.row].push(ev);
+  byRow.forEach(assignLanes);
+
+  // Shared event groups — map of key → [all visible participants]
+  const sharedGroupsMap = {};
+  for (const ev of visibleEvents) {
+    if (ev.shared) {
+      if (!sharedGroupsMap[ev.key]) sharedGroupsMap[ev.key] = [];
+      sharedGroupsMap[ev.key].push(ev);
+    }
+  }
+  // Keys with 2+ visible participants get a connector + "with" chips on each pill
+  const sharedActiveKeys = new Set(
+    Object.entries(sharedGroupsMap)
+      .filter(([, evs]) => evs.length >= 2)
+      .map(([k]) => k)
+  );
+
+  // Remove old connectors (+ any leftover bridge pills from previous render)
+  document.querySelectorAll('.ev-connector, .ev-bridge').forEach(el => el.remove());
+
+  // Draw dashed connector between the outermost participating rows
+  for (const key of sharedActiveKeys) {
+    if (curFilter !== 'all' && sharedGroupsMap[key][0].type !== curFilter) continue;
+
+    const participants = [...sharedGroupsMap[key]].sort((a, b) => a.row - b.row);
+    const topEv = participants[0];
+    const botEv = participants[participants.length - 1];
+
+    const rowMidPx = ROW_HEIGHT / 2;
+    const cx = (topEv.year - START_YEAR) * pxPerYear;
+    const y0 = HDR_H + topEv.row * ROW_HEIGHT + rowMidPx;
+    const y1 = HDR_H + botEv.row * ROW_HEIGHT + rowMidPx;
+
+    const conn = document.createElement('div');
+    conn.className = 'ev-connector';
+    conn.style.cssText = `left:${cx}px;top:${y0}px;height:${y1 - y0}px;`;
+    document.getElementById('grid-inner').appendChild(conn);
+  }
+
+  // Clear old event elements
+  for (let r = 0; r < 4; r++) {
+    const row = document.getElementById(`row-${r}`);
+    row.querySelectorAll('.ev').forEach(e => e.remove());
+  }
+
+  // Build and append events
+  const rowMid = ROW_HEIGHT / 2;
+  for (const ev of visibleEvents) {
+    // Filter
+    if (curFilter !== 'all' && ev.type !== curFilter) continue;
+
+    const x    = (ev.year - START_YEAR) * pxPerYear;
+    const topY = rowMid + (LANE_OFFSETS[String(ev._lane)] ?? 0);
+
+    const typeClass = ev.type;
+    const pastClass = ev.past ? ' past' : '';
+    const aiClass   = ev.ai   ? ' ai-tag' : '';
+    const sparkle   = ev.ai   ? '<span class="sparkle">✦</span>' : '';
+    const critDot   = ev.critical ? '<div class="crit-dot"></div>' : '';
+
+    // "Shared with" strip — shows other participants' avatar chips on this pill
+    let sharedWithHTML = '';
+    if (sharedActiveKeys.has(ev.key)) {
+      const others = sharedGroupsMap[ev.key].filter(p => p.row !== ev.row);
+      const chips  = others.map(p => {
+        const m = MEMBER_INFO[p.row];
+        return `<div class="shared-member-chip" style="background:${m.color};">${m.initials[0]}</div>`;
+      }).join('');
+      sharedWithHTML = `<div class="ev-shared-with"><span class="ev-shared-with-lbl">w/</span>${chips}</div>`;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'ev';
+    div.style.cssText = `left:${x}px;top:${topY}px;`;
+    div.dataset.type   = ev.type;
+    div.dataset.ai     = ev.ai ? '1' : '0';
+    if (ev.shared) div.dataset.shared = '1';
+    div.setAttribute('onclick', `showPop(event,'${ev.key}')`);
+
+    div.innerHTML = `
+      <div class="ev-pill ${typeClass}${pastClass}${aiClass}" style="position:relative;">${critDot}
+        <div class="ev-name">${sparkle}${ev.name}</div>
+        <div class="ev-sub">${ev.year}</div>
+        ${sharedWithHTML}
+      </div>`;
+
+    if (!aiOn && ev.ai) {
+      div.style.opacity = '0.2';
+      div.style.pointerEvents = 'none';
+    }
+
+    document.getElementById(`row-${ev.row}`).appendChild(div);
+  }
+
+  updateCount();
+}
+
+// ── Zoom ──
+function adjustZoom(dir) {
+  const idx = zoomStepIndex();
+  const next = Math.max(0, Math.min(ZOOM_STEPS.length - 1, idx + dir));
+  pxPerYear = ZOOM_STEPS[next];
+  document.getElementById('zoom-val').textContent = ZOOM_LABELS[next];
+  document.getElementById('zoom-out-btn').disabled = next === 0;
+  document.getElementById('zoom-in-btn').disabled  = next === ZOOM_STEPS.length - 1;
+  renderTimeline();
+  const gs = document.getElementById('grid-scroll');
+  const todayX = (TODAY_YEAR - START_YEAR) * pxPerYear;
+  gs.scrollLeft = Math.max(0, todayX - gs.clientWidth * 0.65);
+}
+
+// ── View switch ──
+function switchView(v) {
+  document.getElementById('view-hh360').style.display = v === 'hh360' ? 'block' : 'none';
+  document.getElementById('view-tl').style.display    = v === 'timeline' ? 'block' : 'none';
+  document.getElementById('btn-hh360').classList.toggle('active', v === 'hh360');
+  document.getElementById('btn-tl').classList.toggle('active', v === 'timeline');
+}
+
+// ── AI toggle ──
+function toggleAI() {
+  aiOn = !aiOn;
+  document.getElementById('ai-track').classList.toggle('on', aiOn);
+  document.querySelectorAll('.ev[data-ai="1"]').forEach(el => {
+    el.style.opacity = aiOn ? '1' : '0.2';
+    el.style.pointerEvents = aiOn ? 'auto' : 'none';
+  });
+  updateCount();
+}
+
+// ── Release scope viewer toggle ──
+// OFF → "264" : show only what ships in Winter '27 (264)  [default]
+// ON  → "264 + Roadmap" : show everything, including later-release (266/268) features
+function toggleReleaseScope() {
+  const on = document.getElementById('scope-track').classList.toggle('on');
+  releaseScope = on ? 'all' : 264;
+  document.getElementById('scope-label').textContent = on ? '264 + Roadmap' : '264';
+  applyReleaseScope();
+}
+
+function applyReleaseScope() {
+  // Show/hide any element tagged with a roadmap feature via data-feature
+  document.querySelectorAll('[data-feature]').forEach(el => {
+    el.style.display = featureInScope(el.dataset.feature) ? '' : 'none';
+  });
+  // When AI is back in scope, default its view toggle to visible
+  if (featureInScope('ai-suggested')) {
+    aiOn = true;
+    const track = document.getElementById('ai-track');
+    if (track) track.classList.add('on');
+  }
+  renderTimeline();
+}
+
+// ── Filter ──
+function setFilter(f, label, el) {
+  curFilter = f;
+  document.getElementById('filter-lbl').textContent = label;
+  document.querySelectorAll('#filter-dd .dd-item').forEach(i => i.classList.remove('sel'));
+  el.classList.add('sel');
+  closeAll();
+  renderTimeline();
+}
+
+function updateCount() {
+  let n = 0;
+  document.querySelectorAll('.ev').forEach(ev => {
+    // AI events are removed from the DOM entirely when the feature is off, so only the dim-toggle case matters here
+    if (!(ev.dataset.ai === '1' && !aiOn)) n++;
+  });
+  const lbl = { all:'No filters applied', 'life-event':'Life Event filter', goal:'Goal filter', product:'Financial Product filter' };
+  document.getElementById('item-count').textContent = n + ' Items · ' + (lbl[curFilter] || 'No filters applied');
+}
+
+// ── Dropdowns ──
+function toggleDD(id) {
+  const el = document.getElementById(id);
+  const was = el.classList.contains('open');
+  closeAll();
+  if (!was) el.classList.add('open');
+}
+function closeAll() {
+  document.querySelectorAll('.dd-menu').forEach(m => m.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dd-wrap') && !e.target.closest('.btn-new')) closeAll();
+});
+
+// ── Detail panel data ──
+// stats: [{lbl, val, cls}]  — shown in the bar under the header (max 4)
+// fields: [{lbl, val}]      — two-column grid
+// ai: string | null
+// action: primary CTA label | null
+const POP = {
+  'marriage':{
+    type:'Life Event', icon:'💍', shared:true, title:'Marriage', critical:false,
+    subtitle:'Household life milestone — joint finances begin.',
+    stats:[{lbl:'Year',val:'2017'},{lbl:'Members',val:'Marcel & Rachel'},{lbl:'Phase',val:'Transition'}],
+    fields:[['Event Type','Marriage'],['Date','2017'],['Member 1','Marcel Green'],['Member 2','Rachel Green'],['Household Impact','Joint finances begin'],['Notes','—']],
+    ai:null, action:null },
+  'home':{
+    type:'Life Event', icon:'🏠', shared:false, title:'Home Purchase', critical:false,
+    subtitle:'Primary residence purchased with mortgage financing.',
+    stats:[{lbl:'Year',val:'2018'},{lbl:'Status',val:'EMI Active',cls:'orange'},{lbl:'Phase',val:'Transition'}],
+    fields:[['Event Type','Home Purchase'],['Date','2018'],['Property','Primary Residence'],['Loan Amount','$420,000'],['EMI','$2,800/mo'],['Completion Year','2030']],
+    ai:"Capital committed to the mortgage may compete with education corpus building. Consider reviewing allocation between mortgage prepayment and investment SIPs.",
+    action:'Review Capital Allocation' },
+  'edu-goal':{
+    type:'Goal', icon:'🎓', shared:false, title:'Education Goal', critical:true,
+    subtitle:'College fund goal flagged for review — estimated figures may be outdated.',
+    stats:[{lbl:'Target Date',val:'2034'},{lbl:'Target Amount',val:'$40,000'},{lbl:'Status',val:'Stale ⚠️',cls:'red'},{lbl:'Progress',val:'~18%',cls:'orange'}],
+    fields:[['Goal Type','Education'],['Created','2021'],['Priority','High'],['Actual Amount','$7,200'],['Start Date','2021'],['Owner','Marcel Green'],['Financial Plan','—'],['Est. Success %','34%']],
+    ai:"This goal is 5 years old and was created as a rough estimate. Given two children and rising education costs, it needs to be revisited with precision.",
+    action:'Revisit & Update Goal' },
+  'mortgage':{
+    type:'Goal', icon:'🏠', shared:false, title:'Mortgage Paydown', critical:false,
+    subtitle:'Goal to fully pay off the primary home mortgage by 2030.',
+    stats:[{lbl:'Target Date',val:'2030'},{lbl:'Target Amount',val:'$130,000'},{lbl:'Status',val:'In Progress',cls:'green'},{lbl:'Progress',val:'42%',cls:'green'}],
+    fields:[['Goal Type','Home'],['Priority','High'],['Actual Amount','$54,600'],['Start Date','2018'],['Target Date','2030'],['Owner','Marcel Green'],['Withdrawal Freq.','Monthly'],['Est. Success %','78%']],
+    ai:"Capital directed to mortgage prepayment is competing with education corpus. An optimal balance between the two goals needs to be calculated.",
+    action:'Review Goal Trade-off' },
+  'retirement':{
+    type:'Goal', icon:'🎯', shared:false, title:'Retirement Corpus', critical:false,
+    subtitle:'Long-term retirement savings goal targeting financial independence.',
+    stats:[{lbl:'Target Year',val:'2045'},{lbl:'Target Amount',val:'$1,500,000'},{lbl:'Status',val:'On Track',cls:'green'},{lbl:'Progress',val:'12%',cls:'orange'}],
+    fields:[['Goal Type','Retirement'],['Priority','High'],['Actual Amount','$178,000'],['Start Date','2026'],['Target Date','2045'],['Owner','Marcel Green'],['Monthly SIP','$1,200'],['Est. Success %','68%']],
+    ai:"Household is on track to reach ~68% of the retirement target. Increasing monthly SIP by $300 would close the gap.",
+    action:'Review Retirement Plan' },
+  'marcel-job':{
+    type:'Life Event', icon:'💼', shared:false, title:'Job Start – Marcel', critical:false,
+    subtitle:'Beginning of Marcel\'s primary salaried income.',
+    stats:[{lbl:'Year',val:'2012'},{lbl:'Phase',val:'Accumulation'},{lbl:'Income Type',val:'Salaried'}],
+    fields:[['Event Type','Career Start'],['Date','2012'],['Employer','—'],['Role','—'],['Income','—'],['Notes','Beginning of household income']],
+    ai:null, action:null },
+  'rachel-job':{
+    type:'Life Event', icon:'💼', shared:false, title:'Job Start – Rachel', critical:false,
+    subtitle:'Dual-income household established — increased savings capacity.',
+    stats:[{lbl:'Year',val:'2012'},{lbl:'Phase',val:'Accumulation'},{lbl:'Income Type',val:'Salaried'}],
+    fields:[['Event Type','Career Start'],['Date','2012'],['Employer','—'],['Role','—'],['Income','—'],['Notes','Dual income household established']],
+    ai:null, action:null },
+  'rachel-jobchange':{
+    type:'Life Event', icon:'💼', shared:false, title:'Job Change – Rachel', critical:false,
+    subtitle:'Mid-career role transition; income impact to be assessed.',
+    stats:[{lbl:'Year',val:'2016'},{lbl:'Phase',val:'Accumulation'}],
+    fields:[['Event Type','Job Change'],['Date','2016'],['Previous Role','—'],['New Role','—'],['Income Change','—'],['Notes','—']],
+    ai:null, action:null },
+  'rachel-freelance':{
+    type:'Life Event', icon:'💻', shared:false, title:'Transition to Freelancing', critical:false,
+    subtitle:'Shift to variable income — affects loan eligibility and buffer sizing.',
+    stats:[{lbl:'Year',val:'2020'},{lbl:'Income Type',val:'Variable',cls:'orange'},{lbl:'Phase',val:'Responsibility'}],
+    fields:[['Event Type','Career Transition'],['Date','2020'],['Previous','Salaried Employment'],['New','Freelance / Self-employed'],['Impact','Variable income'],['Notes','Insurance purchased 2023']],
+    ai:"Variable income since 2020 may affect loan eligibility and emergency fund sizing. Household cash reserve should be reviewed.",
+    action:'Review Emergency Buffer' },
+  'insurance':{
+    type:'Financial Product', icon:'📋', shared:false, title:'Life Insurance – Rachel', critical:false,
+    subtitle:'Term life insurance providing income protection for the household.',
+    stats:[{lbl:'Year',val:'2023'},{lbl:'Status',val:'Active',cls:'green'},{lbl:'Type',val:'Life Insurance'}],
+    fields:[['Product Type','Life Insurance'],['Start Date','2023'],['Insured','Rachel Green'],['Coverage','—'],['Premium','—'],['Renewal Date','—'],['Provider','—'],['Beneficiary','Marcel Green']],
+    ai:null, action:null },
+  'michael-born':{
+    type:'Life Event', icon:'👶', shared:false, title:'Michael Born', critical:false,
+    subtitle:'Adds education funding and dependent planning needs to the household.',
+    stats:[{lbl:'Year',val:'2019'},{lbl:'Age Now',val:'7 years'},{lbl:'Phase',val:'Responsibility'}],
+    fields:[['Event Type','Birth'],['Date','2019'],['Member','Michael Green'],['Relationship','Son'],['Education Start','~2024'],['College Target','~2034']],
+    ai:null, action:null },
+  'michael-school':{
+    type:'Life Event', icon:'📚', shared:false, title:'Michael Starts School', critical:false,
+    subtitle:'Formal education underway; college funding horizon approximately 10 years.',
+    stats:[{lbl:'Year',val:'2024'},{lbl:'Current Grade',val:'Grade 2'},{lbl:'Phase',val:'Stabilization'}],
+    fields:[['Event Type','Education Milestone'],['Date','2024'],['Member','Michael Green'],['School Type','Formal / Primary'],['Annual Cost','~$3,000'],['College Year','~2034']],
+    ai:null, action:null },
+  'michael-college':{
+    type:'Goal', icon:'🎓', shared:false, title:'Michael – College Fund', critical:true,
+    subtitle:'Complete funding for Michael\'s higher education by 2034.',
+    stats:[{lbl:'Target Date',val:'2034'},{lbl:'Target Amount',val:'$40,000'},{lbl:'Status',val:'Off Track ⚠️',cls:'red'},{lbl:'Progress',val:'18%',cls:'red'}],
+    fields:[['Goal Type','Education'],['Priority','High'],['Actual Amount','$7,200'],['Start Date','2021'],['Target Date','2034'],['Owner','Marcel Green'],['Monthly Contribution','$120'],['Est. Success %','34%']],
+    ai:"Goal is currently off-track due to a projected corpus shortfall; increasing contributions can help bring the goal back on track.",
+    action:'Review Contribution' },
+  'bonnie-born':{
+    type:'Life Event', icon:'👶', shared:false, title:'Bonnie Born', critical:false,
+    subtitle:'Youngest household member; education horizon extends to approximately 2040.',
+    stats:[{lbl:'Year',val:'2022'},{lbl:'Age Now',val:'4 years'},{lbl:'Phase',val:'Responsibility'}],
+    fields:[['Event Type','Birth'],['Date','2022'],['Member','Bonnie Green'],['Relationship','Daughter'],['Education Start','~2025'],['College Target','~2040']],
+    ai:null, action:null },
+  'bonnie-school':{
+    type:'Life Event', icon:'📚', shared:false, title:'Bonnie Starts School', critical:false,
+    subtitle:'Early education stage; long runway for college savings planning.',
+    stats:[{lbl:'Year',val:'2025'},{lbl:'Stage',val:'Pre-school'},{lbl:'Phase',val:'Stabilization'}],
+    fields:[['Event Type','Education Milestone'],['Date','2025'],['Member','Bonnie Green'],['School Type','Pre-school'],['Annual Cost','~$2,400'],['College Year','~2040']],
+    ai:null, action:null },
+  'florida-condo':{
+    type:'Goal', icon:'🏖️', shared:true, title:'Florida Condo', critical:false,
+    subtitle:'Vacation and retirement property goal — jointly owned by Marcel & Rachel.',
+    stats:[{lbl:'Target Year',val:'2034'},{lbl:'Est. Amount',val:'$350,000'},{lbl:'Status',val:'Planned',cls:'orange'},{lbl:'Members',val:'Marcel & Rachel'}],
+    fields:[['Goal Type','Property'],['Priority','Medium'],['Actual Amount','—'],['Start Date','2026'],['Target Date','2034'],['Owner','Marcel Green'],['Funding Source','Post-mortgage capital'],['Notes','Vacation / retirement property']],
+    ai:"Mortgage paydown completes around 2030, freeing up capital. A 2034 target is well-timed. Savings discipline between 2030–2034 is key.",
+    action:'Review Property Plan' },
+  'inheritance':{
+    type:'Life Event', icon:'🏦', shared:false, title:'Anticipated Inheritance – Rachel', critical:false,
+    subtitle:'AI-detected from estate references in meeting notes — needs verification.',
+    stats:[{lbl:'Predicted Year',val:'2032'},{lbl:'Confidence',val:'Medium',cls:'orange'},{lbl:'Source',val:'AI Detected'}],
+    fields:[['Event Type','Inheritance'],['Predicted Date','2032'],['Member','Rachel Green'],['Confidence','Medium'],['Estimated Value','Unknown'],['Source','Estate docs in meeting notes'],['Related Goal','Florida Condo / Retirement'],['Notes','Needs verification']],
+    ai:"Detected from references to a family estate in meeting notes. If realized, this could significantly accelerate the household's goal trajectory — both retirement corpus and Florida Condo may benefit.",
+    action:'Review Estate Context' },
+};
+
+function showPop(e, key) {
+  e.stopPropagation();
+  const d = POP[key];
+  if (!d) return;
+
+  document.getElementById('pop-shared-badge').style.display = d.shared ? 'inline-flex' : 'none';
+
+  // Icon wrap — colored background keyed to event type
+  const iconBg = { 'Goal':'#1589ee', 'Life Event':'#0891b2', 'Financial Product':'#059669' };
+  document.getElementById('pop-icon-wrap').style.background = iconBg[d.type] || '#1589ee';
+  document.getElementById('pop-icon').textContent = d.icon;
+
+  document.getElementById('pop-type').textContent = d.type;
+  document.getElementById('pop-title').innerHTML  = `<a class="pop-title-link" href="#" onclick="closePop();return false;">${d.title}</a>` + (d.critical ? ' <span style="color:#e53935;font-size:13px;">●</span>' : '');
+
+  // Subtitle
+  const subtitleEl = document.getElementById('pop-subtitle');
+  if (d.subtitle) {
+    subtitleEl.textContent = d.subtitle;
+    subtitleEl.style.display = 'block';
+  } else {
+    subtitleEl.style.display = 'none';
+  }
+
+  // ── Single configurable field list ──
+  // The admin maintains ONE ordered list of fields. The first few are rendered as
+  // emphasized "highlights" (KPI strip); the remainder render as a plain detail grid.
+  // (In this prototype the existing `stats` entries stand in for the highlighted top,
+  //  and `fields` for the rest — same single-list model.)
+  document.getElementById('pop-highlights').innerHTML = (d.stats || []).map(s =>
+    `<div class="pop-hl">
+       <div class="pop-hl-lbl">${s.lbl}</div>
+       <div class="pop-hl-val${s.cls ? ' ' + s.cls : ''}">${s.val}</div>
+     </div>`
+  ).join('');
+
+  // AI insight box + CTA — always paired, both shown/hidden together
+  const aiBox = document.getElementById('pop-ai-box');
+  const primaryBtn  = document.getElementById('pop-primary-btn');
+  const primaryText = document.getElementById('pop-primary-text');
+  if (d.ai) {
+    document.getElementById('pop-ai-text').textContent = d.ai;
+    aiBox.style.display = 'flex';
+    if (d.action) {
+      primaryText.textContent = d.action;
+      primaryBtn.style.display = 'inline-flex';
+    } else {
+      primaryBtn.style.display = 'none';
+    }
+  } else {
+    aiBox.style.display = 'none';
+  }
+
+  // Field grid
+  document.getElementById('pop-fields').innerHTML = (d.fields || []).map(([lbl, val]) =>
+    `<div class="pop-field">
+       <div class="pop-field-lbl">${lbl}</div>
+       <div class="pop-field-val">${val}</div>
+     </div>`
+  ).join('');
+
+  // Close actions menu if open from previous click
+  document.getElementById('pop-actions-menu').classList.remove('open');
+
+  // Position and open
+  const pop = document.getElementById('popover');
+  pop.classList.add('open');
+  document.getElementById('pop-overlay').classList.add('open');
+
+  const r    = e.currentTarget.getBoundingClientRect();
+  let left   = r.left + r.width / 2 - 240;
+  let top    = r.bottom + 12;
+  if (left < 8) left = 8;
+  if (left + 480 > window.innerWidth - 8) left = window.innerWidth - 488;
+  if (top + 480 > window.innerHeight - 8) top = r.top - 490;
+  pop.style.left = left + 'px';
+  pop.style.top  = top  + 'px';
+}
+
+function closePop() {
+  document.getElementById('popover').classList.remove('open');
+  document.getElementById('pop-overlay').classList.remove('open');
+  document.getElementById('pop-actions-menu').classList.remove('open');
+}
+
+function toggleActionsMenu() {
+  const menu = document.getElementById('pop-actions-menu');
+  const btn  = document.querySelector('.pop-actions-btn');
+  const isOpen = menu.classList.contains('open');
+  menu.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    const r = btn.getBoundingClientRect();
+    // open above the button, right-aligned to it
+    menu.style.left = (r.right - menu.offsetWidth || r.right - 200) + 'px';
+    menu.style.top  = (r.top - menu.offsetHeight - 4) + 'px';
+    // recompute once rendered
+    requestAnimationFrame(() => {
+      menu.style.left = (r.right - menu.offsetWidth) + 'px';
+      menu.style.top  = (r.top  - menu.offsetHeight - 4) + 'px';
+    });
+  }
+}
+
+// ── Drag to scroll ──
+const gs = document.getElementById('grid-scroll');
+let isDragging = false, dragStartX = 0, scrollStart = 0;
+gs.addEventListener('mousedown', e => {
+  if (e.target.closest('.ev')) return;
+  isDragging = true; dragStartX = e.clientX; scrollStart = gs.scrollLeft;
+});
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  gs.scrollLeft = scrollStart - (e.clientX - dragStartX);
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+
+// ── Init ──
+window.addEventListener('load', () => {
+  applyReleaseScope();   // applies default scope (264) + renders timeline
+  // Scroll so Today is visible with good past context
+  const todayX = (TODAY_YEAR - START_YEAR) * pxPerYear;
+  gs.scrollLeft = Math.max(0, todayX - gs.clientWidth * 0.65);
+});
+
+// ── New Record modals ──
+const NR_MODAL_MAP = { 'life-event': 'nr-modal-life-event', 'goal': 'nr-modal-goal', 'product': 'nr-modal-product' };
+function openNewModal(type) {
+  closeNewModal(); // close any currently open one
+  const id = NR_MODAL_MAP[type];
+  if (!id) return;
+  document.getElementById('nr-overlay').classList.add('open');
+  document.getElementById(id).classList.add('open');
+  // Focus the first text input in the modal
+  setTimeout(() => { const inp = document.querySelector('#' + id + ' input[type=text], #' + id + ' input[type=date]'); if (inp) inp.focus(); }, 80);
+}
+function closeNewModal() {
+  document.getElementById('nr-overlay').classList.remove('open');
+  Object.values(NR_MODAL_MAP).forEach(id => document.getElementById(id).classList.remove('open'));
+}
+// Close on Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNewModal(); });
+
+// ── Setup modal ──
+function openSetup() {
+  document.getElementById('setup-modal').classList.add('open');
+  document.getElementById('setup-overlay').classList.add('open');
+}
+function closeSetup() {
+  document.getElementById('setup-modal').classList.remove('open');
+  document.getElementById('setup-overlay').classList.remove('open');
+  closeObjEditor();
+}
+function showSetupSection(id, navEl) {
+  document.querySelectorAll('.setup-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.setup-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  navEl.classList.add('active');
+  closeObjEditor();
+}
+
+// ── Data model switcher ──
+let curDataModel = 'pkg';
+const OBJ_DATA_BY_MODEL = {
+  pkg: {
+    'life-event': { label:'Life Event', api:'FinServ__LifeEvent__c', date:'FinServ__EventDate__c', name:'Name', sub:'FinServ__Type__c', rel:'FinServ__PrimaryOwner__c', shared:'IsShared__c', color:'#0891b2' },
+    'goal':        { label:'Financial Goal', api:'FinServ__FinancialGoal__c', date:'FinServ__TargetDate__c', name:'Name', sub:'FinServ__Type__c', rel:'FinServ__PrimaryOwner__c', shared:'', color:'#E8690B' },
+    'product':     { label:'Financial Product', api:'FinServ__FinancialAccount__c', date:'FinServ__OpenDate__c', name:'Name', sub:'FinServ__FinancialAccountType__c', rel:'FinServ__PrimaryOwner__c', shared:'', color:'#059669' },
+    'opportunity': { label:'Opportunity', api:'Opportunity', date:'CloseDate', name:'Name', sub:'Type', rel:'AccountId', shared:'', color:'#7c3aed' },
+  },
+  core: {
+    'life-event': { label:'Life Event', api:'LifeEvent', date:'EventDate', name:'Name', sub:'Type', rel:'PrimaryOwner', shared:'IsShared', color:'#0891b2' },
+    'goal':        { label:'Financial Goal', api:'FinancialGoal', date:'TargetDate', name:'Name', sub:'Type', rel:'PrimaryOwner', shared:'', color:'#E8690B' },
+    'product':     { label:'Financial Product', api:'FinancialAccount', date:'OpenDate', name:'Name', sub:'FinancialAccountType', rel:'PrimaryOwner', shared:'', color:'#059669' },
+    'opportunity': { label:'Opportunity', api:'Opportunity', date:'CloseDate', name:'Name', sub:'Type', rel:'AccountId', shared:'', color:'#7c3aed' },
+  }
+};
+
+function setDataModel(model) {
+  curDataModel = model;
+  document.getElementById('dm-pkg-btn').classList.toggle('active', model === 'pkg');
+  document.getElementById('dm-core-btn').classList.toggle('active', model === 'core');
+
+  // Swap every .dm-val element to show the right attribute value
+  document.querySelectorAll('.dm-val').forEach(el => {
+    el.textContent = el.dataset[model] || el.dataset.pkg;
+  });
+
+  // Swap PKG / CORE badges in the objects table
+  document.querySelectorAll('.dm-badge').forEach(badge => {
+    if (badge.classList.contains('dm-badge-pkg')) {
+      badge.style.display = model === 'pkg' ? '' : 'none';
+    } else {
+      badge.style.display = model === 'core' ? '' : 'none';
+    }
+  });
+
+}
+
+// Object editor slide-in — reads from current data model
+const OBJ_DATA = new Proxy({}, {
+  get(_, key) { return OBJ_DATA_BY_MODEL[curDataModel]?.[key]; }
+});
+let editorMode = 'edit'; // 'edit' | 'add'
+let editorStep = 1;
+
+function openObjEditor(key) {
+  editorMode = 'edit';
+  const d = OBJ_DATA[key] || {};
+  document.getElementById('obj-editor-title').textContent = 'Edit: ' + (d.label || key);
+  document.getElementById('oe-label').value  = d.label  || '';
+  document.getElementById('oe-api').value    = d.api    || '';
+  document.getElementById('oe-date').value   = d.date   || '';
+  document.getElementById('oe-name').value   = d.name   || '';
+  document.getElementById('oe-year').value   = d.year   || 'derived';
+  document.getElementById('oe-rel').value    = d.rel    || '';
+  document.querySelectorAll('.color-sw').forEach(sw => sw.classList.toggle('selected', sw.dataset.color === d.color));
+  // Edit mode: show all pages, hide stepper and nav buttons
+  document.getElementById('oe-stepper').style.display  = 'none';
+  document.getElementById('oe-page-1').style.display   = 'block';
+  document.getElementById('oe-page-2').style.display   = 'block';
+  document.getElementById('oe-page-3').style.display   = 'block';
+  document.getElementById('oe-back-btn').style.display = 'none';
+  document.getElementById('oe-next-btn').style.display = 'none';
+  document.getElementById('oe-save-btn').style.display = 'inline-flex';
+  document.getElementById('oe-save-btn').textContent   = 'Save';
+  document.getElementById('obj-editor').classList.add('open');
+}
+
+function openAddObject() {
+  editorMode = 'add';
+  editorStep = 1;
+  document.getElementById('obj-editor-title').textContent = 'Add Object to Timeline';
+  document.getElementById('oe-label').value  = '';
+  document.getElementById('oe-api').value    = '';
+  document.getElementById('oe-date').value   = '';
+  document.getElementById('oe-name').value   = 'Name';
+  document.getElementById('oe-year').value   = 'derived';
+  document.getElementById('oe-rel').value    = '';
+  document.querySelectorAll('.color-sw').forEach((sw,i) => sw.classList.toggle('selected', i === 0));
+  updatePreviewPill();
+  // Show stepper
+  document.getElementById('oe-stepper').style.display = 'flex';
+  goEditorStep(1);
+  document.getElementById('obj-editor').classList.add('open');
+}
+
+function goEditorStep(step) {
+  editorStep = Math.max(1, Math.min(3, step));
+  // Page visibility
+  document.getElementById('oe-page-1').style.display = editorStep === 1 ? 'block' : 'none';
+  document.getElementById('oe-page-2').style.display = editorStep === 2 ? 'block' : 'none';
+  document.getElementById('oe-page-3').style.display = editorStep === 3 ? 'block' : 'none';
+  // Stepper state
+  [1,2,3].forEach(n => {
+    const el = document.getElementById('oe-step-' + n);
+    el.classList.toggle('active', n === editorStep);
+    el.classList.toggle('done',   n < editorStep);
+  });
+  // Footer buttons
+  document.getElementById('oe-back-btn').style.display = editorStep > 1 ? 'inline-flex' : 'none';
+  document.getElementById('oe-next-btn').style.display = editorStep < 3 ? 'inline-flex' : 'none';
+  document.getElementById('oe-save-btn').style.display = editorStep === 3 ? 'inline-flex' : 'none';
+  document.getElementById('oe-save-btn').textContent   = 'Add to Timeline';
+  // Live preview on step 3
+  if (editorStep === 3) updatePreviewPill();
+}
+
+function updatePreviewPill() {
+  const label    = document.getElementById('oe-label').value || 'Object Name';
+  const yearSel  = document.getElementById('oe-year');
+  const yearVal  = yearSel ? yearSel.value : 'derived';
+  const yearDisp = yearVal === 'derived' ? '(auto)' : yearVal === 'current' ? '2026' : yearVal;
+  const color    = document.querySelector('.color-sw.selected')?.dataset.color || '#0891b2';
+  document.getElementById('oe-preview-pill').style.background = color;
+  document.getElementById('oe-preview-name').textContent = label;
+  document.getElementById('oe-preview-sub').textContent  = label + ' · ' + yearDisp;
+}
+
+function closeObjEditor() {
+  document.getElementById('obj-editor').classList.remove('open');
+}
+
+function selectColor(el) {
+  document.querySelectorAll('.color-sw').forEach(sw => sw.classList.remove('selected'));
+  el.classList.add('selected');
+  updatePreviewPill();
+}
+
+function saveObjEditor() {
+  if (editorMode === 'add') {
+    const label  = document.getElementById('oe-label').value  || 'New Object';
+    const api    = document.getElementById('oe-api').value    || '—';
+    const date   = document.getElementById('oe-date').value   || '—';
+    const yearSel = document.getElementById('oe-year');
+    const yearRaw = yearSel ? yearSel.value : 'derived';
+    const yearDisp = yearRaw === 'derived' ? '(auto)' : yearRaw === 'current' ? '2026' : yearRaw;
+    const color  = document.querySelector('.color-sw.selected')?.dataset.color || '#374151';
+    const tbody  = document.querySelector('#sec-objects .obj-table tbody');
+    const tr     = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="obj-label-cell"><span class="obj-color-swatch" style="background:${color}"></span>${label}</div></td>
+      <td><span class="obj-api">${api}</span></td>
+      <td><span class="obj-date-field">${date}</span><span style="margin-left:6px;font-size:10px;color:#706e6b;">${yearDisp}</span></td>
+      <td><div class="tog on" onclick="this.classList.toggle('on')"></div></td>
+      <td><button class="obj-edit-btn">Edit</button></td>`;
+    tbody.appendChild(tr);
+    showToast('✓ "' + label + '" added to timeline');
+  } else {
+    showToast('✓ Object configuration saved');
+  }
+  closeObjEditor();
+}
+
+// Field tabs
+function switchFieldTab(type, tabEl) {
+  document.querySelectorAll('#sec-fields .obj-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  ['life-event','goal','product'].forEach(t => {
+    document.getElementById('fields-' + t).style.display = t === type ? 'block' : 'none';
+  });
+}
+
+// Save
+function saveSetup() {
+  closeSetup();
+  showToast('✓ Timeline configuration saved');
+}
+function showToast(msg) {
+  const t = document.getElementById('setup-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
