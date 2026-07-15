@@ -1074,10 +1074,6 @@
                                 </button>
                                 <template lwc:if={addFieldDropdownOpen}>
                                     <div class="my-add-field-dropdown" role="listbox">
-                                        <span class="my-add-field-option my-add-field-option_current">
-                                            <lightning-icon icon-name="utility:check" size="xx-small" alternative-text="Current" class="slds-m-right_xx-small"></lightning-icon>
-                                            Choose a field&hellip;
-                                        </span>
                                         <template for:each={availableFieldsForTab} for:item="opt">
                                             <button key={opt.id} class="my-add-field-option" data-id={opt.id} onclick={handleSelectAddField} type="button">{opt.label}</button>
                                         </template>
