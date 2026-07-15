@@ -41,6 +41,13 @@ export const routes = [
     navHighlight: 'contacts',
   },
   {
+    path: '/household-setup',
+    component: 'page-household-setup',
+    title: 'Household Setup',
+    navPage: 'household-setup',
+    navLabel: 'Household Setup',
+  },
+  {
     path: '/',
     component: 'page-builder',
     title: 'Builder',

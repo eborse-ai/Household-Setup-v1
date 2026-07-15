@@ -1,0 +1,1107 @@
+<template>
+    <lightning-modal-header label="Household Setup">
+    </lightning-modal-header>
+
+    <lightning-modal-body>
+        <div class="my-modal-layout slds-grid">
+
+            <!-- Left: stepper navigation -->
+            <aside class="my-setup-nav">
+
+                <!-- Step 1: Global Preferences -->
+                <div class="my-step">
+                    <div class="my-step-track">
+                        <div class={step1CircleClass} onclick={handleGroupClick} data-group="1" role="button" tabindex="0">1</div>
+                        <div class="my-step-line"></div>
+                    </div>
+                    <div class="my-step-content">
+                        <span class={step1LabelClass} onclick={handleGroupClick} data-group="1" role="button" tabindex="0">Global Preferences</span>
+                        <template lwc:if={isGroup1Active}>
+                            <ul class="my-nav-sub-list">
+                                <li class={navClass11} onclick={handleNavClick} data-section="1.1">
+                                    <span>Global Settings</span>
+                                </li>
+                                <li class={navClass12} onclick={handleNavClick} data-section="1.2">
+                                    <span>Set Up the Basics</span>
+                                </li>
+                                <li class={navClass13} onclick={handleNavClick} data-section="1.3">
+                                    <span>Permission Sets and Access</span>
+                                </li>
+                                <li class={navClass14} onclick={handleNavClick} data-section="1.4">
+                                    <span>Roles and Relationships</span>
+                                </li>
+                            </ul>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Step 2: Create Household Settings -->
+                <div class="my-step">
+                    <div class="my-step-track">
+                        <div class={step2CircleClass} onclick={handleGroupClick} data-group="2" role="button" tabindex="0">2</div>
+                        <div class="my-step-line"></div>
+                    </div>
+                    <div class="my-step-content">
+                        <span class={step2LabelClass} onclick={handleGroupClick} data-group="2" role="button" tabindex="0">Create Household Settings</span>
+                        <template lwc:if={isGroup2Active}>
+                            <ul class="my-nav-sub-list">
+                                <li class={navClass21} onclick={handleNavClick} data-section="2.1">
+                                    <span>New Member &amp; Account Settings</span>
+                                </li>
+                                <li class={navClass22} onclick={handleNavClick} data-section="2.2">
+                                    <span>Household Settings</span>
+                                </li>
+                            </ul>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Step 3: Chronicle View Settings (no connector line after) -->
+                <div class="my-step">
+                    <div class="my-step-track">
+                        <div class={step3CircleClass} onclick={handleGroupClick} data-group="3" role="button" tabindex="0">3</div>
+                    </div>
+                    <div class="my-step-content">
+                        <span class={step3LabelClass} onclick={handleGroupClick} data-group="3" role="button" tabindex="0">Chronicle View Settings</span>
+                        <template lwc:if={isGroup3Active}>
+                            <ul class="my-nav-sub-list">
+                                <li class={navClass31} onclick={handleNavClick} data-section="3.1">
+                                    <span>Objects in Timeline</span>
+                                </li>
+                                <li class={navClass32} onclick={handleNavClick} data-section="3.2">
+                                    <span>Detail Panel Fields</span>
+                                </li>
+                            </ul>
+                        </template>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Right: content panel -->
+            <div class="slds-col my-content-panel slds-p-around_large">
+
+                <!-- 1.1 Global Settings -->
+                <template lwc:if={isSection11}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_x-small">Turn on Group Membership and Households</h2>
+                    <p class="slds-text-body_regular slds-m-bottom_medium">Enable the Group Membership and Households feature to start managing household relationships and member data.</p>
+                    <div class="my-toggle-card slds-m-bottom_small">
+                        <div class="my-toggle-row">
+                            <div class="slds-col">
+                                <span class="slds-text-body_regular my-toggle-label">Turn on Group Membership and Households</span>
+                                <div>
+                                    <a href="#" class="my-considerations-link" onclick={handleConsiderationsClick}>See Considerations &#8599;</a>
+                                </div>
+                            </div>
+                            <div class="slds-shrink slds-p-left_medium">
+                                <lightning-input
+                                    type="toggle"
+                                    label="Toggle Group Membership"
+                                    variant="label-hidden"
+                                    checked={groupMembershipEnabled}
+                                    onchange={handleGroupMembershipChange}>
+                                </lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="my-toggle-card">
+                        <div class="my-toggle-row">
+                            <div class="slds-col">
+                                <span class="slds-text-body_regular my-toggle-label">Turn on Context Definitions</span>
+                            </div>
+                            <div class="slds-shrink slds-p-left_medium">
+                                <lightning-input
+                                    type="toggle"
+                                    label="Toggle Context Definitions"
+                                    variant="label-hidden"
+                                    checked={contextDefinitionsEnabled}
+                                    onchange={handleContextDefinitionsChange}>
+                                </lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- 1.2 Set Up the Basics -->
+                <template lwc:elseif={isSection12}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_x-small">Set Up the Basics</h2>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">Complete the required steps to start using this feature.</p>
+
+                    <!-- Accordion: Setup Person Accounts -->
+                    <div class="my-accordion-item">
+                        <div class="my-accordion-header" onclick={handleTogglePersonAccounts} role="button" tabindex="0">
+                            <lightning-icon
+                                icon-name={personAccountsChevron}
+                                size="xx-small"
+                                alternative-text="Toggle Setup Person Accounts"
+                                class="my-accordion-chevron">
+                            </lightning-icon>
+                            <span class="my-accordion-title">Setup Person Accounts</span>
+                        </div>
+                        <template lwc:if={personAccountsExpanded}>
+                            <div class="my-accordion-body">
+
+                                <!-- Toggle + warning card -->
+                                <div class="my-toggle-main-card slds-m-bottom_small">
+                                    <div class="slds-grid slds-grid_vertical-align-start">
+                                        <div class="slds-col">
+                                            <p class="slds-text-heading_x-small my-card-title">Turn on Person Accounts</p>
+                                            <p class="slds-text-body_regular slds-text-color_weak slds-m-top_xx-small">
+                                                Enable person accounts to store information about individuals by combining
+                                                certain account and contact fields into one record.
+                                            </p>
+                                        </div>
+                                        <div class="slds-shrink slds-p-left_medium slds-m-top_xx-small">
+                                            <lightning-input
+                                                type="toggle"
+                                                label="Turn on Person Accounts"
+                                                variant="label-hidden"
+                                                checked={personAccountsEnabled}
+                                                disabled={isPersonAccountsToggleDisabled}
+                                                onchange={handlePersonAccountsToggle}>
+                                            </lightning-input>
+                                        </div>
+                                    </div>
+                                    <template lwc:if={showPersonAccountsWarning}>
+                                        <div class="my-warning-row slds-m-top_small">
+                                            <lightning-icon
+                                                icon-name="utility:warning"
+                                                size="x-small"
+                                                alternative-text="Warning"
+                                                class="my-warning-icon slds-m-right_x-small">
+                                            </lightning-icon>
+                                            <span class="slds-text-body_regular">Complete the pre-requisites below to enable person accounts.</span>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Sub-card: Org Impact Acknowledgment -->
+                                <div class="my-prereq-card slds-m-bottom_x-small">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                        <div class="slds-col">
+                                            <p class="slds-text-heading_x-small my-card-title">Org Impact Acknowledgment</p>
+                                            <p class="slds-text-body_regular slds-text-color_weak slds-m-top_xx-small">Review the impact of turning-on and using person accounts.</p>
+                                        </div>
+                                        <div class="slds-shrink slds-p-left_medium">
+                                            <a href="#" class="my-action-link" onclick={handleReviewOrgImpact}>Review Org Impact</a>
+                                        </div>
+                                    </div>
+                                    <lightning-input
+                                        type="checkbox"
+                                        label="Review the impact of turning-on and using person accounts"
+                                        checked={orgImpactAcknowledged}
+                                        disabled={isOrgImpactCheckboxDisabled}
+                                        onchange={handleOrgImpactCheckbox}>
+                                    </lightning-input>
+                                </div>
+
+                                <!-- Sub-card: Create Accounts Record Type (nested accordion) -->
+                                <div class="my-prereq-card slds-m-bottom_x-small">
+                                    <div class="my-sub-accordion-header" onclick={handleToggleRecordType} role="button" tabindex="0">
+                                        <lightning-icon
+                                            icon-name={recordTypeChevron}
+                                            size="xx-small"
+                                            alternative-text="Toggle Create Accounts Record Type"
+                                            class="my-accordion-chevron">
+                                        </lightning-icon>
+                                        <span class="my-card-title">Create Accounts Record Type</span>
+                                    </div>
+                                    <template lwc:if={recordTypeExpanded}>
+                                        <p class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small">
+                                            To use person accounts, you need at least one record type set up for business accounts.
+                                            Salesforce creates a record type for person accounts when they are enabled.
+                                        </p>
+                                    </template>
+                                </div>
+
+                                <!-- Sub-card: Set Read Permissions -->
+                                <div class="my-prereq-card slds-m-bottom_x-small">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                        <div class="slds-col">
+                                            <p class="slds-text-heading_x-small my-card-title">Set Read Permissions</p>
+                                            <p class="slds-text-body_regular slds-text-color_weak slds-m-top_xx-small">
+                                                Every profile with Read access on Accounts must also have Read access on Contacts.
+                                                This ensures Person Account records open without permission errors.
+                                            </p>
+                                        </div>
+                                        <div class="slds-shrink slds-p-left_medium">
+                                            <a href="#" class="my-action-link" onclick={handleViewPermissions}>View Permissions</a>
+                                        </div>
+                                    </div>
+                                    <p class="my-status-success">
+                                        <lightning-icon icon-name="utility:check" size="xx-small" alternative-text="Done" class="slds-m-right_xx-small"></lightning-icon>
+                                        Permissions are set
+                                    </p>
+                                </div>
+
+                                <!-- Sub-card: Set Organization-Wide Sharing -->
+                                <div class="my-prereq-card">
+                                    <p class="slds-text-heading_x-small my-card-title slds-m-bottom_x-small">Set Organization-Wide Sharing</p>
+                                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_x-small">
+                                        Contact org-wide default must be set to <strong>Controlled by Parent</strong>,
+                                        or both Account and Contact OWD set to <strong>Private</strong>.
+                                        Public Read on Contact is not permitted.
+                                    </p>
+                                    <p class="my-status-success">
+                                        <lightning-icon icon-name="utility:check" size="xx-small" alternative-text="Done" class="slds-m-right_xx-small"></lightning-icon>
+                                        Organization-wide sharing is set to: <strong>Controlled by Parent</strong>&nbsp;|&nbsp;Current Status: <strong>Done</strong>
+                                    </p>
+                                </div>
+
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Accordion: Contacts to Multiple Accounts -->
+                    <div class="my-accordion-item">
+                        <div class="my-accordion-header" onclick={handleToggleContacts} role="button" tabindex="0">
+                            <lightning-icon
+                                icon-name={contactsChevron}
+                                size="xx-small"
+                                alternative-text="Toggle Contacts to Multiple Accounts"
+                                class="my-accordion-chevron">
+                            </lightning-icon>
+                            <span class="my-accordion-title">Contacts to Multiple Accounts</span>
+                        </div>
+                        <template lwc:if={contactsExpanded}>
+                            <div class="my-accordion-body">
+                                <div class="my-feature-card">
+                                    <div class="slds-grid slds-grid_vertical-align-start">
+                                        <div class="slds-col">
+                                            <p class="my-card-title slds-m-bottom_xx-small">Turn on Contacts to Multiple Accounts</p>
+                                            <p class="slds-text-body_regular slds-m-bottom_x-small">
+                                                To provide access to the Account Contact Relationship object, turn on contacts to multiple accounts.
+                                            </p>
+                                            <a href="#" class="my-action-link" onclick={handleContactsLearnMore}>Learn more in help</a>
+                                        </div>
+                                        <div class="slds-shrink slds-p-left_medium slds-m-top_xx-small">
+                                            <lightning-input
+                                                type="toggle"
+                                                label="Turn on Contacts to Multiple Accounts"
+                                                variant="label-hidden"
+                                                checked={contactsToMultipleEnabled}
+                                                onchange={handleContactsToMultipleToggle}>
+                                            </lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- 1.3 Permission Sets and Access -->
+                <template lwc:elseif={isSection13}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_x-small">Permission Sets and Access</h2>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+                        Review and assign users to the five Financial Services Cloud permission set licenses required for Household access.
+                    </p>
+
+                    <div class="my-perm-card">
+
+                        <!-- Permission set identity header with dropdown -->
+                        <div class="my-perm-header">
+                            <div class="slds-grid slds-grid_vertical-align-center">
+                                <div class="slds-shrink slds-m-right_small">
+                                    <lightning-icon
+                                        icon-name="standard:user"
+                                        size="medium"
+                                        alternative-text="Permission Set License">
+                                    </lightning-icon>
+                                </div>
+                                <div class="slds-col">
+                                    <p class="slds-text-body_small slds-text-color_weak">Permission Set License</p>
+
+                                    <!-- Dropdown trigger -->
+                                    <div class="my-perm-dropdown-wrap">
+                                        <button class="my-perm-select-btn" onclick={handlePermSetDropdown}>
+                                            <span class="my-perm-select-label slds-text-heading_small">{selectedPermSetLabel}</span>
+                                            <lightning-icon
+                                                icon-name="utility:chevrondown"
+                                                size="xx-small"
+                                                alternative-text="Select permission set"
+                                                class="slds-m-left_xx-small">
+                                            </lightning-icon>
+                                        </button>
+
+                                        <!-- Dropdown list -->
+                                        <template lwc:if={permSetDropdownOpen}>
+                                            <div class="my-perm-dropdown" role="listbox">
+                                                <template for:each={permSetOptions} for:item="opt">
+                                                    <div key={opt.value} class={opt.cssClass} onclick={handleSelectPermSet} data-value={opt.value} role="option">
+                                                        <span class="slds-col slds-text-body_regular">{opt.label}</span>
+                                                        <span class="my-perm-assigned-count">{opt.assignedLabel}</span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <p class="slds-text-body_small slds-text-color_weak">{permHeaderSubtext}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description bar -->
+                        <div class="my-perm-desc-bar">
+                            <p class="slds-text-body_regular">{selectedPermSetDescription}</p>
+                        </div>
+
+                        <!-- Tabs: Assigned Users / All Users -->
+                        <div class="my-perm-tabs">
+                            <lightning-tabset active-tab-value={activePermTab} onselect={handlePermTabSelect}>
+
+                                <!-- Assigned Users tab -->
+                                <lightning-tab label="Assigned Users" value="assigned">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                        <span class="slds-col slds-text-body_small slds-text-color_weak">{permItemCount}</span>
+                                        <div class="slds-shrink">
+                                            <lightning-input
+                                                type="search"
+                                                label="Search assigned users"
+                                                variant="label-hidden"
+                                                placeholder="Search this list..."
+                                                value={permSearchTerm}
+                                                onchange={handlePermSearch}>
+                                            </lightning-input>
+                                        </div>
+                                    </div>
+                                    <lightning-datatable
+                                        key-field="id"
+                                        data={filteredPermData}
+                                        columns={permColumns}
+                                        hide-checkbox-column>
+                                    </lightning-datatable>
+                                </lightning-tab>
+
+                                <!-- All Users tab -->
+                                <lightning-tab label="All Users" value="all">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                        <div class="slds-col">
+                                            <span class="slds-text-body_small slds-text-color_weak">{allUsersTotalCount} items</span>
+                                            <span class="slds-text-body_small slds-text-color_weak"> | {allUsersNewlySelectedCount} selected</span>
+                                        </div>
+                                        <div class="my-tab-actions">
+                                            <lightning-input
+                                                type="search"
+                                                label="Search all users"
+                                                variant="label-hidden"
+                                                placeholder="Search this list..."
+                                                value={allUsersSearchTerm}
+                                                onchange={handleAllUsersSearch}>
+                                            </lightning-input>
+                                            <lightning-button
+                                                label="Assign Selected"
+                                                variant="neutral"
+                                                disabled={isAssignDisabled}
+                                                onclick={handleAssignSelected}>
+                                            </lightning-button>
+                                        </div>
+                                    </div>
+
+                                    <!-- All users table -->
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col" class="my-check-col"></th>
+                                                <th scope="col" class="slds-text-title_caps">Full Name</th>
+                                                <th scope="col" class="slds-text-title_caps">Username</th>
+                                                <th scope="col" class="slds-text-title_caps">Profile</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={filteredAllUsersData} for:item="user">
+                                                <tr key={user.id} class="slds-hint-parent">
+                                                    <td data-label="Select">
+                                                        <lightning-input
+                                                            type="checkbox"
+                                                            label={user.fullName}
+                                                            variant="label-hidden"
+                                                            checked={user.isSelected}
+                                                            disabled={user.isAssigned}
+                                                            data-id={user.id}
+                                                            onchange={handleUserCheckbox}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td data-label="Full Name">
+                                                        <span>{user.fullName}</span>
+                                                        <template lwc:if={user.isAssigned}>
+                                                            <span class="my-assigned-badge slds-m-left_xx-small">ASSIGNED</span>
+                                                        </template>
+                                                    </td>
+                                                    <td data-label="Username">{user.username}</td>
+                                                    <td data-label="Profile">{user.profile}</td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </lightning-tab>
+
+                            </lightning-tabset>
+                        </div>
+
+                    </div>
+                </template>
+
+                <!-- 1.4 Roles and Relationships -->
+                <template lwc:elseif={isSection14}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_x-small">Roles and Relationships</h2>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+                        View and manage the picklist values used for household member roles and party role relationships.
+                    </p>
+
+                    <!-- ── Card 1: ACR Roles ── -->
+                    <div class="my-roles-card slds-m-bottom_medium">
+                        <div class="my-roles-card-header">
+                            <div class="slds-col">
+                                <p class="my-roles-card-title">ACR Roles</p>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                    Picklist values configured for the <strong>Role</strong> field on Account Contact Relationship.&#32;<a href="#" class="my-roles-learn-more" onclick={handleLearnMoreAcr}>Learn More &#8599;</a>
+                                </p>
+                            </div>
+                            <div class="slds-shrink slds-p-left_medium">
+                                <span class="my-values-badge">{acrValuesBadge}</span>
+                            </div>
+                        </div>
+
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col" class="slds-text-title_caps">Label</th>
+                                    <th scope="col" class="slds-text-title_caps">API Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={_acrRoles} for:item="role">
+                                    <tr key={role.id}>
+                                        <td>{role.label}</td>
+                                        <td class="my-api-name">{role.apiName}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <!-- Add ACR Role inline form -->
+                        <template lwc:if={isAddingAcrRole}>
+                            <div class="my-add-form-row">
+                                <div class="my-add-form-field">
+                                    <lightning-input
+                                        label="Label"
+                                        placeholder="e.g. Power of Attorney"
+                                        value={newAcrLabel}
+                                        onchange={handleNewAcrLabelChange}>
+                                    </lightning-input>
+                                </div>
+                                <div class="my-add-form-field">
+                                    <lightning-input
+                                        label="API Name"
+                                        value={newAcrApiName}
+                                        read-only>
+                                    </lightning-input>
+                                </div>
+                                <div class="my-add-form-actions">
+                                    <lightning-button label="Add" variant="brand" onclick={handleAddAcrRole} class="slds-m-right_x-small"></lightning-button>
+                                    <lightning-button label="Cancel" variant="neutral" onclick={handleCancelAcrRole}></lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <div class="my-add-value-trigger">
+                                <a href="#" class="my-add-value-link" onclick={handleShowAddAcrRole}>+ Add Value</a>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- ── Card 2: Party Role Relationships ── -->
+                    <div class="my-roles-card">
+                        <div class="my-roles-card-header">
+                            <div class="slds-col">
+                                <p class="my-roles-card-title">Party Role Relationships</p>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                    Existing Party Role Relationship values. Inverse relationships are created automatically for each pair.&#32;<a href="#" class="my-roles-learn-more" onclick={handleLearnMoreParty}>Learn More &#8599;</a>
+                                </p>
+                            </div>
+                            <div class="slds-shrink slds-p-left_medium">
+                                <span class="my-values-badge">{partyValuesBadge}</span>
+                            </div>
+                        </div>
+
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col" class="slds-text-title_caps">Label</th>
+                                    <th scope="col" class="slds-text-title_caps">Type</th>
+                                    <th scope="col" class="slds-text-title_caps">Inverse Label</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={_partyRoles} for:item="row">
+                                    <tr key={row.id} class={row.rowClass}>
+                                        <template lwc:if={row.isGroupHeader}>
+                                            <td class="my-group-header-cell" colspan="3">{row.groupLabel}</td>
+                                        </template>
+                                        <template lwc:else>
+                                            <td>{row.label}</td>
+                                            <td><span class={row.typeBadgeClass}>{row.type}</span></td>
+                                            <td class="slds-text-color_weak">{row.inverseLabel}</td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <!-- Add Party Role inline form -->
+                        <template lwc:if={isAddingPartyRole}>
+                            <div class="my-add-form-row">
+                                <div class="my-add-form-field">
+                                    <lightning-input
+                                        label="Label"
+                                        placeholder="e.g. Donor"
+                                        value={newPartyLabel}
+                                        onchange={handleNewPartyLabelChange}>
+                                    </lightning-input>
+                                </div>
+                                <div class="my-add-form-field">
+                                    <lightning-input
+                                        label="Inverse Label"
+                                        placeholder="e.g. Recipient"
+                                        value={newPartyInverseLabel}
+                                        onchange={handleNewPartyInverseLabelChange}>
+                                    </lightning-input>
+                                </div>
+                                <div class="my-add-form-field">
+                                    <lightning-combobox
+                                        label="Type"
+                                        value={newPartyType}
+                                        options={partyTypeOptions}
+                                        onchange={handleNewPartyTypeChange}>
+                                    </lightning-combobox>
+                                </div>
+                                <div class="my-add-form-actions">
+                                    <lightning-button label="Add" variant="brand" onclick={handleAddPartyRole} class="slds-m-right_x-small"></lightning-button>
+                                    <lightning-button label="Cancel" variant="neutral" onclick={handleCancelPartyRole}></lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <div class="my-add-value-trigger">
+                                <a href="#" class="my-add-value-link" onclick={handleShowAddPartyRole}>+ Add Value</a>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- 2.1 New Member & Account Settings -->
+                <template lwc:elseif={isSection21}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_x-small">New Member and Account Settings</h2>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+                        Choose which inputs appear when user creates a new member or a new account during household creation.
+                    </p>
+
+                    <!-- Accordion 1: Create new member or contact -->
+                    <div class="my-accordion-item slds-m-bottom_small">
+                        <div class="my-accordion-header" onclick={handleToggleNewMemberAcc1} role="button" tabindex="0">
+                            <lightning-icon
+                                icon-name={newMemberAcc1Chevron}
+                                size="xx-small"
+                                alternative-text="Toggle"
+                                class="my-accordion-chevron">
+                            </lightning-icon>
+                            <span class="my-accordion-title">Create new member or contact during Household creation</span>
+                        </div>
+                        <template lwc:if={newMemberAcc1Expanded}>
+                            <div class="my-accordion-body">
+                                <div class="my-nm-card">
+                                    <p class="my-card-title slds-m-bottom_xx-small">Configure Input Fields</p>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                                        Choose which fields to show at runtime. Users will fill in these inputs when they create a new member or contact during household creation or update.
+                                    </p>
+
+                                    <!-- Object row -->
+                                    <div class="my-object-row slds-m-bottom_small">
+                                        <span class="my-object-row-prefix">Object:</span>
+                                        <a href="#" class="my-action-link" onclick={handleContactObjectClick}>Contact</a>
+                                    </div>
+
+                                    <!-- Multi-select trigger -->
+                                    <div class="my-multiselect-wrap slds-m-bottom_small">
+                                        <button class="my-multiselect-trigger" onclick={handleContactFieldsDropdown}>
+                                            <span class="slds-text-body_regular">{contactFieldsSelectedLabel}</span>
+                                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="my-multiselect-chevron"></lightning-icon>
+                                        </button>
+                                        <template lwc:if={contactFieldsOpen}>
+                                            <div class="my-multiselect-dropdown" role="listbox">
+                                                <template for:each={_contactFields} for:item="opt">
+                                                    <div key={opt.id} class="my-multiselect-option" data-id={opt.id} onchange={handleContactFieldCheck}>
+                                                        <lightning-input
+                                                            type="checkbox"
+                                                            label={opt.label}
+                                                            checked={opt.isSelected}
+                                                            variant="label-inline">
+                                                        </lightning-input>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Selected pills -->
+                                    <div class="my-pills-row">
+                                        <template for:each={selectedContactFieldPills} for:item="field">
+                                            <span key={field.id} class="my-pill">
+                                                <span class="my-pill__label">{field.label}</span>
+                                                <button class="my-pill__remove" type="button" data-id={field.id} onclick={handleRemoveContactField} title="Remove">
+                                                    <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Remove"></lightning-icon>
+                                                </button>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Accordion 2: Create new account during Household creation -->
+                    <div class="my-accordion-item">
+                        <div class="my-accordion-header" onclick={handleToggleNewMemberAcc2} role="button" tabindex="0">
+                            <lightning-icon
+                                icon-name={newMemberAcc2Chevron}
+                                size="xx-small"
+                                alternative-text="Toggle"
+                                class="my-accordion-chevron">
+                            </lightning-icon>
+                            <span class="my-accordion-title">Create new account during Household creation</span>
+                        </div>
+                        <template lwc:if={newMemberAcc2Expanded}>
+                            <div class="my-accordion-body">
+                                <div class="my-nm-card">
+                                    <p class="my-card-title slds-m-bottom_xx-small">Configure Input Fields</p>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                                        Choose which fields to show at runtime. Users will fill in these inputs when they create a new account during household creation or update.
+                                    </p>
+
+                                    <!-- Object row -->
+                                    <div class="my-object-row slds-m-bottom_small">
+                                        <span class="my-object-row-prefix">Object:</span>
+                                        <a href="#" class="my-action-link" onclick={handleAcrObjectClick}>Account</a>
+                                    </div>
+
+                                    <!-- Multi-select trigger -->
+                                    <div class="my-multiselect-wrap slds-m-bottom_small">
+                                        <button class="my-multiselect-trigger" onclick={handleAcrFieldsDropdown}>
+                                            <span class="slds-text-body_regular">{acrFieldsSelectedLabel}</span>
+                                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="my-multiselect-chevron"></lightning-icon>
+                                        </button>
+                                        <template lwc:if={acrFieldsOpen}>
+                                            <div class="my-multiselect-dropdown" role="listbox">
+                                                <template for:each={_acrFields} for:item="opt">
+                                                    <div key={opt.id} class="my-multiselect-option" data-id={opt.id} onchange={handleAcrFieldCheck}>
+                                                        <lightning-input
+                                                            type="checkbox"
+                                                            label={opt.label}
+                                                            checked={opt.isSelected}
+                                                            variant="label-inline">
+                                                        </lightning-input>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Selected pills -->
+                                    <div class="my-pills-row">
+                                        <template for:each={selectedAcrFieldPills} for:item="field">
+                                            <span key={field.id} class="my-pill">
+                                                <span class="my-pill__label">{field.label}</span>
+                                                <button class="my-pill__remove" type="button" data-id={field.id} onclick={handleRemoveAcrField} title="Remove">
+                                                    <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Remove"></lightning-icon>
+                                                </button>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- 2.2 Household Settings -->
+                <template lwc:elseif={isSection22}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_x-small">Household Settings</h2>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+                        Choose which account and party relationship group (PRG) fields appear when user creates or edits a household.
+                    </p>
+
+                    <!-- Accordion 1: Account Fields on Household -->
+                    <div class="my-accordion-item slds-m-bottom_small">
+                        <div class="my-accordion-header" onclick={handleToggleHhAcc1} role="button" tabindex="0">
+                            <lightning-icon
+                                icon-name={hhAcc1Chevron}
+                                size="xx-small"
+                                alternative-text="Toggle"
+                                class="my-accordion-chevron">
+                            </lightning-icon>
+                            <span class="my-accordion-title">Account Fields on Household</span>
+                        </div>
+                        <template lwc:if={hhAcc1Expanded}>
+                            <div class="my-accordion-body">
+                                <div class="my-nm-card">
+                                    <p class="my-card-title slds-m-bottom_xx-small">Account Fields to display</p>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                                        Select the input type shown on the household creation.
+                                    </p>
+
+                                    <div class="my-object-row slds-m-bottom_small">
+                                        <span class="my-object-row-prefix">Object:</span>
+                                        <a href="#" class="my-action-link" onclick={handleAccountObjectClick}>Account</a>
+                                    </div>
+
+                                    <div class="my-multiselect-wrap slds-m-bottom_small">
+                                        <button class="my-multiselect-trigger" onclick={handleAccountFieldsDropdown}>
+                                            <span class="slds-text-body_regular">{accountFieldsSelectedLabel}</span>
+                                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="my-multiselect-chevron"></lightning-icon>
+                                        </button>
+                                        <template lwc:if={accountFieldsOpen}>
+                                            <div class="my-multiselect-dropdown" role="listbox">
+                                                <template for:each={_accountFields} for:item="opt">
+                                                    <div key={opt.id} class="my-multiselect-option" data-id={opt.id} onchange={handleAccountFieldCheck}>
+                                                        <lightning-input
+                                                            type="checkbox"
+                                                            label={opt.label}
+                                                            checked={opt.isSelected}
+                                                            variant="label-inline">
+                                                        </lightning-input>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <div class="my-pills-row">
+                                        <template for:each={selectedAccountFieldPills} for:item="field">
+                                            <span key={field.id} class="my-pill">
+                                                <span class="my-pill__label">{field.label}</span>
+                                                <button class="my-pill__remove" type="button" data-id={field.id} onclick={handleRemoveAccountField} title="Remove">
+                                                    <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Remove"></lightning-icon>
+                                                </button>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Accordion 2: PRG Fields on Household -->
+                    <div class="my-accordion-item">
+                        <div class="my-accordion-header" onclick={handleToggleHhAcc2} role="button" tabindex="0">
+                            <lightning-icon
+                                icon-name={hhAcc2Chevron}
+                                size="xx-small"
+                                alternative-text="Toggle"
+                                class="my-accordion-chevron">
+                            </lightning-icon>
+                            <span class="my-accordion-title">PRG Fields on Household</span>
+                        </div>
+                        <template lwc:if={hhAcc2Expanded}>
+                            <div class="my-accordion-body">
+                                <div class="my-nm-card">
+                                    <p class="my-card-title slds-m-bottom_xx-small">PRG Fields to display</p>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                                        Select the input type shown on the household creation.
+                                    </p>
+
+                                    <div class="my-object-row slds-m-bottom_small">
+                                        <span class="my-object-row-prefix">Object:</span>
+                                        <a href="#" class="my-action-link" onclick={handlePrgObjectClick}>Party Relationship Group</a>
+                                    </div>
+
+                                    <div class="my-multiselect-wrap slds-m-bottom_small">
+                                        <button class="my-multiselect-trigger" onclick={handlePrgFieldsDropdown}>
+                                            <span class="slds-text-body_regular">{prgFieldsSelectedLabel}</span>
+                                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="my-multiselect-chevron"></lightning-icon>
+                                        </button>
+                                        <template lwc:if={prgFieldsOpen}>
+                                            <div class="my-multiselect-dropdown" role="listbox">
+                                                <template for:each={_prgFields} for:item="opt">
+                                                    <div key={opt.id} class="my-multiselect-option" data-id={opt.id} onchange={handlePrgFieldCheck}>
+                                                        <lightning-input
+                                                            type="checkbox"
+                                                            label={opt.label}
+                                                            checked={opt.isSelected}
+                                                            variant="label-inline">
+                                                        </lightning-input>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <div class="my-pills-row">
+                                        <template for:each={selectedPrgFieldPills} for:item="field">
+                                            <span key={field.id} class="my-pill">
+                                                <span class="my-pill__label">{field.label}</span>
+                                                <button class="my-pill__remove" type="button" data-id={field.id} onclick={handleRemovePrgField} title="Remove">
+                                                    <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Remove"></lightning-icon>
+                                                </button>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- 3.1 Objects in Timeline -->
+                <template lwc:elseif={isSection31}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_x-small">Objects in Timeline</h2>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+                        Choose which Salesforce objects appear as events on the Chronicle View timeline. Each object gets its own color, date field, and field mapping.
+                    </p>
+
+                    <div class="my-roles-card">
+                        <!-- Table header bar -->
+                        <div class="my-timeline-header">
+                            <span class="slds-text-body_small slds-text-color_weak">{timelineObjectCount}</span>
+                            <div class="my-timeline-search">
+                                <lightning-input
+                                    type="search"
+                                    label="Search objects"
+                                    variant="label-hidden"
+                                    placeholder="Search this list..."
+                                    value={timelineSearchTerm}
+                                    onchange={handleTimelineSearch}>
+                                </lightning-input>
+                            </div>
+                        </div>
+
+                        <!-- Objects table -->
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col" class="my-drag-col"></th>
+                                    <th scope="col" class="my-num-col slds-text-title_caps">#</th>
+                                    <th scope="col" class="slds-text-title_caps">Object</th>
+                                    <th scope="col" class="slds-text-title_caps">Visible</th>
+                                    <th scope="col" class="my-actions-col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={filteredTimelineObjects} for:item="obj">
+                                    <tr key={obj.id} class={obj.rowClass}>
+                                        <td class="my-drag-col">
+                                            <lightning-icon
+                                                icon-name="utility:drag_and_drop"
+                                                size="xx-small"
+                                                alternative-text="Drag"
+                                                class="my-drag-handle">
+                                            </lightning-icon>
+                                        </td>
+                                        <td class="my-num-col slds-text-color_weak">{obj.num}</td>
+                                        <td>
+                                            <div class="slds-grid slds-grid_vertical-align-center">
+                                                <span class={obj.dotClass}></span>
+                                                <span class="slds-m-left_x-small my-timeline-obj-label">{obj.label}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div data-id={obj.id} onchange={handleTimelineToggle}>
+                                                <lightning-input
+                                                    type="toggle"
+                                                    label="Visible"
+                                                    variant="label-hidden"
+                                                    checked={obj.visible}>
+                                                </lightning-input>
+                                            </div>
+                                        </td>
+                                        <td class="my-actions-col">
+                                            <div class="my-row-menu-wrap">
+                                                <button class={obj.menuBtnClass} data-id={obj.id} onclick={handleTimelineMenu} title="More actions">
+                                                    <lightning-icon icon-name="utility:more" size="xx-small" alternative-text="More"></lightning-icon>
+                                                </button>
+                                                <template lwc:if={obj.isMenuOpen}>
+                                                    <div class="my-row-dropdown" role="menu">
+                                                        <button class="my-row-menu-item" data-id={obj.id} onclick={handleTimelineEdit}>
+                                                            <lightning-icon icon-name="utility:edit" size="xx-small" alternative-text="Edit" class="slds-m-right_x-small"></lightning-icon>
+                                                            Edit
+                                                        </button>
+                                                        <button class="my-row-menu-item" data-id={obj.id} onclick={handleTimelineRemove}>
+                                                            <lightning-icon icon-name="utility:delete" size="xx-small" alternative-text="Remove" class="slds-m-right_x-small"></lightning-icon>
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <!-- Add Object footer -->
+                        <div class="my-add-value-trigger">
+                            <lightning-button
+                                label="+ Add Object"
+                                variant="neutral"
+                                onclick={handleAddTimelineObject}>
+                            </lightning-button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- 3.2 Detail Panel Fields -->
+                <template lwc:elseif={isSection32}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_x-small">Detail Panel Fields</h2>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+                        Choose which fields appear when an advisor opens an event&apos;s detail panel. Select up to 4 fields to feature them as highlight cards at the top &#8212; all other fields render as labelled rows below.
+                    </p>
+
+                    <!-- ── Preview diagram ── -->
+                    <div class="my-detail-preview slds-m-bottom_large">
+                        <!-- Left: standalone card mockup -->
+                        <div class="my-preview-diagram">
+                            <div class="my-preview-section">
+                                <div class="my-preview-section-hdr">
+                                    <span class="my-dot my-dot-orange my-preview-dot"></span>
+                                    <span class="my-preview-section-label">HIGHLIGHTS</span>
+                                </div>
+                                <div class="my-preview-pills">
+                                    <span class="my-preview-pill">Field 1</span>
+                                    <span class="my-preview-pill">Field 2</span>
+                                    <span class="my-preview-pill">Field 3</span>
+                                    <span class="my-preview-pill">Field 4</span>
+                                </div>
+                            </div>
+                            <div class="my-preview-rule"></div>
+                            <div class="my-preview-section">
+                                <div class="my-preview-section-hdr">
+                                    <span class="my-dot my-preview-dot my-dot-mid-gray"></span>
+                                    <span class="my-preview-section-label">BODY FIELDS</span>
+                                </div>
+                                <div class="my-preview-bars">
+                                    <div class="my-preview-bar-row">
+                                        <span class="my-preview-bar my-preview-bar_short"></span>
+                                        <span class="my-preview-bar"></span>
+                                    </div>
+                                    <div class="my-preview-bar-row">
+                                        <span class="my-preview-bar my-preview-bar_short"></span>
+                                        <span class="my-preview-bar"></span>
+                                    </div>
+                                    <div class="my-preview-bar-row">
+                                        <span class="my-preview-bar my-preview-bar_short"></span>
+                                        <span class="my-preview-bar"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Right: annotation descriptions -->
+                        <div class="my-preview-legend">
+                            <div class="my-preview-legend-item">
+                                <p class="slds-text-body_regular">
+                                    <strong>Highlights</strong> &#8212; the first 4 selected fields render as prominent cards at the top of the detail panel.
+                                </p>
+                            </div>
+                            <div class="my-preview-legend-rule"></div>
+                            <div class="my-preview-legend-item">
+                                <p class="slds-text-body_regular">
+                                    <strong>Body Fields</strong> &#8212; all remaining fields render as labelled rows below.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Object tabs ── -->
+                    <div class="my-detail-tabs slds-m-bottom_medium" role="tablist">
+                        <template for:each={detailTabs} for:item="tab">
+                            <button key={tab.id} class={tab.tabClass} onclick={handleDetailTabClick} data-id={tab.id} role="tab" type="button">
+                                <span class={tab.dotClass}></span>
+                                <span class="my-detail-tab-label">{tab.label}</span>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- ── Field table ── -->
+                    <div class="my-roles-card my-detail-section-card">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col" class="my-drag-col"></th>
+                                    <th scope="col" class="slds-text-title_caps">Field Label</th>
+                                    <th scope="col" class="slds-text-title_caps">Data Type</th>
+                                    <th scope="col" class="slds-text-title_caps my-highlight-col">
+                                        Highlight&nbsp;<span class="my-highlight-badge">{highlightBadge}</span>
+                                    </th>
+                                    <th scope="col" class="my-actions-col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={activeDetailFields} for:item="field">
+                                    <tr key={field.id} class="slds-hint-parent">
+                                        <td class="my-drag-col">
+                                            <lightning-icon icon-name="utility:drag_and_drop" size="xx-small" alternative-text="Drag" class="my-drag-handle"></lightning-icon>
+                                        </td>
+                                        <td class="slds-text-body_regular my-field-label-cell">{field.label}</td>
+                                        <td class="slds-text-body_regular slds-text-color_weak">{field.dataType}</td>
+                                        <td class="my-highlight-col">
+                                            <div data-id={field.id} onchange={handleHighlightToggle}>
+                                                <lightning-input
+                                                    type="toggle"
+                                                    label="Highlight"
+                                                    variant="label-hidden"
+                                                    checked={field.isHighlight}
+                                                    disabled={field.isHighlightDisabled}>
+                                                </lightning-input>
+                                            </div>
+                                        </td>
+                                        <td class="my-actions-col">
+                                            <button class="my-remove-field-btn" data-id={field.id} onclick={handleRemoveDetailField} title="Remove field" type="button">
+                                                <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Remove"></lightning-icon>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <!-- Add field row -->
+                        <div class="my-add-field-row">
+                            <span class="slds-text-body_regular my-add-field-label">Add field:</span>
+                            <div class="my-add-field-wrap">
+                                <button class="my-add-field-trigger" type="button" onclick={handleAddFieldDropdown}>
+                                    <span class="my-add-field-placeholder">{addFieldSelectedLabel}</span>
+                                    <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="slds-m-left_x-small"></lightning-icon>
+                                </button>
+                                <template lwc:if={addFieldDropdownOpen}>
+                                    <div class="my-add-field-dropdown" role="listbox">
+                                        <span class="my-add-field-option my-add-field-option_current">
+                                            <lightning-icon icon-name="utility:check" size="xx-small" alternative-text="Current" class="slds-m-right_xx-small"></lightning-icon>
+                                            Choose a field&hellip;
+                                        </span>
+                                        <template for:each={availableFieldsForTab} for:item="opt">
+                                            <button key={opt.id} class="my-add-field-option" data-id={opt.id} onclick={handleSelectAddField} type="button">{opt.label}</button>
+                                        </template>
+                                        <template lwc:if={noAvailableFields}>
+                                            <span class="my-add-field-empty slds-text-color_weak">No more fields available</span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+            </div>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <div class="slds-grid slds-grid_align-end">
+            <lightning-button
+                label="Save &amp; Next"
+                variant="brand"
+                onclick={handleSaveNext}>
+            </lightning-button>
+        </div>
+    </lightning-modal-footer>
+</template>

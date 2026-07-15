@@ -1,0 +1,148 @@
+<template>
+    <div class="my-setup-page">
+        <!-- Left Sidebar -->
+        <aside class="my-setup-sidebar">
+            <div class="slds-p-horizontal_small slds-p-top_small">
+                <lightning-input
+                    type="search"
+                    label="Quick Find"
+                    placeholder="Quick Find"
+                    variant="label-hidden">
+                </lightning-input>
+            </div>
+
+            <nav class="slds-nav-vertical" aria-label="Setup navigation">
+                <!-- Setup Home -->
+                <div class="slds-nav-vertical__section">
+                    <ul>
+                        <li class="slds-nav-vertical__item">
+                            <a href="#" class="slds-nav-vertical__action" onclick={handleNavClick} data-item="setup-home">
+                                Setup Home
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Administration -->
+                <div class="slds-nav-vertical__section">
+                    <h2 id="nav-administration" class="slds-nav-vertical__title">Administration</h2>
+                    <ul aria-labelledby="nav-administration">
+                        <li class="slds-nav-vertical__item">
+                            <a href="#" class="slds-nav-vertical__action" onclick={handleNavClick} data-item="users">Users</a>
+                        </li>
+                        <li class="slds-nav-vertical__item">
+                            <a href="#" class="slds-nav-vertical__action" onclick={handleNavClick} data-item="data">Data</a>
+                        </li>
+                        <li class="slds-nav-vertical__item">
+                            <a href="#" class="slds-nav-vertical__action" onclick={handleNavClick} data-item="email">Email</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Platform Tools -->
+                <div class="slds-nav-vertical__section">
+                    <h2 id="nav-platform-tools" class="slds-nav-vertical__title">Platform Tools</h2>
+                    <ul aria-labelledby="nav-platform-tools">
+                        <li class="slds-nav-vertical__item">
+                            <a href="#" class="slds-nav-vertical__action" onclick={handleNavClick} data-item="apps">Apps</a>
+                        </li>
+                        <!-- Household Settings: expandable group -->
+                        <li class="slds-nav-vertical__item">
+                            <button
+                                type="button"
+                                class="slds-nav-vertical__action my-nav-expand-btn"
+                                onclick={handleToggleHousehold}
+                                aria-expanded={isHouseholdExpandedStr}>
+                                <lightning-icon
+                                    icon-name={chevronIcon}
+                                    size="xx-small"
+                                    alternative-text="Toggle Household Settings"
+                                    class="my-nav-chevron">
+                                </lightning-icon>
+                                <span>Household Settings</span>
+                            </button>
+                            <template lwc:if={isHouseholdExpanded}>
+                                <ul class="my-nav-sub-list">
+                                    <li class={generalSettingsItemClass}>
+                                        <a
+                                            href="#"
+                                            class="slds-nav-vertical__action my-nav-sub-action"
+                                            aria-current={generalSettingsAriaCurrent}
+                                            onclick={handleNavClick}
+                                            data-item="general-settings">
+                                            General Settings
+                                        </a>
+                                    </li>
+                                </ul>
+                            </template>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="my-setup-content slds-p-around_large">
+            <!-- Page header -->
+            <p class="slds-text-title_caps slds-m-bottom_x-small">Setup</p>
+            <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_large">
+                <lightning-icon
+                    icon-name="standard:setup_modal"
+                    size="medium"
+                    alternative-text="Household General Settings"
+                    class="slds-m-right_small">
+                </lightning-icon>
+                <h1 class="slds-text-heading_large">Household General Settings</h1>
+            </div>
+
+            <!-- Setting: NextGen Household toggle -->
+            <div class="my-setting-card slds-m-bottom_small">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <div class="slds-col">
+                        <h2 class="slds-text-heading_small slds-m-bottom_xx-small">NextGen Household</h2>
+                        <p class="slds-text-body_regular">Enable or disable the NextGen Household experience for your org.</p>
+                    </div>
+                    <div class="slds-shrink slds-p-left_medium">
+                        <lightning-input
+                            type="toggle"
+                            label="Enable NextGen Household"
+                            variant="label-hidden"
+                            checked={nextGenEnabled}
+                            onchange={handleNextGenToggle}>
+                        </lightning-input>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Setting: Version radio group -->
+            <div class="my-setting-card slds-m-bottom_small">
+                <h2 class="slds-text-heading_small slds-m-bottom_xx-small">Select Next Gen Household Version</h2>
+                <p class="slds-text-body_regular slds-m-bottom_small">Choose between package and core</p>
+                <lightning-radio-group
+                    label="Household Version"
+                    variant="label-hidden"
+                    options={versionOptions}
+                    value={selectedVersion}
+                    onchange={handleVersionChange}>
+                </lightning-radio-group>
+            </div>
+
+            <!-- Setting: Household Setup action -->
+            <div class="slds-p-vertical_small">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <div class="slds-col">
+                        <h2 class="slds-text-heading_small slds-m-bottom_xx-small">Household Setup</h2>
+                        <p class="slds-text-body_regular">Configure AI settings, create households, set up visualizations, and manage household preferences.</p>
+                    </div>
+                    <div class="slds-shrink slds-p-left_medium">
+                        <lightning-button
+                            label="Set Up Household"
+                            variant="brand"
+                            onclick={handleSetupHousehold}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

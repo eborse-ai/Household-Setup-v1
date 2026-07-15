@@ -1,0 +1,54 @@
+<template>
+    <lightning-modal-header label="Org Impact Acknowledgement">
+        <p class="slds-text-body_regular slds-text-align_center my-modal-subtitle">
+            Read and acknowledge the permanent changes associated with enabling person accounts.
+            Review the changes with any stakeholders before proceeding.
+        </p>
+    </lightning-modal-header>
+
+    <lightning-modal-body>
+        <div class="slds-p-around_large">
+            <p class="slds-text-body_regular slds-m-bottom_medium">
+                After Person Accounts is enabled, it can't be disabled. We strongly recommend that you create
+                a sandbox to preview how Person Accounts affect your Salesforce org before enabling the feature.
+            </p>
+            <p class="slds-text-body_regular slds-m-bottom_medium">
+                We also recommend reviewing the impacts of turning on person accounts with all stakeholders
+                before enabling the feature. See the Salesforce Help for a full list of considerations related
+                to enabling person accounts.
+                <a href="#" class="my-help-link" onclick={handleGoToHelp}>Go to Help &#8599;</a>
+            </p>
+
+            <p class="slds-text-heading_small slds-m-bottom_small">Some major implications include:</p>
+            <ul class="slds-list_dotted my-implications-list">
+                <li class="slds-m-bottom_small">
+                    Person Accounts count against both account and contact storage, because each person account
+                    consists of one account and one contact.
+                </li>
+                <li class="slds-m-bottom_small">
+                    Person Accounts can't be included in account hierarchies, contact hierarchies, or have direct
+                    relationships with other accounts or contacts. However, you can use Contacts to Multiple Accounts
+                    to create indirect relationships between a person account and another person account, business
+                    account, or contact.
+                </li>
+                <li class="slds-m-bottom_small">
+                    Creating or editing a person account triggers account workflow rules.
+                </li>
+                <li>
+                    Contact fields from person accounts will continue to be exposed on account list views and
+                    reports even if your org stops using person accounts.
+                </li>
+            </ul>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <div class="slds-grid slds-grid_align-end">
+            <lightning-button
+                label="Close"
+                variant="brand"
+                onclick={handleClose}>
+            </lightning-button>
+        </div>
+    </lightning-modal-footer>
+</template>

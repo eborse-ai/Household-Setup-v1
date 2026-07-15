@@ -1,0 +1,1110 @@
+/* ── Modal two-column layout ── */
+.my-modal-layout {
+    /* No SLDS sizing hook for this fixed modal height; intentional layout value */
+    height: 34rem;
+    align-items: stretch;
+    overflow: hidden;
+}
+
+/* ── Left stepper navigation panel ── */
+.my-setup-nav {
+    /* Intentional fixed width; no SLDS sizing hook for this nav panel */
+    width: 14rem;
+    flex-shrink: 0;
+    border-right: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-3, 0.75rem);
+    overflow-y: auto;
+}
+
+/* ── Step row (circle track + label/sub-items) ── */
+.my-step {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+/* ── Left track: circle + vertical connector line ── */
+.my-step-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    /* Intentional fixed width to match circle size */
+    width: 2.25rem;
+}
+
+.my-step-circle {
+    /* Intentional fixed size for stepper circles */
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--slds-g-radius-border-circle, 100%);
+    border: none;
+    background: #f3f3f3; /* hardcoded; token resolves inconsistently in this env */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #03234d);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.my-step-circle:hover {
+    background: #e0e0e0; /* slightly darker on hover */
+}
+
+.my-step-circle_active {
+    background: var(--slds-g-color-on-surface-3, #03234d);
+    color: var(--slds-g-color-on-surface-inverse-1, #fff);
+    font-weight: 700;
+}
+
+.my-step-line {
+    flex: 1;
+    /* Intentional fixed width for connector line */
+    width: 2px;
+    min-height: var(--slds-g-spacing-3, 0.75rem);
+    background: var(--slds-g-color-on-surface-3, #03234d);
+    margin: var(--slds-g-spacing-1, 0.25rem) 0;
+}
+
+/* ── Right content: step label + sub-items ── */
+.my-step-content {
+    flex: 1;
+    padding-bottom: var(--slds-g-spacing-3, 0.75rem);
+    min-width: 0;
+}
+
+.my-step-label {
+    display: block;
+    padding-top: var(--slds-g-spacing-1, 0.25rem);
+    padding-bottom: var(--slds-g-spacing-2, 0.5rem);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-3, #03234d);
+    cursor: pointer;
+}
+
+.my-step-label:hover {
+    color: var(--slds-g-color-brand-base-60, #0176d3);
+}
+
+/* ── Sub-item list ── */
+.my-nav-sub-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.my-nav-sub-item {
+    display: flex;
+    align-items: center;
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem);
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-3, #03234d);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    margin-bottom: var(--slds-g-spacing-1, 0.25rem);
+    line-height: 1.4;
+}
+
+.my-nav-sub-item:hover {
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+}
+
+.my-nav-sub-item_active {
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+    font-weight: 600; /* no SLDS hook available */
+}
+
+/* ── Right content panel ── */
+.my-content-panel {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--slds-g-color-surface-1, #fff);
+}
+
+/* ── Section content headings ── */
+.my-content-heading {
+    color: var(--slds-g-color-on-surface-3, #03234d);
+    font-size: var(--slds-g-font-scale-3, 1.125rem);
+    font-weight: 400;
+    line-height: 1.5; /* no SLDS hook available */
+}
+
+/* ── Toggle setting card ── */
+.my-toggle-card {
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    overflow: hidden;
+}
+
+.my-toggle-row {
+    display: flex;
+    align-items: center;
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+}
+
+.my-toggle-divider {
+    height: var(--slds-g-sizing-border-1, 1px);
+    background: var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-toggle-label {
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-considerations-link {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-border-accent-1, #066afe);
+    text-decoration: none;
+    margin-top: var(--slds-g-spacing-1, 0.25rem);
+    display: inline-block;
+}
+
+.my-considerations-link:hover {
+    text-decoration: underline;
+}
+
+/* ── Section 1.3: Permission set card ── */
+.my-perm-card {
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--slds-g-color-surface-1, #fff);
+}
+
+.my-perm-header {
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-perm-desc-bar {
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-5, 1.5rem);
+    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-perm-tabs {
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+}
+
+/* ── Permission set dropdown trigger ── */
+.my-perm-dropdown-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.my-perm-select-btn {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-perm-select-btn:hover .my-perm-select-label {
+    text-decoration: underline;
+}
+
+/* ── Permission set dropdown list ── */
+.my-perm-dropdown {
+    position: absolute;
+    /* No SLDS hook for percentage positioning; intentional layout value */
+    top: 100%;
+    left: 0;
+    z-index: 9000;
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: 0 var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-5, 1.5rem) rgb(0 0 0 / 15%);
+    /* No SLDS hook for this dropdown width; intentional layout value */
+    min-width: 18rem;
+    margin-top: var(--slds-g-spacing-1, 0.25rem);
+    overflow: hidden;
+}
+
+.my-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-dropdown-item:hover {
+    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+}
+
+.my-dropdown-item_selected {
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+    font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+.my-perm-assigned-count {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+/* ── All Users tab actions row ── */
+.my-tab-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    flex-shrink: 0;
+}
+
+/* ── All Users table ── */
+.my-check-col {
+    width: var(--slds-g-spacing-7, 2.5rem);
+}
+
+/* ── ASSIGNED badge ── */
+.my-assigned-badge {
+    display: inline-block;
+    font-size: var(--slds-g-font-scale-neg-2, 0.625rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-success-1, #056764);
+    background: var(--slds-g-color-success-container-1, #e3f5f0);
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    vertical-align: middle;
+}
+
+/* ── Section 1.2 accordion items ── */
+.my-accordion-item {
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-accordion-item:first-child {
+    border-top: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-accordion-header {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-3, 0.75rem) 0;
+    cursor: pointer;
+}
+
+.my-accordion-header:hover .my-accordion-title {
+    text-decoration: none;
+}
+
+.my-accordion-title {
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-3, #03234d);
+}
+
+.my-accordion-chevron {
+    color: var(--slds-g-color-on-surface-3, #03234d);
+    flex-shrink: 0;
+}
+
+.my-accordion-body {
+    padding-bottom: var(--slds-g-spacing-4, 1rem);
+}
+
+/* ── "Turn on Person Accounts" toggle card ── */
+.my-toggle-main-card {
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+}
+
+/* ── Pre-req warning bar ── */
+.my-warning-row {
+    display: flex;
+    align-items: center;
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    background: var(--slds-g-color-warning-container-1, #fef3c7);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    color: var(--slds-g-color-warning-1, #92400e);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+}
+
+.my-warning-icon {
+    color: var(--slds-g-color-warning-1, #92400e);
+    flex-shrink: 0;
+}
+
+/* ── Pre-req sub-cards ── */
+.my-prereq-card {
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+}
+
+/* ── Sub-accordion header inside a pre-req card ── */
+.my-sub-accordion-header {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    cursor: pointer;
+}
+
+.my-sub-accordion-header:hover .my-card-title {
+    text-decoration: underline;
+}
+
+/* ── Card title (bold label within sub-cards) ── */
+.my-card-title {
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    font-size: var(--slds-g-font-scale-2, 1rem);
+}
+
+/* ── Action link (blue right-aligned links) ── */
+.my-action-link {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-border-accent-1, #066afe);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.my-action-link:hover {
+    text-decoration: underline;
+}
+
+/* ── Feature card (light blue tinted background) ── */
+.my-feature-card {
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+}
+
+/* ── Success status line ── */
+.my-status-success {
+    display: flex;
+    align-items: center;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-success-1, #056764);
+    font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+/* ════════════════════════════════════
+   Section 1.4 – Roles & Relationships
+   ════════════════════════════════════ */
+
+/* ── Card shell ── */
+/* No border-radius: prevents the "arch" artefact where table cell borders
+   are clipped at a rounded corner by overflow:hidden */
+.my-roles-card {
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+/* ── Card header row ── */
+.my-roles-card-header {
+    display: flex;
+    align-items: flex-start;
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+/* ── Bold card title ── */
+.my-roles-card-title {
+    font-weight: var(--slds-g-font-weight-7, 700);
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    margin: 0;
+}
+
+/* ── Rounded-rectangle badge ("6 values") — matches SLDS badge style ── */
+.my-values-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-3, 0.75rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: var(--slds-g-color-on-surface-2, #3e3e3c);
+    white-space: nowrap;
+    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+/* ── Inline "Learn More" link — matches surrounding small text size ── */
+.my-roles-learn-more {
+    font-size: inherit;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-border-accent-1, #066afe);
+    text-decoration: none;
+}
+
+.my-roles-learn-more:hover {
+    text-decoration: underline;
+}
+
+/* ── Monospace API name column ── */
+.my-api-name {
+    font-family: monospace;
+    color: var(--slds-g-color-on-surface-3, #3e3e3c);
+}
+
+/* ── CCR type badge (blue) ── */
+.my-ccr-badge {
+    display: inline-block;
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+    color: var(--slds-g-color-border-accent-1, #066afe);
+}
+
+/* ── AAR type badge (green) ── */
+.my-aar-badge {
+    display: inline-block;
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    background: var(--slds-g-color-success-base-95, #e3f5e1);
+    color: var(--slds-g-color-success-1, #056764);
+}
+
+/* ── Group header row (e.g. CONTACT–CONTACT (CCR)) ── */
+.my-group-header-row {
+    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+}
+
+.my-group-header-cell {
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem) !important;
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-3, #3e3e3c);
+    text-transform: uppercase;
+}
+
+/* ── Inline add-value form row ── */
+.my-add-form-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+    border-top: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    background: var(--slds-g-color-surface-1, #fff);
+}
+
+.my-add-form-field {
+    flex: 1;
+}
+
+.my-add-form-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding-bottom: var(--slds-g-spacing-1, 0.25rem);
+}
+
+/* ── "+ Add Value" trigger link ── */
+.my-add-value-trigger {
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-5, 1.5rem);
+    border-top: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-add-value-link {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-border-accent-1, #066afe);
+    text-decoration: none;
+}
+
+.my-add-value-link:hover {
+    text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════
+   Section 2.1 – New Member Settings
+   ═══════════════════════════════════════ */
+
+/* ── Inner card (no border, just padding) ── */
+.my-nm-card {
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+}
+
+/* ── Object row ("Object: [link]") ── */
+.my-object-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+}
+
+.my-object-row-prefix {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: 400;
+    color: #03234d;
+}
+
+/* ── Multi-select dropdown wrapper (relative so dropdown anchors here) ── */
+.my-multiselect-wrap {
+    position: relative;
+}
+
+/* ── Dropdown trigger button (looks like a select input) ── */
+.my-multiselect-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    /* Intentional fixed values; sizing/spacing tokens resolve too large in this env */
+    padding: 0 0.75rem;
+    height: 2.25rem;
+    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-multiselect-trigger:hover {
+    border-color: var(--slds-g-color-border-accent-1, #066afe);
+}
+
+.my-multiselect-chevron {
+    flex-shrink: 0;
+    margin-left: var(--slds-g-spacing-2, 0.5rem);
+    color: var(--slds-g-color-on-surface-2, #3e3e3c);
+}
+
+/* ── Floating dropdown list ── */
+.my-multiselect-dropdown {
+    position: absolute;
+    top: calc(100% + var(--slds-g-spacing-1, 0.25rem));
+    left: 0;
+    width: 100%;
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: 0 var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-5, 1.5rem) rgb(0 0 0 / 15%);
+    z-index: 100;
+    /* No SLDS sizing hook for dropdown max-height; intentional layout value */
+    max-height: 14rem;
+    overflow-y: auto;
+}
+
+/* ── Individual checkbox option in the dropdown ── */
+.my-multiselect-option {
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-multiselect-option:hover {
+    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+}
+
+/* ── Pills row ── */
+.my-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+/* ── Custom pill (blue label + blue remove, no slds-pill override) ── */
+.my-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-3, 0.75rem);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: 999px; /* intentional pill shape */
+    background: var(--slds-g-color-surface-1, #fff);
+    vertical-align: middle;
+}
+
+.my-pill__label {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-3, #03234d);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.my-pill__remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--slds-g-color-on-surface-3, #03234d);
+    line-height: 1;
+}
+
+.my-pill__remove:hover {
+    opacity: 0.7;
+}
+
+
+
+/* ═══════════════════════════════════════
+   Section 3.1 – Objects in Timeline
+   ═══════════════════════════════════════ */
+
+/* ── Table header bar ── */
+.my-timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-timeline-search {
+    /* No SLDS sizing hook for search input width; intentional layout value */
+    width: 14rem;
+}
+
+/* ── Narrow drag-handle and number columns ── */
+.my-drag-col  { width: var(--slds-g-spacing-5, 1.5rem); }
+.my-num-col   { width: var(--slds-g-spacing-6, 2rem); color: var(--slds-g-color-on-surface-3, #706e6b); }
+.my-actions-col { width: var(--slds-g-spacing-7, 2.5rem); text-align: right; }
+
+/* ── Drag handle icon — always present, fades in on row hover ── */
+.my-drag-handle {
+    opacity: 0;
+    cursor: grab;
+    color: var(--slds-g-color-on-surface-3, #706e6b);
+}
+
+.my-timeline-row:hover .my-drag-handle,
+.my-timeline-row_active .my-drag-handle {
+    opacity: 1;
+}
+
+/* ── Highlighted row (when its menu is open) ── */
+.my-timeline-row_active {
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+}
+
+/* ── Colored dot ── */
+.my-dot {
+    display: inline-block;
+    flex-shrink: 0;
+    /* No SLDS sizing hook for 10px dot diameter; intentional layout value */
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: var(--slds-g-radius-border-circle, 100%);
+}
+
+.my-dot-blue   { background: var(--slds-g-color-accent-1, #0070d2); }
+.my-dot-orange { background: var(--slds-g-color-palette-orange-65, #ff8c00); }
+.my-dot-green  { background: var(--slds-g-color-palette-green-70, #4bca81); }
+.my-dot-purple { background: var(--slds-g-color-palette-purple-50, #9c5db5); }
+
+/* ── Row ⋮ menu button ── */
+.my-row-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--slds-g-sizing-8, 1.75rem);
+    height: var(--slds-g-sizing-8, 1.75rem);
+    background: none;
+    border: var(--slds-g-sizing-border-1, 1px) solid transparent;
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    cursor: pointer;
+    color: var(--slds-g-color-on-surface-3, #706e6b);
+    opacity: 0;
+}
+
+.my-timeline-row:hover .my-row-menu-btn,
+.my-timeline-row_active .my-row-menu-btn {
+    opacity: 1;
+}
+
+.my-row-menu-btn_active {
+    border-color: var(--slds-g-color-border-accent-1, #066afe);
+    opacity: 1;
+}
+
+/* ── Dropdown menu (Edit / Remove) ── */
+.my-row-menu-wrap {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.my-row-dropdown {
+    position: absolute;
+    top: calc(100% + var(--slds-g-spacing-1, 0.25rem));
+    right: 0;
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: 0 var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-4, 1rem) rgb(0 0 0 / 12%);
+    z-index: 200;
+    /* No SLDS sizing hook for this dropdown min-width; intentional layout value */
+    min-width: 8rem; /* stylelint-disable-line */
+    overflow: hidden;
+}
+
+/* ── Object name label in the row ── */
+.my-timeline-obj-label {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+/* ═══════════════════════════════════════
+   Section 3.2 – Detail Panel Fields
+   ═══════════════════════════════════════ */
+
+/* ── Preview card: diagram + legend side-by-side ── */
+.my-detail-preview {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid #d8d8d8;
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: #f5f5f5; /* lighter grey; hardcoded — token resolves too light or too dark */
+    padding: var(--slds-g-spacing-4, 1rem);
+    overflow: visible;
+}
+
+/* Left: standalone card mockup — fills ~50% so elements read end-to-end */
+.my-preview-diagram {
+    flex: 1;
+    /* Intentional fixed max-width to maintain proportions */
+    max-width: 50%;
+    min-width: 0;
+    padding: var(--slds-g-spacing-4, 1rem);
+    background: #fff; /* hardcoded; token resolves inconsistently */
+    border: 1px solid #d8d8d8;
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    display: flex;
+    flex-direction: column;
+}
+
+.my-preview-section {
+    padding: var(--slds-g-spacing-2, 0.5rem) 0;
+}
+
+.my-preview-section-hdr {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    margin-bottom: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.my-preview-section-label {
+    font-size: var(--slds-g-font-scale-neg-2, 0.625rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+}
+
+.my-preview-dot {
+    /* Intentional fixed dot size for diagram context */
+    width: 0.625rem;
+    height: 0.625rem;
+    flex-shrink: 0;
+}
+
+/* Mid-gray dot color for BODY FIELDS header */
+.my-dot-mid-gray { background: #b0adab; /* hardcoded; token resolves inconsistently */ }
+
+/* Orange highlight pills in diagram */
+.my-preview-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.my-preview-pill {
+    display: inline-block;
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-3, 0.75rem);
+    border: var(--slds-g-sizing-border-1, 1px) solid #e07b00;
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    color: #e07b00;
+    background: #fff; /* hardcoded; token resolves inconsistently */
+}
+
+/* Dashed divider between HIGHLIGHTS and BODY FIELDS */
+.my-preview-rule {
+    border-top: var(--slds-g-sizing-border-1, 1px) dashed var(--slds-g-color-border-1, #c9c9c9);
+    margin: var(--slds-g-spacing-3, 0.75rem) 0;
+}
+
+/* Gray placeholder bars for body fields — two-column rows */
+.my-preview-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    margin-top: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.my-preview-bar-row {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    align-items: center;
+}
+
+.my-preview-bar {
+    display: block;
+    height: var(--slds-g-spacing-2, 0.5rem);
+    flex: 1;
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    background: #b8b8b8; /* hardcoded; darker for visibility against grey background */
+}
+
+.my-preview-bar_short {
+    flex: 0 0 auto;
+    /* Short label-width bar; intentional layout value */
+    width: 30%;
+}
+
+/* Right: annotation-style descriptions with dashed left connector */
+.my-preview-legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px dashed #c9c9c9; /* intentional; dashed annotation line */
+    margin-left: var(--slds-g-spacing-4, 1rem);
+    background: #f5f5f5; /* matches parent; explicit to prevent override */
+}
+
+.my-preview-legend-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+}
+
+.my-preview-legend-rule {
+    height: var(--slds-g-sizing-border-1, 1px);
+    background: var(--slds-g-color-border-1, #c9c9c9);
+    margin: 0 var(--slds-g-spacing-4, 1rem);
+}
+
+/* ── Object tabs ── */
+.my-detail-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-detail-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem);
+    background: none;
+    border: none;
+    border-bottom: var(--slds-g-sizing-border-2, 2px) solid transparent;
+    cursor: pointer;
+    color: var(--slds-g-color-on-surface-2, #3e3e3c);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    margin-bottom: calc(var(--slds-g-sizing-border-1, 1px) * -1);
+}
+
+.my-detail-tab:hover {
+    color: var(--slds-g-color-border-accent-1, #066afe);
+}
+
+.my-detail-tab_active {
+    border-bottom-color: var(--slds-g-color-border-accent-1, #066afe);
+    color: var(--slds-g-color-border-accent-1, #066afe);
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+.my-detail-tab-label {
+    white-space: nowrap;
+}
+
+/* ── HIGHLIGHT count badge (orange) ── */
+.my-highlight-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: 400;
+    background: #e0e0e0; /* neutral gray badge; hardcoded */
+    color: var(--slds-g-color-on-surface-2, #3e3e3c);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* ── Highlight column alignment ── */
+.my-highlight-col {
+    /* No SLDS hook for explicit column width; intentional layout value */
+    width: 8rem; /* stylelint-disable-line */
+}
+
+/* ── Bold field label cell ── */
+.my-field-label-cell {
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+/* ── × remove field button ── */
+.my-remove-field-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--slds-g-sizing-8, 1.75rem);
+    height: var(--slds-g-sizing-8, 1.75rem);
+    background: none;
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    cursor: pointer;
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+}
+
+.my-remove-field-btn:hover {
+    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+/* ── Add field row ── */
+/* ── Allow dropdown to escape card bounds in the detail panel section ── */
+.my-detail-section-card {
+    overflow: visible;
+}
+
+.my-add-field-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    border-top: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    background: var(--slds-g-color-surface-1, #fff);
+}
+
+.my-add-field-label {
+    white-space: nowrap;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+/* ── Add field trigger (styled like a bordered select) ── */
+.my-add-field-wrap {
+    position: relative;
+}
+
+.my-add-field-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    /* Intentional fixed width for the add-field combobox */
+    min-width: 14rem;
+    /* Zero vertical padding; height governs the row size */
+    padding: 0 0.75rem;
+    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: #fff;
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    /* Standard SLDS 2 input height; hardcoded — sizing token resolves too large */
+    height: 2.25rem;
+}
+
+.my-add-field-trigger:hover {
+    border-color: var(--slds-g-color-border-accent-1, #066afe);
+}
+
+.my-add-field-placeholder {
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+}
+
+/* ── Add field dropdown list — opens upward so it clears the modal bottom edge ── */
+.my-add-field-dropdown {
+    position: absolute;
+    /* 4px gap above the trigger */
+    bottom: calc(100% + 4px);
+    top: auto;
+    left: 0;
+    /* Intentional fixed min-width matching trigger */
+    min-width: 14rem;
+    background: #fff;
+    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: 0 -0.25rem 1rem rgb(0 0 0 / 15%);
+    z-index: 200;
+    overflow: hidden;
+}
+
+.my-add-field-option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-add-field-option:hover {
+    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+}
+
+.my-add-field-option_current {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    cursor: default;
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-add-field-option_current:hover {
+    background: none;
+}
+
+.my-add-field-empty {
+    display: block;
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-style: italic;
+}
+
+/* ── Edit / Remove items ── */
+.my-row-menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    text-align: left;
+}
+
+.my-row-menu-item:hover {
+    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+}

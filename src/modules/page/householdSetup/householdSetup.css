@@ -1,0 +1,67 @@
+/* ── Page layout ── */
+.my-setup-page {
+    display: flex;
+    /* 100vh ensures the flex container is at least full viewport height so the
+       sidebar background stretches to the bottom regardless of content length.
+       No SLDS hook exists for viewport-relative heights; intentional layout value. */
+    min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+.my-setup-sidebar {
+    width: var(--slds-g-sizing-14, 15rem);
+    flex-shrink: 0;
+    background: var(--slds-g-color-surface-1, #fff);
+    border-right: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    overflow-y: auto;
+}
+
+/* ── Main content column ── */
+.my-setup-content {
+    flex: 1;
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+    overflow-y: auto;
+}
+
+/* ── Expandable nav button (Household Settings toggle) ── */
+.my-nav-expand-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    /* No SLDS hook exists for percentage widths; intentional full-width button */
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem);
+}
+
+.my-nav-expand-btn:hover {
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+}
+
+.my-nav-chevron {
+    flex-shrink: 0;
+}
+
+/* ── Sub-nav list ── */
+.my-nav-sub-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.my-nav-sub-action {
+    padding-left: var(--slds-g-spacing-6, 2rem);
+}
+
+/* ── Settings cards ── */
+.my-setting-card {
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+}

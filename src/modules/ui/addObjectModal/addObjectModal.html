@@ -1,0 +1,137 @@
+<template>
+    <lightning-modal-header label="Add Object"></lightning-modal-header>
+
+    <lightning-modal-body>
+        <div class="my-add-obj-form">
+
+            <!-- Row 1: Object composite picker + Object API Name -->
+            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+
+                <!-- Object field -->
+                <div class="slds-col slds-size_1-of-2">
+                    <p class="my-field-label">
+                        Object&nbsp;<abbr title="required" class="my-req-star">*</abbr>
+                    </p>
+                    <div class={objPickerClass}>
+                        <!-- Color swatch + picker -->
+                        <div class="my-color-section">
+                            <button class="my-color-trigger" type="button" title="Choose color" onclick={handleColorPickerToggle}>
+                                <span class={selectedSwatchClass}></span>
+                                <lightning-icon icon-name="utility:chevrondown" size="x-small" alternative-text="Choose color"></lightning-icon>
+                            </button>
+                            <template lwc:if={colorPickerOpen}>
+                                <div class="my-color-picker" role="listbox">
+                                    <template for:each={availableColors} for:item="swatch">
+                                        <button key={swatch.id} type="button" class={swatch.btnClass} data-color-class={swatch.colorClass} onclick={handleSelectColor} title={swatch.label}></button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                        <!-- Divider -->
+                        <span class="my-obj-divider" aria-hidden="true"></span>
+                        <!-- Object dropdown trigger -->
+                        <button class="my-obj-select-trigger" type="button" onclick={handleObjectDropdownToggle}>
+                            <span class={objLabelClass}>{selectedObjectDisplayLabel}</span>
+                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Choose object"></lightning-icon>
+                        </button>
+                        <!-- Object options dropdown -->
+                        <template lwc:if={objectDropdownOpen}>
+                            <div class="my-obj-dropdown" role="listbox">
+                                <template for:each={objectChoices} for:item="opt">
+                                    <button
+                                        key={opt.value}
+                                        type="button"
+                                        class="my-obj-option"
+                                        data-value={opt.value}
+                                        data-label={opt.label}
+                                        data-api={opt.apiName}
+                                        data-color-class={opt.defaultColorClass}
+                                        onclick={handleSelectObject}>
+                                        {opt.label}
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Object API Name -->
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-input
+                        label="Object API Name *"
+                        value={objectApiName}
+                        placeholder="e.g. FinServ__LifeEvent__c"
+                        read-only>
+                    </lightning-input>
+                </div>
+            </div>
+
+            <!-- Row 2: Date Field + Member Relationship Field -->
+            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                <!-- Date Field -->
+                <div class="slds-col slds-size_1-of-2">
+                    <div class="my-custom-label slds-m-bottom_xx-small">
+                        <span class="my-field-label">Date Field&nbsp;<abbr title="required" class="my-req-star">*</abbr></span>
+                        <span class="my-tooltip-wrap">
+                            <lightning-icon icon-name="utility:info" size="xx-small" alternative-text="About Date Field" class="my-info-icon"></lightning-icon>
+                            <span class="my-tooltip" role="tooltip">Anchors the event to the timeline axis.</span>
+                        </span>
+                    </div>
+                    <lightning-combobox
+                        label="Date Field"
+                        variant="label-hidden"
+                        placeholder="— Select a date field —"
+                        value={dateField}
+                        options={dateFieldOptions}
+                        disabled={isFieldsDisabled}
+                        onchange={handleDateFieldChange}>
+                    </lightning-combobox>
+                </div>
+                <!-- Member Relationship Field -->
+                <div class="slds-col slds-size_1-of-2">
+                    <div class="my-custom-label slds-m-bottom_xx-small">
+                        <span class="my-field-label">Member Relationship Field</span>
+                        <span class="my-tooltip-wrap">
+                            <lightning-icon icon-name="utility:info" size="xx-small" alternative-text="About Member Relationship Field" class="my-info-icon"></lightning-icon>
+                            <span class="my-tooltip my-tooltip_right" role="tooltip">Lookup that routes this event to the correct member row.</span>
+                        </span>
+                    </div>
+                    <lightning-combobox
+                        label="Member Relationship Field"
+                        variant="label-hidden"
+                        placeholder="— Select a relationship field —"
+                        value={relationshipField}
+                        options={relationshipFieldOptions}
+                        disabled={isFieldsDisabled}
+                        onchange={handleRelationshipFieldChange}>
+                    </lightning-combobox>
+                </div>
+            </div>
+
+            <!-- Visible by default toggle -->
+            <div class="my-visible-row">
+                <div class="slds-shrink">
+                    <lightning-input
+                        type="toggle"
+                        label="Visible by default"
+                        variant="label-hidden"
+                        checked={visibleByDefault}
+                        onchange={handleVisibleChange}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-m-left_small">
+                    <p class="my-field-label">Visible by default</p>
+                    <p class="slds-text-body_small slds-text-color_weak">Show this object type on the timeline when advisors first open it.</p>
+                </div>
+            </div>
+
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <div class="my-footer-btns">
+            <lightning-button label="Cancel" variant="neutral" onclick={handleCancel}></lightning-button>
+            <lightning-button label="Add Object" variant="brand" disabled={isAddDisabled} onclick={handleAddObject}></lightning-button>
+        </div>
+    </lightning-modal-footer>
+</template>

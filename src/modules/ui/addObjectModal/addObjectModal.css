@@ -1,0 +1,300 @@
+/* ── Form padding ── */
+.my-add-obj-form {
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+}
+
+/* ── Field label ── */
+.my-field-label {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    margin: 0;
+}
+
+/* ── Required asterisk ── */
+.my-req-star {
+    color: var(--slds-g-color-error-1, #ea001e);
+    text-decoration: none;
+    font-style: normal;
+}
+
+/* ── Custom label row with info icon ── */
+.my-custom-label {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+}
+
+/* ── Blue info icon ── */
+.my-info-icon {
+    color: var(--slds-g-color-brand-base-50, #0070d2);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* ════════════════════════════════
+   SLDS 2-style tooltip
+   ════════════════════════════════ */
+
+/* Relative anchor for the tooltip */
+.my-tooltip-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Tooltip bubble — hidden by default */
+.my-tooltip {
+    display: none;
+    position: absolute;
+    /* Appears above the icon; no SLDS hook for calc offset */
+    bottom: calc(100% + var(--slds-g-spacing-3, 0.75rem));
+    /* No SLDS hook for 50% position; intentional centering value */
+    left: 50%; /* stylelint-disable-line */
+    transform: translateX(-50%);
+    /* SLDS 2 tooltip dark surface — --slds-g-color-inverse-surface-1 not yet in token set */
+    background: #1d1d1f;
+    color: var(--slds-g-color-on-surface-inverse-1, #fff);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    line-height: var(--slds-g-font-line-height-2, 1.5);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    /* No SLDS hook for tooltip max-width; intentional layout value */
+    max-width: 12rem; /* stylelint-disable-line */
+    white-space: normal;
+    text-align: left;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-4, 1rem) rgb(0 0 0 / 20%);
+}
+
+/* Downward nubbin arrow pointing at the icon */
+.my-tooltip::after {
+    content: '';
+    position: absolute;
+    /* No SLDS hook for 100%/50% arrow position; intentional layout value */
+    top: 100%; /* stylelint-disable-line */
+    left: 50%; /* stylelint-disable-line */
+    transform: translateX(-50%);
+    border-width: var(--slds-g-spacing-2, 0.5rem);
+    border-style: solid;
+    /* Matches tooltip background; no SLDS hook available */
+    border-color: #1d1d1f transparent transparent transparent;
+}
+
+/* Right-column tooltip: anchor toward center so it doesn't clip outside modal */
+.my-tooltip_right {
+    left: auto;
+    /* No SLDS hook for 50% position; intentional layout value */
+    right: 50%; /* stylelint-disable-line */
+    transform: translateX(50%);
+}
+
+.my-tooltip_right::after {
+    left: auto;
+    /* No SLDS hook for 50% position; intentional layout value */
+    right: 50%; /* stylelint-disable-line */
+    transform: translateX(50%);
+}
+
+/* Show tooltip on hover */
+.my-tooltip-wrap:hover .my-tooltip {
+    display: block;
+}
+
+/* ════════════════════════════════
+   Composite Object picker
+   ════════════════════════════════ */
+
+.my-obj-picker {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    background: #fff;
+    overflow: visible;
+    position: relative;
+    margin-top: var(--slds-g-spacing-1, 0.25rem);
+    /* Standard SLDS 2 input height; intentional layout value */
+    height: 2.25rem;
+    box-sizing: border-box;
+}
+
+.my-obj-picker_active {
+    border-color: var(--slds-g-color-border-accent-1, #066afe);
+    box-shadow: 0 0 0 var(--slds-g-sizing-border-1, 1px) var(--slds-g-color-border-accent-1, #066afe);
+}
+
+/* ── Left section: color swatch trigger — narrow, compact ── */
+.my-color-section {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.my-color-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    /* Zero vertical padding; height is controlled by parent .my-obj-picker */
+    padding: 0 0.625rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    height: 100%;
+    /* Fixed narrow width so trigger looks like the reference */
+    min-width: 2.5rem;
+}
+
+/* ── Divider between color section and object dropdown ── */
+.my-obj-divider {
+    display: block;
+    width: var(--slds-g-sizing-border-1, 1px);
+    background: var(--slds-g-color-border-1, #c9c9c9);
+    align-self: stretch;
+}
+
+/* ── Right section: object dropdown trigger ── */
+.my-obj-select-trigger {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Zero vertical padding; height is controlled by parent .my-obj-picker */
+    padding: 0 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.my-obj-label {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-obj-label_placeholder {
+    color: var(--slds-g-color-on-surface-3, #03234d);
+    font-style: italic;
+}
+
+/* ── Object dropdown list — absolute, anchored to .my-obj-picker ── */
+/* position:fixed + getBoundingClientRect breaks when lightning/modal applies
+   a CSS transform for centering (transform creates a new stacking context).
+   position:absolute relative to the picker (position:relative) is correct here
+   because the form is compact and the dropdown stays within the modal body. */
+.my-obj-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 15%);
+    z-index: 9000;
+    /* Intentional fixed max-height for scrollable list */
+    max-height: 16rem;
+    overflow-y: auto;
+}
+
+/* ── Object option item ── */
+.my-obj-option {
+    display: block;
+    width: 100%;
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem);
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    line-height: var(--slds-g-font-line-height-2, 1.5);
+}
+
+.my-obj-option:hover {
+    background: #f3f3f3;
+}
+
+/* ════════════════════════════════
+   Color picker palette
+   ════════════════════════════════ */
+
+/* ── Swatch dot inside the color trigger — always visible, grey by default ── */
+.my-swatch-dot {
+    display: inline-block;
+    /* Intentional fixed size; larger than palette swatches to match reference */
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 100%;
+    flex-shrink: 0;
+}
+
+/* Default grey when no color is chosen */
+.my-dot-gray { background: #c9c9c9; }
+
+/* ── Color picker floating grid ── */
+.my-color-picker {
+    position: absolute;
+    top: calc(100% + var(--slds-g-spacing-1, 0.25rem));
+    left: 0;
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: 0 var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-4, 1rem) rgb(0 0 0 / 12%);
+    padding: var(--slds-g-spacing-2, 0.5rem);
+    display: grid;
+    /* No SLDS sizing hook for 4-column grid; intentional layout value */
+    grid-template-columns: repeat(4, 1.5rem);
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    z-index: 400;
+}
+
+/* ── Individual swatch circle ── */
+.my-color-swatch {
+    display: block;
+    width: var(--slds-g-sizing-7, 1.5rem);
+    height: var(--slds-g-sizing-7, 1.5rem);
+    border-radius: var(--slds-g-radius-border-circle, 100%);
+    border: var(--slds-g-sizing-border-2, 2px) solid transparent;
+    cursor: pointer;
+    padding: 0;
+}
+
+.my-color-swatch:hover,
+.my-color-swatch:focus {
+    border-color: var(--slds-g-color-border-accent-1, #066afe);
+}
+
+/* ── Dot / swatch color definitions ── */
+.my-dot-gray   { background: var(--slds-g-color-surface-container-2, #b0adab); }
+.my-dot-blue   { background: var(--slds-g-color-accent-1, #0070d2); }
+.my-dot-orange { background: var(--slds-g-color-palette-orange-65, #e07b00); }
+.my-dot-green  { background: var(--slds-g-color-palette-green-70, #4bca81); }
+.my-dot-purple { background: var(--slds-g-color-palette-purple-50, #9c5db5); }
+.my-dot-red    { background: var(--slds-g-color-error-1, #ea001e); }
+.my-dot-teal   { background: var(--slds-g-color-success-1, #0b7477); }
+.my-dot-yellow { background: var(--slds-g-color-warning-1, #c97a00); }
+.my-dot-navy   { background: var(--slds-g-color-on-surface-3, #16325c); }
+
+/* ════════════════════════════════
+   Visible by default row
+   ════════════════════════════════ */
+
+.my-visible-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+/* ════════════════════════════════
+   Footer buttons
+   ════════════════════════════════ */
+
+.my-footer-btns {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
