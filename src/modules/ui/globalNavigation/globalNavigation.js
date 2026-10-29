@@ -3,7 +3,7 @@ import { LightningElement, api } from 'lwc';
 const VARIANT_CONSOLE = 'console';
 
 export default class GlobalNavigation extends LightningElement {
-    @api currentPage = 'home';
+    @api currentPage = 'household-setup';
     @api navItems = [];
     @api appItems = [];
     @api pagesInCurrentApp = [];

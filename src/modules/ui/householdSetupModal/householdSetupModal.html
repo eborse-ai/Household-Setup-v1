@@ -35,14 +35,14 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Create Household Settings -->
+                <!-- Step 2: Household Configuration -->
                 <div class="my-step">
                     <div class="my-step-track">
                         <div class={step2CircleClass} onclick={handleGroupClick} data-group="2" role="button" tabindex="0">2</div>
                         <div class="my-step-line"></div>
                     </div>
                     <div class="my-step-content">
-                        <span class={step2LabelClass} onclick={handleGroupClick} data-group="2" role="button" tabindex="0">Create Household Settings</span>
+                        <span class={step2LabelClass} onclick={handleGroupClick} data-group="2" role="button" tabindex="0">Household Configuration</span>
                         <template lwc:if={isGroup2Active}>
                             <ul class="my-nav-sub-list">
                                 <li class={navClass21} onclick={handleNavClick} data-section="2.1">
@@ -50,6 +50,9 @@
                                 </li>
                                 <li class={navClass22} onclick={handleNavClick} data-section="2.2">
                                     <span>Household Settings</span>
+                                </li>
+                                <li class={navClass23} onclick={handleNavClick} data-section="2.3">
+                                    <span>AI Recommendations</span>
                                 </li>
                             </ul>
                         </template>
@@ -89,7 +92,10 @@
                         <div class="my-toggle-row">
                             <div class="slds-col">
                                 <span class="slds-text-body_regular my-toggle-label">Turn on Group Membership and Households</span>
-                                <div>
+                                <p class="slds-text-body_regular slds-text-color_weak slds-m-top_xx-small">
+                                    Turn on Group Membership to enable relationship objects, such as Account Account Relationship, Contact Contact Relationship, Party Role Relationship, and Party Relationship Group.
+                                </p>
+                                <div class="slds-m-top_xx-small">
                                     <a href="#" class="my-considerations-link" onclick={handleConsiderationsClick}>See Considerations &#8599;</a>
                                 </div>
                             </div>
@@ -108,6 +114,9 @@
                         <div class="my-toggle-row">
                             <div class="slds-col">
                                 <span class="slds-text-body_regular my-toggle-label">Turn on Context Definitions</span>
+                                <p class="slds-text-body_regular slds-text-color_weak slds-m-top_xx-small">
+                                    Create a context definition and map its nodes and attributes to the household configuration data that is used in the household creation workflow.
+                                </p>
                             </div>
                             <div class="slds-shrink slds-p-left_medium">
                                 <lightning-input
@@ -207,10 +216,16 @@
                                         <span class="my-card-title">Create Accounts Record Type</span>
                                     </div>
                                     <template lwc:if={recordTypeExpanded}>
-                                        <p class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small">
+                                        <p class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small slds-m-bottom_small">
                                             To use person accounts, you need at least one record type set up for business accounts.
                                             Salesforce creates a record type for person accounts when they are enabled.
                                         </p>
+                                        <lightning-combobox
+                                            label="Select Record Type"
+                                            value={selectedAccountRecordType}
+                                            options={accountRecordTypeOptions}
+                                            onchange={handleAccountRecordTypeChange}>
+                                        </lightning-combobox>
                                     </template>
                                 </div>
 
@@ -469,13 +484,56 @@
                                 <tr class="slds-line-height_reset">
                                     <th scope="col" class="slds-text-title_caps">Label</th>
                                     <th scope="col" class="slds-text-title_caps">API Name</th>
+                                    <th scope="col" class="my-row-actions-col"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template for:each={_acrRoles} for:item="role">
-                                    <tr key={role.id}>
-                                        <td>{role.label}</td>
-                                        <td class="my-api-name">{role.apiName}</td>
+                                <template for:each={acrRolesView} for:item="role">
+                                    <tr key={role.id} class="slds-hint-parent">
+                                        <template lwc:if={role.isEditing}>
+                                            <td colspan="2">
+                                                <div class="my-inline-edit-row">
+                                                    <lightning-input
+                                                        label="Label"
+                                                        variant="label-hidden"
+                                                        placeholder="Label"
+                                                        value={role.editLabel}
+                                                        data-id={role.id}
+                                                        onchange={handleAcrEditLabelChange}>
+                                                    </lightning-input>
+                                                    <span class="my-api-name my-inline-edit-api">{role.editApiName}</span>
+                                                </div>
+                                            </td>
+                                            <td class="my-row-actions-col">
+                                                <div class="my-inline-edit-actions">
+                                                    <lightning-button label="Save" variant="brand" data-id={role.id} onclick={handleSaveAcrRole}></lightning-button>
+                                                    <lightning-button label="Cancel" variant="neutral" data-id={role.id} onclick={handleCancelAcrEdit}></lightning-button>
+                                                </div>
+                                            </td>
+                                        </template>
+                                        <template lwc:else>
+                                            <td>{role.label}</td>
+                                            <td class="my-api-name">{role.apiName}</td>
+                                            <td class="my-row-actions-col">
+                                                <div class="my-row-menu-wrap">
+                                                    <button class={role.menuBtnClass} data-id={role.id} onclick={handleAcrMenu} title="More actions">
+                                                        <lightning-icon icon-name="utility:threedots_vertical" size="xx-small" alternative-text="More"></lightning-icon>
+                                                    </button>
+                                                    <template lwc:if={role.isMenuOpen}>
+                                                        <div class="my-row-dropdown" role="menu">
+                                                            <button class="my-row-menu-item" data-id={role.id} onclick={handleEditAcrRole}>
+                                                                <lightning-icon icon-name="utility:edit" size="xx-small" alternative-text="Edit" class="slds-m-right_x-small"></lightning-icon>
+                                                                Edit
+                                                            </button>
+                                                            <button class="my-row-menu-item my-row-menu-item_destructive" data-id={role.id} onclick={handleDeleteAcrRole}>
+                                                                <lightning-icon icon-name="utility:delete" size="xx-small" alternative-text="Delete" class="slds-m-right_x-small"></lightning-icon>
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </td>
+                                        </template>
                                     </tr>
                                 </template>
                             </tbody>
@@ -532,18 +590,55 @@
                                     <th scope="col" class="slds-text-title_caps">Label</th>
                                     <th scope="col" class="slds-text-title_caps">Type</th>
                                     <th scope="col" class="slds-text-title_caps">Inverse Label</th>
+                                    <th scope="col" class="my-row-actions-col"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template for:each={_partyRoles} for:item="row">
+                                <template for:each={partyRolesView} for:item="row">
                                     <tr key={row.id} class={row.rowClass}>
                                         <template lwc:if={row.isGroupHeader}>
-                                            <td class="my-group-header-cell" colspan="3">{row.groupLabel}</td>
+                                            <td class="my-group-header-cell" colspan="4">{row.groupLabel}</td>
+                                        </template>
+                                        <template lwc:elseif={row.isEditing}>
+                                            <td>
+                                                <lightning-input label="Label" variant="label-hidden" value={row.editLabel} data-id={row.id} onchange={handlePartyEditLabelChange}></lightning-input>
+                                            </td>
+                                            <td>
+                                                <span class={row.typeBadgeClass}>{row.type}</span>
+                                            </td>
+                                            <td>
+                                                <lightning-input label="Inverse Label" variant="label-hidden" value={row.editInverseLabel} data-id={row.id} onchange={handlePartyEditInverseLabelChange}></lightning-input>
+                                            </td>
+                                            <td class="my-row-actions-col">
+                                                <div class="my-inline-edit-actions">
+                                                    <lightning-button label="Save" variant="brand" data-id={row.id} onclick={handleSavePartyRole}></lightning-button>
+                                                    <lightning-button label="Cancel" variant="neutral" data-id={row.id} onclick={handleCancelPartyEdit}></lightning-button>
+                                                </div>
+                                            </td>
                                         </template>
                                         <template lwc:else>
                                             <td>{row.label}</td>
                                             <td><span class={row.typeBadgeClass}>{row.type}</span></td>
                                             <td class="slds-text-color_weak">{row.inverseLabel}</td>
+                                            <td class="my-row-actions-col">
+                                                <div class="my-row-menu-wrap">
+                                                    <button class={row.menuBtnClass} data-id={row.id} onclick={handlePartyMenu} title="More actions">
+                                                        <lightning-icon icon-name="utility:threedots_vertical" size="xx-small" alternative-text="More"></lightning-icon>
+                                                    </button>
+                                                    <template lwc:if={row.isMenuOpen}>
+                                                        <div class="my-row-dropdown" role="menu">
+                                                            <button class="my-row-menu-item" data-id={row.id} onclick={handleEditPartyRole}>
+                                                                <lightning-icon icon-name="utility:edit" size="xx-small" alternative-text="Edit" class="slds-m-right_x-small"></lightning-icon>
+                                                                Edit
+                                                            </button>
+                                                            <button class="my-row-menu-item my-row-menu-item_destructive" data-id={row.id} onclick={handleDeletePartyRole}>
+                                                                <lightning-icon icon-name="utility:delete" size="xx-small" alternative-text="Delete" class="slds-m-right_x-small"></lightning-icon>
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </td>
                                         </template>
                                     </tr>
                                 </template>
@@ -630,18 +725,28 @@
                                             <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="my-multiselect-chevron"></lightning-icon>
                                         </button>
                                         <template lwc:if={contactFieldsOpen}>
-                                            <div class="my-multiselect-dropdown" role="listbox">
-                                                <template for:each={_contactFields} for:item="opt">
-                                                    <div key={opt.id} class="my-multiselect-option" data-id={opt.id} onchange={handleContactFieldCheck}>
-                                                        <lightning-input
-                                                            type="checkbox"
-                                                            label={opt.label}
-                                                            checked={opt.isSelected}
-                                                            variant="label-inline">
-                                                        </lightning-input>
-                                                    </div>
+                                            <ul class="slds-listbox slds-listbox_vertical my-multiselect-dropdown" role="listbox" aria-multiselectable="true" aria-label="Contact fields">
+                                                <template for:each={contactFieldOptions} for:item="opt">
+                                                    <li key={opt.id} role="presentation" class="slds-listbox__item">
+                                                        <div
+                                                            class={opt.optionClass}
+                                                            role="option"
+                                                            aria-selected={opt.isSelected}
+                                                            data-id={opt.id}
+                                                            onclick={handleContactFieldCheck}
+                                                            tabindex="0">
+                                                            <span class="slds-media__figure slds-listbox__option-icon">
+                                                                <template lwc:if={opt.isSelected}>
+                                                                    <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Selected" class="my-multiselect-check"></lightning-icon>
+                                                                </template>
+                                                            </span>
+                                                            <span class="slds-media__body">
+                                                                <span class="slds-truncate" title={opt.label}>{opt.label}</span>
+                                                            </span>
+                                                        </div>
+                                                    </li>
                                                 </template>
-                                            </div>
+                                            </ul>
                                         </template>
                                     </div>
 
@@ -693,18 +798,28 @@
                                             <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="my-multiselect-chevron"></lightning-icon>
                                         </button>
                                         <template lwc:if={acrFieldsOpen}>
-                                            <div class="my-multiselect-dropdown" role="listbox">
-                                                <template for:each={_acrFields} for:item="opt">
-                                                    <div key={opt.id} class="my-multiselect-option" data-id={opt.id} onchange={handleAcrFieldCheck}>
-                                                        <lightning-input
-                                                            type="checkbox"
-                                                            label={opt.label}
-                                                            checked={opt.isSelected}
-                                                            variant="label-inline">
-                                                        </lightning-input>
-                                                    </div>
+                                            <ul class="slds-listbox slds-listbox_vertical my-multiselect-dropdown" role="listbox" aria-multiselectable="true" aria-label="Account fields">
+                                                <template for:each={acrFieldOptions} for:item="opt">
+                                                    <li key={opt.id} role="presentation" class="slds-listbox__item">
+                                                        <div
+                                                            class={opt.optionClass}
+                                                            role="option"
+                                                            aria-selected={opt.isSelected}
+                                                            data-id={opt.id}
+                                                            onclick={handleAcrFieldCheck}
+                                                            tabindex="0">
+                                                            <span class="slds-media__figure slds-listbox__option-icon">
+                                                                <template lwc:if={opt.isSelected}>
+                                                                    <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Selected" class="my-multiselect-check"></lightning-icon>
+                                                                </template>
+                                                            </span>
+                                                            <span class="slds-media__body">
+                                                                <span class="slds-truncate" title={opt.label}>{opt.label}</span>
+                                                            </span>
+                                                        </div>
+                                                    </li>
                                                 </template>
-                                            </div>
+                                            </ul>
                                         </template>
                                     </div>
 
@@ -762,18 +877,28 @@
                                             <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="my-multiselect-chevron"></lightning-icon>
                                         </button>
                                         <template lwc:if={accountFieldsOpen}>
-                                            <div class="my-multiselect-dropdown" role="listbox">
-                                                <template for:each={_accountFields} for:item="opt">
-                                                    <div key={opt.id} class="my-multiselect-option" data-id={opt.id} onchange={handleAccountFieldCheck}>
-                                                        <lightning-input
-                                                            type="checkbox"
-                                                            label={opt.label}
-                                                            checked={opt.isSelected}
-                                                            variant="label-inline">
-                                                        </lightning-input>
-                                                    </div>
+                                            <ul class="slds-listbox slds-listbox_vertical my-multiselect-dropdown" role="listbox" aria-multiselectable="true" aria-label="Household account fields">
+                                                <template for:each={accountFieldOptions} for:item="opt">
+                                                    <li key={opt.id} role="presentation" class="slds-listbox__item">
+                                                        <div
+                                                            class={opt.optionClass}
+                                                            role="option"
+                                                            aria-selected={opt.isSelected}
+                                                            data-id={opt.id}
+                                                            onclick={handleAccountFieldCheck}
+                                                            tabindex="0">
+                                                            <span class="slds-media__figure slds-listbox__option-icon">
+                                                                <template lwc:if={opt.isSelected}>
+                                                                    <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Selected" class="my-multiselect-check"></lightning-icon>
+                                                                </template>
+                                                            </span>
+                                                            <span class="slds-media__body">
+                                                                <span class="slds-truncate" title={opt.label}>{opt.label}</span>
+                                                            </span>
+                                                        </div>
+                                                    </li>
                                                 </template>
-                                            </div>
+                                            </ul>
                                         </template>
                                     </div>
 
@@ -822,18 +947,28 @@
                                             <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Open" class="my-multiselect-chevron"></lightning-icon>
                                         </button>
                                         <template lwc:if={prgFieldsOpen}>
-                                            <div class="my-multiselect-dropdown" role="listbox">
-                                                <template for:each={_prgFields} for:item="opt">
-                                                    <div key={opt.id} class="my-multiselect-option" data-id={opt.id} onchange={handlePrgFieldCheck}>
-                                                        <lightning-input
-                                                            type="checkbox"
-                                                            label={opt.label}
-                                                            checked={opt.isSelected}
-                                                            variant="label-inline">
-                                                        </lightning-input>
-                                                    </div>
+                                            <ul class="slds-listbox slds-listbox_vertical my-multiselect-dropdown" role="listbox" aria-multiselectable="true" aria-label="PRG fields">
+                                                <template for:each={prgFieldOptions} for:item="opt">
+                                                    <li key={opt.id} role="presentation" class="slds-listbox__item">
+                                                        <div
+                                                            class={opt.optionClass}
+                                                            role="option"
+                                                            aria-selected={opt.isSelected}
+                                                            data-id={opt.id}
+                                                            onclick={handlePrgFieldCheck}
+                                                            tabindex="0">
+                                                            <span class="slds-media__figure slds-listbox__option-icon">
+                                                                <template lwc:if={opt.isSelected}>
+                                                                    <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Selected" class="my-multiselect-check"></lightning-icon>
+                                                                </template>
+                                                            </span>
+                                                            <span class="slds-media__body">
+                                                                <span class="slds-truncate" title={opt.label}>{opt.label}</span>
+                                                            </span>
+                                                        </div>
+                                                    </li>
                                                 </template>
-                                            </div>
+                                            </ul>
                                         </template>
                                     </div>
 
@@ -850,6 +985,139 @@
                                 </div>
                             </div>
                         </template>
+                    </div>
+                </template>
+
+                <!-- 2.3 AI Recommendations -->
+                <template lwc:elseif={isSection23}>
+                    <h2 class="slds-text-heading_medium my-content-heading slds-m-bottom_medium">AI Recommendations for Households</h2>
+
+                    <!-- Enable AI Relationship Research -->
+                    <div class="my-ai-card slds-m-bottom_medium">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="slds-col">
+                                <p class="my-ai-card-title">Enable AI Relationship Research</p>
+                                <p class="slds-text-body_regular slds-text-color_weak slds-m-top_xx-small">
+                                    Let AIRR research household members and surface suggested members, related accounts, and related contacts on the household record.
+                                </p>
+                            </div>
+                            <div class="slds-shrink slds-p-left_medium">
+                                <lightning-input
+                                    type="toggle"
+                                    label="Enable AI Relationship Research"
+                                    variant="label-hidden"
+                                    checked={aiResearchEnabled}
+                                    onchange={handleAiResearchToggle}>
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="my-ai-credit-banner slds-m-top_small" role="status">
+                            <lightning-icon icon-name="utility:warning" size="x-small" alternative-text="Warning" class="my-ai-credit-icon"></lightning-icon>
+                            <p class="slds-text-body_small">
+                                AI research consumes flex credits. Leave this off if you don&apos;t want to draw down credits — recommendations won&apos;t run until it&apos;s enabled.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Linked Research Configuration (active only when pref is on) -->
+                    <div class={aiDependentClass}>
+                        <div class="my-ai-card slds-m-bottom_medium">
+                            <p class="my-ai-card-title slds-m-bottom_medium">Linked Research Configuration</p>
+                            <div class="my-ai-feature-pill slds-m-bottom_small">
+                                <span class="slds-text-body_small">Feature: AI Relationship Research</span>
+                            </div>
+                            <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_small">
+                                Select the AI Relationship Research configuration to use when generating relationship recommendations for this household setup.
+                            </p>
+                            <lightning-combobox
+                                label="Household Recommendations"
+                                value={selectedAiConfig}
+                                options={aiConfigOptions}
+                                disabled={isAiConfigDisabled}
+                                onchange={handleAiConfigChange}
+                                class="slds-m-bottom_small">
+                            </lightning-combobox>
+                            <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                <lightning-icon icon-name="utility:success" size="x-small" alternative-text="Linked" class="my-ai-success-icon slds-m-right_xx-small"></lightning-icon>
+                                <span class="slds-text-body_regular">Household Recommendations is linked to this household configuration.</span>
+                            </div>
+                            <a href="#" class="my-ai-external-link" onclick={handleOpenAiSetup} target="_blank" rel="noopener noreferrer">
+                                <span>Open in AI Relationship Research Setup</span>
+                                <lightning-icon icon-name="utility:new_window" size="xx-small" alternative-text="Opens in a new window" class="my-ai-external-icon"></lightning-icon>
+                            </a>
+                        </div>
+
+                        <!-- Household AI Recommendations accordion card -->
+                        <div class="my-ai-card">
+                            <div class="my-ai-config-header" onclick={handleToggleAiConfig} role="button" tabindex="0">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:einstein" size="x-small" alternative-text="AI" class="slds-m-right_x-small my-ai-einstein-icon"></lightning-icon>
+                                    <span class="my-ai-card-title">Household AI Recommendations</span>
+                                </div>
+                                <lightning-icon icon-name={aiConfigChevron} size="xx-small" alternative-text="Toggle" class="my-accordion-chevron"></lightning-icon>
+                            </div>
+
+                            <template lwc:if={aiConfigExpanded}>
+                                <div class="my-ai-config-body">
+                                    <dl class="my-ai-meta">
+                                        <div class="my-ai-meta-row">
+                                            <dt>Status</dt>
+                                            <dd><span class={aiStatusBadgeClass}>{aiStatusLabel}</span></dd>
+                                        </div>
+                                        <div class="my-ai-meta-row">
+                                            <dt>Configuration Type</dt>
+                                            <dd>AI Relationship Research Basic Setup</dd>
+                                        </div>
+                                        <div class="my-ai-meta-row">
+                                            <dt>Created By</dt>
+                                            <dd>Salesforce</dd>
+                                        </div>
+                                        <div class="my-ai-meta-row">
+                                            <dt>Created Date</dt>
+                                            <dd>7/6/2026</dd>
+                                        </div>
+                                        <div class="my-ai-meta-row">
+                                            <dt>Last Modified Date</dt>
+                                            <dd>7/6/2026</dd>
+                                        </div>
+                                    </dl>
+
+                                    <template lwc:if={showAiDraftBanner}>
+                                        <div class="my-ai-draft-banner" role="status">
+                                            <lightning-icon icon-name="utility:warning" size="x-small" alternative-text="Warning" class="my-ai-credit-icon"></lightning-icon>
+                                            <span class="slds-text-body_small">This configuration is in Draft.</span>
+                                        </div>
+                                    </template>
+
+                                    <div class="slds-grid slds-grid_align-end slds-m-top_medium">
+                                        <lightning-button
+                                            label="Review Configuration"
+                                            variant="neutral"
+                                            disabled={isAiConfigDisabled}
+                                            onclick={handleReviewAiConfig}
+                                            class="slds-m-right_x-small">
+                                        </lightning-button>
+                                        <template lwc:if={aiConfigActivated}>
+                                            <lightning-button
+                                                label="Activated"
+                                                variant="brand"
+                                                icon-name="utility:success"
+                                                icon-position="right"
+                                                disabled>
+                                            </lightning-button>
+                                        </template>
+                                        <template lwc:else>
+                                            <lightning-button
+                                                label="Activate"
+                                                variant="brand"
+                                                disabled={isAiConfigDisabled}
+                                                onclick={handleActivateAiConfig}>
+                                            </lightning-button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </template>
 
@@ -876,8 +1144,8 @@
                             </div>
                         </div>
 
-                        <!-- Objects table -->
-                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                        <!-- Objects table — slds-no-row-hover kills the dark hover outline -->
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-no-row-hover my-timeline-table">
                             <thead>
                                 <tr class="slds-line-height_reset">
                                     <th scope="col" class="my-drag-col"></th>
@@ -889,12 +1157,22 @@
                             </thead>
                             <tbody>
                                 <template for:each={filteredTimelineObjects} for:item="obj">
-                                    <tr key={obj.id} class={obj.rowClass}>
+                                    <tr
+                                        key={obj.id}
+                                        class={obj.rowClass}
+                                        draggable="true"
+                                        data-id={obj.id}
+                                        ondragstart={handleTimelineDragStart}
+                                        ondragover={handleTimelineDragOver}
+                                        ondragenter={handleTimelineDragEnter}
+                                        ondragleave={handleTimelineDragLeave}
+                                        ondrop={handleTimelineDrop}
+                                        ondragend={handleTimelineDragEnd}>
                                         <td class="my-drag-col">
                                             <lightning-icon
                                                 icon-name="utility:drag_and_drop"
                                                 size="xx-small"
-                                                alternative-text="Drag"
+                                                alternative-text="Drag to reorder"
                                                 class="my-drag-handle">
                                             </lightning-icon>
                                         </td>
@@ -918,7 +1196,7 @@
                                         <td class="my-actions-col">
                                             <div class="my-row-menu-wrap">
                                                 <button class={obj.menuBtnClass} data-id={obj.id} onclick={handleTimelineMenu} title="More actions">
-                                                    <lightning-icon icon-name="utility:more" size="xx-small" alternative-text="More"></lightning-icon>
+                                                    <lightning-icon icon-name="utility:threedots_vertical" size="xx-small" alternative-text="More"></lightning-icon>
                                                 </button>
                                                 <template lwc:if={obj.isMenuOpen}>
                                                     <div class="my-row-dropdown" role="menu">
@@ -981,15 +1259,15 @@
                                 </div>
                                 <div class="my-preview-bars">
                                     <div class="my-preview-bar-row">
-                                        <span class="my-preview-bar my-preview-bar_short"></span>
+                                        <span class="my-preview-bar"></span>
                                         <span class="my-preview-bar"></span>
                                     </div>
                                     <div class="my-preview-bar-row">
-                                        <span class="my-preview-bar my-preview-bar_short"></span>
+                                        <span class="my-preview-bar"></span>
                                         <span class="my-preview-bar"></span>
                                     </div>
                                     <div class="my-preview-bar-row">
-                                        <span class="my-preview-bar my-preview-bar_short"></span>
+                                        <span class="my-preview-bar"></span>
                                         <span class="my-preview-bar"></span>
                                     </div>
                                 </div>
@@ -1094,7 +1372,7 @@
     <lightning-modal-footer>
         <div class="slds-grid slds-grid_align-end">
             <lightning-button
-                label="Save &amp; Next"
+                label={saveButtonLabel}
                 variant="brand"
                 onclick={handleSaveNext}>
             </lightning-button>

@@ -1,6 +1,12 @@
+/* Let the object dropdown paint over the modal body / footer instead of clipping */
+lightning-modal-body::part(modal-body) {
+    overflow: visible;
+}
+
 /* ── Form padding ── */
 .my-add-obj-form {
     padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+    overflow: visible;
 }
 
 /* ── Field label ── */
@@ -111,8 +117,8 @@
     display: flex;
     align-items: stretch;
     width: 100%;
-    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    border: 1px solid #5c5c5c;
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
     background: #fff;
     overflow: visible;
     position: relative;
@@ -120,6 +126,11 @@
     /* Standard SLDS 2 input height; intentional layout value */
     height: 2.25rem;
     box-sizing: border-box;
+    z-index: 1;
+}
+
+.my-obj-picker:has(.my-obj-dropdown) {
+    z-index: 20;
 }
 
 .my-obj-picker_active {
@@ -180,24 +191,20 @@
     font-style: italic;
 }
 
-/* ── Object dropdown list — absolute, anchored to .my-obj-picker ── */
-/* position:fixed + getBoundingClientRect breaks when lightning/modal applies
-   a CSS transform for centering (transform creates a new stacking context).
-   position:absolute relative to the picker (position:relative) is correct here
-   because the form is compact and the dropdown stays within the modal body. */
+/* ── Object dropdown list — absolute, overlaps content below (no clip) ── */
 .my-obj-dropdown {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
     width: 100%;
     background: #fff;
-    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
+    border: none !important;
+    outline: none;
     border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 15%);
+    box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 12%);
     z-index: 9000;
-    /* Intentional fixed max-height for scrollable list */
-    max-height: 16rem;
-    overflow-y: auto;
+    /* No max-height — full list may overlap footer; preferred over truncation */
+    overflow: visible;
 }
 
 /* ── Object option item ── */
@@ -215,7 +222,7 @@
 }
 
 .my-obj-option:hover {
-    background: #f3f3f3;
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
 }
 
 /* ════════════════════════════════
@@ -241,9 +248,10 @@
     top: calc(100% + var(--slds-g-spacing-1, 0.25rem));
     left: 0;
     background: var(--slds-g-color-surface-1, #fff);
-    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border: none !important;
+    outline: none;
     border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    box-shadow: 0 var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-4, 1rem) rgb(0 0 0 / 12%);
+    box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 12%);
     padding: var(--slds-g-spacing-2, 0.5rem);
     display: grid;
     /* No SLDS sizing hook for 4-column grid; intentional layout value */

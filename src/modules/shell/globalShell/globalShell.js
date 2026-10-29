@@ -1,7 +1,7 @@
 import { LightningElement, api } from 'lwc';
 
 export default class GlobalShell extends LightningElement {
-    @api currentPage = 'home';
+    @api currentPage = 'household-setup';
     @api navItems = [];
     @api currentAppVariant = 'standard';
     @api appItems = [];

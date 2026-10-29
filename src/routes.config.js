@@ -13,19 +13,21 @@
  */
 
 export const routes = [
+  // Bare /app prefix lands on Household Setup without a duplicate nav tab
   {
     path: '/',
-    component: 'page-home',
-    title: 'Home',
-    navPage: 'home',
-    navLabel: 'Home',
+    component: 'page-household-setup',
+    title: 'Household Setup',
+    navHighlight: 'household-setup',
+    app: 'standard',
   },
+  // Bare /console prefix lands on Contacts
   {
-    path: '/icons',
-    component: 'page-icon-test',
-    title: 'Icons',
-    navPage: 'icons',
-    navLabel: 'Icons',
+    path: '/',
+    component: 'page-contacts',
+    title: 'Contacts',
+    navHighlight: 'contacts',
+    app: 'console',
   },
   {
     path: '/contacts',

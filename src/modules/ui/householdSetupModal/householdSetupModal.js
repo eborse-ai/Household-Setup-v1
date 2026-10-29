@@ -1,5 +1,6 @@
 import LightningModal from 'lightning/modal';
 import { track } from 'lwc';
+import Toast from 'lightning/toast';
 import OrgImpactModal from 'ui/orgImpactModal';
 import AddObjectModal from 'ui/addObjectModal';
 
@@ -17,6 +18,12 @@ export default class HouseholdSetupModal extends LightningModal {
     @track orgImpactAcknowledged = false;  // true after user checks the checkbox
     @track personAccountsEnabled = false;
     @track contactsToMultipleEnabled = false;
+    @track selectedAccountRecordType = 'household';
+    accountRecordTypeOptions = [
+        { label: 'Household', value: 'household' },
+        { label: 'Business Account', value: 'business' },
+        { label: 'Person Account', value: 'person' },
+    ];
 
     // ── Section visibility getters ──
     get isSection11() { return this.activeSection === '1.1'; }
@@ -25,6 +32,7 @@ export default class HouseholdSetupModal extends LightningModal {
     get isSection14() { return this.activeSection === '1.4'; }
     get isSection21() { return this.activeSection === '2.1'; }
     get isSection22() { return this.activeSection === '2.2'; }
+    get isSection23() { return this.activeSection === '2.3'; }
     get isSection31() { return this.activeSection === '3.1'; }
     get isSection32() { return this.activeSection === '3.2'; }
 
@@ -39,6 +47,7 @@ export default class HouseholdSetupModal extends LightningModal {
     get navClass14() { return this._navClass('1.4'); }
     get navClass21() { return this._navClass('2.1'); }
     get navClass22() { return this._navClass('2.2'); }
+    get navClass23() { return this._navClass('2.3'); }
     get navClass31() { return this._navClass('3.1'); }
     get navClass32() { return this._navClass('3.2'); }
 
@@ -53,7 +62,7 @@ export default class HouseholdSetupModal extends LightningModal {
 
     _sectionItems = {
         '1': ['1.1', '1.2', '1.3', '1.4'],
-        '2': ['2.1', '2.2'],
+        '2': ['2.1', '2.2', '2.3'],
         '3': ['3.1', '3.2']
     };
 
@@ -144,6 +153,10 @@ export default class HouseholdSetupModal extends LightningModal {
 
     handleToggleRecordType() {
         this.recordTypeExpanded = !this.recordTypeExpanded;
+    }
+
+    handleAccountRecordTypeChange(event) {
+        this.selectedAccountRecordType = event.detail.value;
     }
 
     // ── Org Impact flow ──
@@ -339,6 +352,15 @@ export default class HouseholdSetupModal extends LightningModal {
         { id: 'acr5', label: 'Beneficiary', apiName: 'Beneficiary' },
         { id: 'acr6', label: 'Child', apiName: 'Child' },
     ];
+    @track activeAcrMenu = null;
+
+    get acrRolesView() {
+        return this._acrRoles.map(r => ({
+            ...r,
+            isMenuOpen: this.activeAcrMenu === r.id,
+            menuBtnClass: `my-row-menu-btn${this.activeAcrMenu === r.id ? ' my-row-menu-btn_active' : ''}`,
+        }));
+    }
 
     get acrValuesBadge() {
         return `${this._acrRoles.length} values`;
@@ -347,6 +369,10 @@ export default class HouseholdSetupModal extends LightningModal {
     get newAcrApiName() {
         if (!this.newAcrLabel) return '';
         return this.newAcrLabel.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+    }
+
+    _toApiName(label) {
+        return label.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
     }
 
     handleLearnMoreAcr(event) { event.preventDefault(); }
@@ -375,11 +401,60 @@ export default class HouseholdSetupModal extends LightningModal {
         this.newAcrLabel = '';
     }
 
+    handleAcrMenu(event) {
+        event.preventDefault();
+        const id = event.currentTarget.dataset.id;
+        this.activeAcrMenu = this.activeAcrMenu === id ? null : id;
+    }
+
+    handleEditAcrRole(event) {
+        event.preventDefault();
+        const id = event.currentTarget.dataset.id;
+        this.activeAcrMenu = null;
+        this._acrRoles = this._acrRoles.map(r =>
+            r.id === id
+                ? { ...r, isEditing: true, editLabel: r.label, editApiName: r.apiName }
+                : { ...r, isEditing: false }
+        );
+    }
+
+    handleAcrEditLabelChange(event) {
+        const id = event.currentTarget.dataset.id;
+        const val = event.target.value;
+        this._acrRoles = this._acrRoles.map(r =>
+            r.id === id ? { ...r, editLabel: val, editApiName: this._toApiName(val) } : r
+        );
+    }
+
+    handleSaveAcrRole(event) {
+        const id = event.currentTarget.dataset.id;
+        this._acrRoles = this._acrRoles.map(r =>
+            r.id === id
+                ? { ...r, label: r.editLabel, apiName: r.editApiName, isEditing: false }
+                : r
+        );
+    }
+
+    handleCancelAcrEdit(event) {
+        const id = event.currentTarget.dataset.id;
+        this._acrRoles = this._acrRoles.map(r =>
+            r.id === id ? { ...r, isEditing: false } : r
+        );
+    }
+
+    handleDeleteAcrRole(event) {
+        event.preventDefault();
+        const id = event.currentTarget.dataset.id;
+        this.activeAcrMenu = null;
+        this._acrRoles = this._acrRoles.filter(r => r.id !== id);
+    }
+
     // ── Section 1.4: Party Role Relationships ──
     @track isAddingPartyRole = false;
     @track newPartyLabel = '';
     @track newPartyInverseLabel = '';
     @track newPartyType = 'AAR';
+    @track activePartyMenu = null;
     @track _partyRoles = [
         { id: 'g1', isGroupHeader: true, groupLabel: 'CONTACT\u2013CONTACT (CCR)', rowClass: 'my-group-header-row' },
         { id: 'pr1', isGroupHeader: false, label: 'Husband', type: 'CCR', inverseLabel: 'Wife', typeBadgeClass: 'my-ccr-badge', rowClass: '' },
@@ -404,6 +479,14 @@ export default class HouseholdSetupModal extends LightningModal {
         { label: 'CCR \u2014 Contact\u2013Contact', value: 'CCR' },
         { label: 'AAR \u2014 Account\u2013Account', value: 'AAR' },
     ];
+
+    get partyRolesView() {
+        return this._partyRoles.map(r => ({
+            ...r,
+            isMenuOpen: !r.isGroupHeader && this.activePartyMenu === r.id,
+            menuBtnClass: `my-row-menu-btn${this.activePartyMenu === r.id ? ' my-row-menu-btn_active' : ''}`,
+        }));
+    }
 
     get partyValuesBadge() {
         return `${this._partyRoles.filter(r => !r.isGroupHeader).length} values`;
@@ -438,6 +521,60 @@ export default class HouseholdSetupModal extends LightningModal {
         this.newPartyLabel = '';
         this.newPartyInverseLabel = '';
         this.newPartyType = 'AAR';
+    }
+
+    handlePartyMenu(event) {
+        event.preventDefault();
+        const id = event.currentTarget.dataset.id;
+        this.activePartyMenu = this.activePartyMenu === id ? null : id;
+    }
+
+    handleEditPartyRole(event) {
+        event.preventDefault();
+        const id = event.currentTarget.dataset.id;
+        this.activePartyMenu = null;
+        this._partyRoles = this._partyRoles.map(r =>
+            r.id === id
+                ? { ...r, isEditing: true, editLabel: r.label, editInverseLabel: r.inverseLabel }
+                : { ...r, isEditing: false }
+        );
+    }
+
+    handlePartyEditLabelChange(event) {
+        const id = event.currentTarget.dataset.id;
+        this._partyRoles = this._partyRoles.map(r =>
+            r.id === id ? { ...r, editLabel: event.target.value } : r
+        );
+    }
+
+    handlePartyEditInverseLabelChange(event) {
+        const id = event.currentTarget.dataset.id;
+        this._partyRoles = this._partyRoles.map(r =>
+            r.id === id ? { ...r, editInverseLabel: event.target.value } : r
+        );
+    }
+
+    handleSavePartyRole(event) {
+        const id = event.currentTarget.dataset.id;
+        this._partyRoles = this._partyRoles.map(r =>
+            r.id === id
+                ? { ...r, label: r.editLabel, inverseLabel: r.editInverseLabel, isEditing: false }
+                : r
+        );
+    }
+
+    handleCancelPartyEdit(event) {
+        const id = event.currentTarget.dataset.id;
+        this._partyRoles = this._partyRoles.map(r =>
+            r.id === id ? { ...r, isEditing: false } : r
+        );
+    }
+
+    handleDeletePartyRole(event) {
+        event.preventDefault();
+        const id = event.currentTarget.dataset.id;
+        this.activePartyMenu = null;
+        this._partyRoles = this._partyRoles.filter(r => r.id !== id);
     }
 
     // ── Section 2.1: New Member Settings ──
@@ -475,6 +612,16 @@ export default class HouseholdSetupModal extends LightningModal {
     get selectedContactFieldPills() { return this._contactFields.filter(f => f.isSelected); }
     get selectedAcrFieldPills()     { return this._acrFields.filter(f => f.isSelected); }
 
+    _toListboxOptions(fields) {
+        return fields.map(f => ({
+            ...f,
+            optionClass: `slds-media slds-listbox__option slds-listbox__option_plain slds-media_small${f.isSelected ? ' slds-is-selected' : ''}`,
+        }));
+    }
+
+    get contactFieldOptions() { return this._toListboxOptions(this._contactFields); }
+    get acrFieldOptions()     { return this._toListboxOptions(this._acrFields); }
+
     get contactFieldsSelectedLabel() {
         const n = this.selectedContactFieldPills.length;
         return `${n} option${n !== 1 ? 's' : ''} selected`;
@@ -497,14 +644,14 @@ export default class HouseholdSetupModal extends LightningModal {
     handleContactFieldCheck(event) {
         const id = event.currentTarget.dataset.id;
         this._contactFields = this._contactFields.map(f =>
-            f.id === id ? { ...f, isSelected: event.target.checked } : f
+            f.id === id ? { ...f, isSelected: !f.isSelected } : f
         );
     }
 
     handleAcrFieldCheck(event) {
         const id = event.currentTarget.dataset.id;
         this._acrFields = this._acrFields.map(f =>
-            f.id === id ? { ...f, isSelected: event.target.checked } : f
+            f.id === id ? { ...f, isSelected: !f.isSelected } : f
         );
     }
 
@@ -556,6 +703,9 @@ export default class HouseholdSetupModal extends LightningModal {
     get selectedAccountFieldPills() { return this._accountFields.filter(f => f.isSelected); }
     get selectedPrgFieldPills()     { return this._prgFields.filter(f => f.isSelected); }
 
+    get accountFieldOptions() { return this._toListboxOptions(this._accountFields); }
+    get prgFieldOptions()     { return this._toListboxOptions(this._prgFields); }
+
     get accountFieldsSelectedLabel() {
         const n = this.selectedAccountFieldPills.length;
         return `${n} option${n !== 1 ? 's' : ''} selected`;
@@ -578,14 +728,14 @@ export default class HouseholdSetupModal extends LightningModal {
     handleAccountFieldCheck(event) {
         const id = event.currentTarget.dataset.id;
         this._accountFields = this._accountFields.map(f =>
-            f.id === id ? { ...f, isSelected: event.target.checked } : f
+            f.id === id ? { ...f, isSelected: !f.isSelected } : f
         );
     }
 
     handlePrgFieldCheck(event) {
         const id = event.currentTarget.dataset.id;
         this._prgFields = this._prgFields.map(f =>
-            f.id === id ? { ...f, isSelected: event.target.checked } : f
+            f.id === id ? { ...f, isSelected: !f.isSelected } : f
         );
     }
 
@@ -605,9 +755,81 @@ export default class HouseholdSetupModal extends LightningModal {
         );
     }
 
+    // ── Section 2.3: AI Recommendations ──
+    @track aiResearchEnabled = false;
+    @track aiConfigExpanded = true;
+    @track aiConfigActivated = false;
+    @track selectedAiConfig = 'household-recommendations';
+
+    aiConfigOptions = [
+        { label: 'Household Recommendations', value: 'household-recommendations' },
+        { label: 'Member Suggestions', value: 'member-suggestions' },
+        { label: 'Related Accounts Research', value: 'related-accounts' },
+    ];
+
+    get aiDependentClass() {
+        return `my-ai-dependent${this.aiResearchEnabled ? '' : ' my-ai-dependent_disabled'}`;
+    }
+
+    get aiConfigChevron() {
+        return this.aiConfigExpanded ? 'utility:chevrondown' : 'utility:chevronright';
+    }
+
+    get isAiConfigDisabled() {
+        return !this.aiResearchEnabled;
+    }
+
+    get aiStatusLabel() {
+        return this.aiConfigActivated ? 'Active' : 'Draft';
+    }
+
+    get aiStatusBadgeClass() {
+        return `my-ai-status-badge${this.aiConfigActivated ? ' my-ai-status-badge_active' : ''}`;
+    }
+
+    get showAiDraftBanner() {
+        return !this.aiConfigActivated;
+    }
+
+    handleAiResearchToggle(event) {
+        this.aiResearchEnabled = event.target.checked;
+    }
+
+    handleAiConfigChange(event) {
+        this.selectedAiConfig = event.detail.value;
+    }
+
+    handleToggleAiConfig(event) {
+        event.preventDefault();
+        if (!this.aiResearchEnabled) return;
+        this.aiConfigExpanded = !this.aiConfigExpanded;
+    }
+
+    handleOpenAiSetup(event) {
+        event.preventDefault();
+    }
+
+    handleReviewAiConfig() {
+        // Prototype: no-op
+    }
+
+    handleActivateAiConfig() {
+        if (this.aiConfigActivated || !this.aiResearchEnabled) return;
+        this.aiConfigActivated = true;
+        Toast.show({
+            label: 'Configuration activated',
+            message: 'Household AI Recommendations is now active.',
+            variant: 'success',
+            mode: 'dismissible',
+        });
+    }
+
     // ── Section 3.1: Objects in Timeline ──
     @track timelineSearchTerm = '';
     @track activeTimelineMenu = null;
+    @track draggingTimelineId = null;
+    @track dragOverTimelineId = null;
+    _dragTimelineId = null;
     @track _timelineObjects = [
         { id: 'tl1', num: 1, label: 'Life Event',        dotClass: 'my-dot my-dot-blue',   visible: true  },
         { id: 'tl2', num: 2, label: 'Financial Goal',    dotClass: 'my-dot my-dot-orange', visible: true  },
@@ -625,12 +847,18 @@ export default class HouseholdSetupModal extends LightningModal {
         const list = term
             ? this._timelineObjects.filter(o => o.label.toLowerCase().includes(term))
             : this._timelineObjects;
-        return list.map(obj => ({
-            ...obj,
-            rowClass: `slds-hint-parent my-timeline-row${this.activeTimelineMenu === obj.id ? ' my-timeline-row_active' : ''}`,
-            isMenuOpen: this.activeTimelineMenu === obj.id,
-            menuBtnClass: `my-row-menu-btn${this.activeTimelineMenu === obj.id ? ' my-row-menu-btn_active' : ''}`,
-        }));
+        return list.map(obj => {
+            const classes = ['slds-hint-parent', 'my-timeline-row'];
+            if (this.activeTimelineMenu === obj.id) classes.push('my-timeline-row_active');
+            if (this.draggingTimelineId === obj.id) classes.push('my-timeline-row_dragging');
+            if (this.dragOverTimelineId === obj.id) classes.push('my-timeline-row_dragover');
+            return {
+                ...obj,
+                rowClass: classes.join(' '),
+                isMenuOpen: this.activeTimelineMenu === obj.id,
+                menuBtnClass: `my-row-menu-btn${this.activeTimelineMenu === obj.id ? ' my-row-menu-btn_active' : ''}`,
+            };
+        });
     }
 
     handleTimelineSearch(event)  { this.timelineSearchTerm = event.target.value; }
@@ -662,13 +890,86 @@ export default class HouseholdSetupModal extends LightningModal {
         this.activeTimelineMenu = null;
     }
 
+    handleTimelineDragStart(event) {
+        // Don't start a drag from toggles or row-action controls
+        if (event.target.closest('button, lightning-input, lightning-button, a, input')) {
+            event.preventDefault();
+            return;
+        }
+        const id = event.currentTarget.dataset.id;
+        this._dragTimelineId = id;
+        this.draggingTimelineId = id;
+        this.activeTimelineMenu = null;
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', id);
+    }
+
+    handleTimelineDragOver(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+    }
+
+    handleTimelineDragEnter(event) {
+        event.preventDefault();
+        const id = event.currentTarget.dataset.id;
+        if (id && id !== this._dragTimelineId) {
+            this.dragOverTimelineId = id;
+        }
+    }
+
+    handleTimelineDragLeave(event) {
+        const related = event.relatedTarget;
+        if (related && event.currentTarget.contains(related)) return;
+        if (this.dragOverTimelineId === event.currentTarget.dataset.id) {
+            this.dragOverTimelineId = null;
+        }
+    }
+
+    handleTimelineDrop(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const targetId = event.currentTarget.dataset.id;
+        const sourceId = this._dragTimelineId || event.dataTransfer.getData('text/plain');
+        if (!sourceId || !targetId || sourceId === targetId) {
+            this._clearTimelineDrag();
+            return;
+        }
+        const list = [...this._timelineObjects];
+        const fromIndex = list.findIndex(o => o.id === sourceId);
+        const toIndex = list.findIndex(o => o.id === targetId);
+        if (fromIndex < 0 || toIndex < 0) {
+            this._clearTimelineDrag();
+            return;
+        }
+        const [moved] = list.splice(fromIndex, 1);
+        list.splice(toIndex, 0, moved);
+        this._timelineObjects = list.map((o, i) => ({ ...o, num: i + 1 }));
+        this._clearTimelineDrag();
+    }
+
+    handleTimelineDragEnd() {
+        this._clearTimelineDrag();
+    }
+
+    _clearTimelineDrag() {
+        this._dragTimelineId = null;
+        this.draggingTimelineId = null;
+        this.dragOverTimelineId = null;
+    }
+
     async handleAddTimelineObject() {
         this.activeTimelineMenu = null;
         // Collect colors already assigned so the palette can hide them
         const usedColors = this._timelineObjects
             .map(o => o.dotClass.split(' ').find(c => c.startsWith('my-dot-')))
             .filter(Boolean);
-        const result = await AddObjectModal.open({ size: 'small', label: 'Add Object', usedColors });
+        const usedLabels = this._timelineObjects.map(o => o.label);
+        const result = await AddObjectModal.open({
+            size: 'small',
+            label: 'Add Object',
+            usedColors,
+            usedLabels,
+        });
         if (result) {
             const newId = `tl${Date.now()}`;
             const num = this._timelineObjects.length + 1;
@@ -812,7 +1113,31 @@ export default class HouseholdSetupModal extends LightningModal {
     }
 
     // ── Footer ──
+    _sectionOrder = ['1.1', '1.2', '1.3', '1.4', '2.1', '2.2', '2.3', '3.1', '3.2'];
+
+    get isLastSection() {
+        return this.activeSection === '3.2';
+    }
+
+    get saveButtonLabel() {
+        return this.isLastSection ? 'Save and finish' : 'Save & Next';
+    }
+
     handleSaveNext() {
-        this.close({ section: this.activeSection });
+        if (this.isLastSection) {
+            Toast.show({
+                label: 'Setup successful',
+                message: 'Household setup completed successfully.',
+                variant: 'success',
+                mode: 'dismissible',
+            });
+            this.close({ section: this.activeSection, finished: true });
+            return;
+        }
+
+        const idx = this._sectionOrder.indexOf(this.activeSection);
+        if (idx >= 0 && idx < this._sectionOrder.length - 1) {
+            this.activeSection = this._sectionOrder[idx + 1];
+        }
     }
 }

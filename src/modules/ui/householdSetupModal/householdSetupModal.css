@@ -1,15 +1,26 @@
-/* ── Modal two-column layout ── */
+/* ── Modal two-column layout + shared dropdown tokens ── */
 .my-modal-layout {
     /* No SLDS sizing hook for this fixed modal height; intentional layout value */
     height: 34rem;
     align-items: stretch;
     overflow: hidden;
+    /* Match Household Recommendations combobox: darker outline + larger radius */
+    --my-dropdown-border-color: #5c5c5c;
+    --my-dropdown-radius: var(--slds-g-radius-border-2, 0.5rem);
+    /* Open menus: no outline — soft drop shadow only (no perimeter ring) */
+    --my-dropdown-menu-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 12%);
+    --my-dropdown-menu-hover: var(--slds-g-color-accent-light-1, #e8f4fd);
+    /* Pass through to lightning-combobox / lightning-input */
+    --slds-c-input-color-border: var(--my-dropdown-border-color);
+    --slds-c-input-radius-border: var(--my-dropdown-radius);
+    --slds-c-inputtext-color-border: var(--my-dropdown-border-color);
+    --slds-c-inputtext-radius-border: var(--my-dropdown-radius);
 }
 
 /* ── Left stepper navigation panel ── */
 .my-setup-nav {
-    /* Intentional fixed width; no SLDS sizing hook for this nav panel */
-    width: 14rem;
+    /* Intentional fixed width; no SLDS sizing hook for this nav panel (+10% for readability) */
+    width: 14.3rem;
     flex-shrink: 0;
     border-right: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
     padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-3, 0.75rem);
@@ -28,14 +39,14 @@
     flex-direction: column;
     align-items: center;
     flex-shrink: 0;
-    /* Intentional fixed width to match circle size */
-    width: 2.25rem;
+    /* Matches smaller circle diameter */
+    width: 1.5rem;
 }
 
 .my-step-circle {
-    /* Intentional fixed size for stepper circles */
-    width: 2.25rem;
-    height: 2.25rem;
+    /* Compact stepper circle — closer to SLDS progress-indicator size */
+    width: 1.5rem;
+    height: 1.5rem;
     border-radius: var(--slds-g-radius-border-circle, 100%);
     border: none;
     background: #f3f3f3; /* hardcoded; token resolves inconsistently in this env */
@@ -43,7 +54,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
     font-weight: 600;
     color: var(--slds-g-color-on-surface-3, #03234d);
     line-height: 1;
@@ -62,9 +73,8 @@
 
 .my-step-line {
     flex: 1;
-    /* Intentional fixed width for connector line */
-    width: 2px;
-    min-height: var(--slds-g-spacing-3, 0.75rem);
+    width: var(--slds-g-sizing-border-1, 1px);
+    min-height: var(--slds-g-spacing-2, 0.5rem);
     background: var(--slds-g-color-on-surface-3, #03234d);
     margin: var(--slds-g-spacing-1, 0.25rem) 0;
 }
@@ -72,22 +82,28 @@
 /* ── Right content: step label + sub-items ── */
 .my-step-content {
     flex: 1;
-    padding-bottom: var(--slds-g-spacing-3, 0.75rem);
+    padding-bottom: var(--slds-g-spacing-2, 0.5rem);
     min-width: 0;
 }
 
 .my-step-label {
     display: block;
-    padding-top: var(--slds-g-spacing-1, 0.25rem);
+    /* Align label with the smaller circle */
+    padding-top: 0.125rem;
     padding-bottom: var(--slds-g-spacing-2, 0.5rem);
     font-size: var(--slds-g-font-scale-1, 0.875rem);
-    font-weight: 400;
+    font-weight: var(--slds-g-font-weight-4, 400);
     color: var(--slds-g-color-on-surface-3, #03234d);
     cursor: pointer;
+    line-height: 1.25rem;
 }
 
 .my-step-label:hover {
     color: var(--slds-g-color-brand-base-60, #0176d3);
+}
+
+.my-step-label_active {
+    font-weight: var(--slds-g-font-weight-7, 700);
 }
 
 /* ── Sub-item list ── */
@@ -102,12 +118,13 @@
     align-items: center;
     padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem);
     cursor: pointer;
-    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
-    font-weight: 400;
+    /* Same size as step labels; only the selected item is bold */
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-4, 400);
     color: var(--slds-g-color-on-surface-3, #03234d);
     border-radius: var(--slds-g-radius-border-2, 0.5rem);
     margin-bottom: var(--slds-g-spacing-1, 0.25rem);
-    line-height: 1.4;
+    line-height: 1.25rem;
 }
 
 .my-nav-sub-item:hover {
@@ -116,7 +133,7 @@
 
 .my-nav-sub-item_active {
     background: var(--slds-g-color-accent-light-1, #e8f4fd);
-    font-weight: 600; /* no SLDS hook available */
+    font-weight: var(--slds-g-font-weight-7, 700);
 }
 
 /* ── Right content panel ── */
@@ -173,20 +190,18 @@
 /* ── Section 1.3: Permission set card ── */
 .my-perm-card {
     border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: 0;
-    overflow: hidden;
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
     background: var(--slds-g-color-surface-1, #fff);
+    overflow: hidden;
 }
 
 .my-perm-header {
     padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
-    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
 }
 
 .my-perm-desc-bar {
     padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-5, 1.5rem);
     background: var(--slds-g-color-surface-container-1, #f3f3f3);
-    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
 }
 
 .my-perm-tabs {
@@ -221,9 +236,10 @@
     left: 0;
     z-index: 9000;
     background: var(--slds-g-color-surface-1, #fff);
-    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    box-shadow: 0 var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-5, 1.5rem) rgb(0 0 0 / 15%);
+    border: none !important;
+    outline: none;
+    border-radius: var(--my-dropdown-radius, 0.5rem);
+    box-shadow: var(--my-dropdown-menu-shadow);
     /* No SLDS hook for this dropdown width; intentional layout value */
     min-width: 18rem;
     margin-top: var(--slds-g-spacing-1, 0.25rem);
@@ -241,11 +257,11 @@
 }
 
 .my-dropdown-item:hover {
-    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+    background: var(--my-dropdown-menu-hover);
 }
 
 .my-dropdown-item_selected {
-    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+    background: var(--my-dropdown-menu-hover);
     font-weight: var(--slds-g-font-weight-6, 600);
 }
 
@@ -322,25 +338,28 @@
 
 /* ── "Turn on Person Accounts" toggle card ── */
 .my-toggle-main-card {
-    background: var(--slds-g-color-surface-1, #fff);
-    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    /* Match Contacts-to-Multiple feature card blue tint */
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+    border: none;
     border-radius: var(--slds-g-radius-border-2, 0.5rem);
     padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
 }
 
-/* ── Pre-req warning bar ── */
+/* ── Pre-req warning bar (sits inside the grey card; no extra chrome) ── */
 .my-warning-row {
     display: flex;
     align-items: center;
-    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
-    background: var(--slds-g-color-warning-container-1, #fef3c7);
-    border-radius: var(--slds-g-radius-border-1, 0.25rem);
-    color: var(--slds-g-color-warning-1, #92400e);
+    padding: var(--slds-g-spacing-2, 0.5rem) 0 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
     font-size: var(--slds-g-font-scale-1, 0.875rem);
 }
 
 .my-warning-icon {
-    color: var(--slds-g-color-warning-1, #92400e);
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-2, #2e2e2e);
+    --slds-c-icon-color-foreground: var(--slds-g-color-on-surface-2, #2e2e2e);
     flex-shrink: 0;
 }
 
@@ -387,7 +406,7 @@
 /* ── Feature card (light blue tinted background) ── */
 .my-feature-card {
     background: var(--slds-g-color-accent-light-1, #e8f4fd);
-    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border: none;
     border-radius: var(--slds-g-radius-border-2, 0.5rem);
     padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
 }
@@ -406,12 +425,44 @@
    ════════════════════════════════════ */
 
 /* ── Card shell ── */
-/* No border-radius: prevents the "arch" artefact where table cell borders
-   are clipped at a rounded corner by overflow:hidden */
+/* overflow:hidden clips children to the radius so corners read as rounded.
+   Outer table borders are stripped below to avoid the concave "arch" artefact. */
 .my-roles-card {
     border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: 0;
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: var(--slds-g-color-surface-1, #fff);
     overflow: hidden;
+}
+
+/* Drop the table's outer perimeter so only the card border forms the chrome;
+   keeps internal grid lines without doubling/arching at the rounded edge. */
+.my-roles-card .slds-table_bordered {
+    border: none;
+}
+
+.my-roles-card .slds-table_bordered th:first-child,
+.my-roles-card .slds-table_bordered td:first-child {
+    border-left: none;
+}
+
+.my-roles-card .slds-table_bordered th:last-child,
+.my-roles-card .slds-table_bordered td:last-child {
+    border-right: none;
+}
+
+/* Kill SLDS bordered-table dark hover line under the selected/hovered row */
+.my-roles-card .slds-table_bordered tbody tr:hover > td,
+.my-roles-card .slds-table_bordered tbody tr:hover > th,
+.my-roles-card .slds-table_bordered tbody tr:focus > td,
+.my-roles-card .slds-table_bordered tbody tr:focus > th {
+    box-shadow: none;
+}
+
+.my-roles-card .slds-table_bordered tbody tr:hover + tr > td,
+.my-roles-card .slds-table_bordered tbody tr:hover + tr > th,
+.my-roles-card .slds-table_bordered tbody tr:focus + tr > td,
+.my-roles-card .slds-table_bordered tbody tr:focus + tr > th {
+    border-color: var(--slds-g-color-border-1, #c9c9c9);
 }
 
 /* ── Card header row ── */
@@ -566,7 +617,7 @@
     position: relative;
 }
 
-/* ── Dropdown trigger button (looks like a select input) ── */
+/* ── Dropdown trigger — shared modal dropdown chrome ── */
 .my-multiselect-trigger {
     display: flex;
     align-items: center;
@@ -575,51 +626,80 @@
     /* Intentional fixed values; sizing/spacing tokens resolve too large in this env */
     padding: 0 0.75rem;
     height: 2.25rem;
-    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    background: #fff;
+    border: 1px solid var(--my-dropdown-border-color, #5c5c5c);
+    border-radius: var(--my-dropdown-radius, 0.5rem);
+    background: var(--slds-g-color-surface-1, #fff);
     cursor: pointer;
     text-align: left;
     font-size: var(--slds-g-font-scale-1, 0.875rem);
-    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: var(--slds-g-color-on-surface-2, #181818);
+    box-sizing: border-box;
 }
 
 .my-multiselect-trigger:hover {
-    border-color: var(--slds-g-color-border-accent-1, #066afe);
+    border-color: var(--my-dropdown-border-color, #5c5c5c);
+}
+
+.my-multiselect-trigger:focus {
+    outline: none;
+    border-color: var(--slds-g-color-border-accent-1, #0176d3);
+    box-shadow: var(--slds-g-color-border-accent-1, #0176d3) 0 0 0 1px;
 }
 
 .my-multiselect-chevron {
     flex-shrink: 0;
     margin-left: var(--slds-g-spacing-2, 0.5rem);
-    color: var(--slds-g-color-on-surface-2, #3e3e3c);
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #747474);
+    --slds-c-icon-color-foreground: var(--slds-g-color-on-surface-1, #747474);
 }
 
-/* ── Floating dropdown list ── */
+/* ── Floating dropdown list (SLDS 2 listbox) — no outline, soft shadow ── */
+ul.slds-listbox.slds-listbox_vertical.my-multiselect-dropdown,
+ul.my-multiselect-dropdown,
 .my-multiselect-dropdown {
     position: absolute;
     top: calc(100% + var(--slds-g-spacing-1, 0.25rem));
     left: 0;
     width: 100%;
+    margin: 0;
+    padding: var(--slds-g-spacing-1, 0.25rem) 0;
+    list-style: none;
     background: var(--slds-g-color-surface-1, #fff);
-    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    box-shadow: 0 var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-5, 1.5rem) rgb(0 0 0 / 15%);
+    border: none !important;
+    outline: none !important;
+    box-shadow: var(--my-dropdown-menu-shadow);
+    border-radius: var(--my-dropdown-radius, 0.5rem);
     z-index: 100;
     /* No SLDS sizing hook for dropdown max-height; intentional layout value */
     max-height: 14rem;
     overflow-y: auto;
 }
 
-/* ── Individual checkbox option in the dropdown ── */
-.my-multiselect-option {
-    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+/* Match SLDS listbox option density; keep label regular weight */
+.my-multiselect-dropdown .slds-listbox__option {
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: var(--slds-g-color-on-surface-2, #181818);
     cursor: pointer;
-    font-size: var(--slds-g-font-scale-2, 1rem);
-    color: var(--slds-g-color-on-surface-2, #2e2e2e);
 }
 
-.my-multiselect-option:hover {
-    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+.my-multiselect-dropdown .slds-listbox__option:hover,
+.my-multiselect-dropdown .slds-listbox__option:focus {
+    background: var(--my-dropdown-menu-hover);
+    outline: none;
+}
+
+.my-multiselect-check {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-border-accent-1, #0176d3);
+    --slds-c-icon-color-foreground: var(--slds-g-color-border-accent-1, #0176d3);
+}
+
+.my-multiselect-dropdown .slds-listbox__option-icon {
+    /* Reserve checkmark column so unselected rows stay aligned */
+    width: 1.25rem;
+    margin-right: var(--slds-g-spacing-2, 0.5rem);
 }
 
 /* ── Pills row ── */
@@ -629,13 +709,13 @@
     gap: var(--slds-g-spacing-2, 0.5rem);
 }
 
-/* ── Custom pill (blue label + blue remove, no slds-pill override) ── */
+/* ── Custom pill (reverted pre-SLDS-polish styling) ── */
 .my-pill {
     display: inline-flex;
     align-items: center;
     gap: var(--slds-g-spacing-1, 0.25rem);
     padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-3, 0.75rem);
-    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border: 1px solid var(--my-dropdown-border-color, #5c5c5c);
     border-radius: 999px; /* intentional pill shape */
     background: var(--slds-g-color-surface-1, #fff);
     vertical-align: middle;
@@ -689,16 +769,33 @@
 .my-num-col   { width: var(--slds-g-spacing-6, 2rem); color: var(--slds-g-color-on-surface-3, #706e6b); }
 .my-actions-col { width: var(--slds-g-spacing-7, 2.5rem); text-align: right; }
 
-/* ── Drag handle icon — always present, fades in on row hover ── */
+/* ── Drag handle — always visible so reorder is discoverable ── */
 .my-drag-handle {
-    opacity: 0;
     cursor: grab;
-    color: var(--slds-g-color-on-surface-3, #706e6b);
+    color: var(--slds-g-color-on-surface-1, #747474);
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #747474);
+    --slds-c-icon-color-foreground: var(--slds-g-color-on-surface-1, #747474);
 }
 
-.my-timeline-row:hover .my-drag-handle,
-.my-timeline-row_active .my-drag-handle {
-    opacity: 1;
+.my-timeline-row {
+    cursor: grab;
+    outline: none;
+}
+
+/* Soft hover fill without the SLDS bordered-table dark top/bottom line */
+.my-timeline-table.slds-no-row-hover tbody .my-timeline-row:hover > td,
+.my-timeline-table.slds-no-row-hover tbody .my-timeline-row:hover > th {
+    background-color: var(--slds-g-color-surface-container-2, #f3f3f3);
+    box-shadow: none;
+}
+
+.my-timeline-row_dragging {
+    opacity: 0.45;
+    cursor: grabbing;
+}
+
+.my-timeline-row_dragover {
+    box-shadow: inset 0 2px 0 var(--slds-g-color-border-accent-1, #066afe);
 }
 
 /* ── Highlighted row (when its menu is open) ── */
@@ -720,30 +817,66 @@
 .my-dot-orange { background: var(--slds-g-color-palette-orange-65, #ff8c00); }
 .my-dot-green  { background: var(--slds-g-color-palette-green-70, #4bca81); }
 .my-dot-purple { background: var(--slds-g-color-palette-purple-50, #9c5db5); }
+.my-dot-red    { background: var(--slds-g-color-error-1, #ea001e); }
+.my-dot-teal   { background: var(--slds-g-color-success-1, #0b7477); }
+.my-dot-yellow { background: var(--slds-g-color-warning-1, #c97a00); }
+.my-dot-navy   { background: var(--slds-g-color-on-surface-3, #16325c); }
+.my-dot-gray   { background: var(--slds-g-color-surface-container-2, #b0adab); }
 
-/* ── Row ⋮ menu button ── */
+/* ── Row ⋮ menu button — always visible, bare SLDS 2 utility:more (no circle) ── */
 .my-row-menu-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: var(--slds-g-sizing-8, 1.75rem);
     height: var(--slds-g-sizing-8, 1.75rem);
-    background: none;
-    border: var(--slds-g-sizing-border-1, 1px) solid transparent;
+    padding: 0;
+    background: transparent;
+    border: none;
     border-radius: var(--slds-g-radius-border-1, 0.25rem);
     cursor: pointer;
-    color: var(--slds-g-color-on-surface-3, #706e6b);
-    opacity: 0;
+    color: var(--slds-g-color-on-surface-1, #747474);
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #747474);
+    --slds-c-icon-color-foreground: var(--slds-g-color-on-surface-1, #747474);
 }
 
-.my-timeline-row:hover .my-row-menu-btn,
-.my-timeline-row_active .my-row-menu-btn {
-    opacity: 1;
-}
-
+.my-row-menu-btn:hover,
 .my-row-menu-btn_active {
-    border-color: var(--slds-g-color-border-accent-1, #066afe);
-    opacity: 1;
+    background: transparent;
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-2, #2e2e2e);
+    --slds-c-icon-color-foreground: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+/* ── Roles/Party table row actions column ── */
+.my-row-actions-col {
+    width: 3rem;
+    text-align: right;
+}
+
+/* ── Destructive menu item (Delete) ── */
+.my-row-menu-item_destructive {
+    color: #c23934;
+}
+
+/* ── Inline edit row (edit mode) ── */
+.my-inline-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.my-inline-edit-api {
+    white-space: nowrap;
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    font-size: 0.875rem;
+}
+
+.my-inline-edit-actions {
+    display: flex;
+    gap: 0.375rem;
+    justify-content: flex-end;
+    white-space: nowrap;
 }
 
 /* ── Dropdown menu (Edit / Remove) ── */
@@ -758,9 +891,10 @@
     top: calc(100% + var(--slds-g-spacing-1, 0.25rem));
     right: 0;
     background: var(--slds-g-color-surface-1, #fff);
-    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    box-shadow: 0 var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-4, 1rem) rgb(0 0 0 / 12%);
+    border: none !important;
+    outline: none;
+    border-radius: var(--my-dropdown-radius, 0.5rem);
+    box-shadow: var(--my-dropdown-menu-shadow);
     z-index: 200;
     /* No SLDS sizing hook for this dropdown min-width; intentional layout value */
     min-width: 8rem; /* stylelint-disable-line */
@@ -790,11 +924,12 @@
     overflow: visible;
 }
 
-/* Left: standalone card mockup — sized to pill row only */
+/* Left: standalone card mockup — fixed width, 40% narrower than natural size */
 .my-preview-diagram {
-    /* flex: 0 0 auto lets the card size to max-content without token interference */
     flex: 0 0 auto;
-    /* Intentional fixed padding; token resolves too large in this env */
+    /* Intentional hardcoded width; natural sizing via tokens resolves too wide */
+    width: 17rem;
+    overflow: hidden;
     padding: 0.75rem;
     background: #fff;
     border: 1px solid #d8d8d8;
@@ -836,7 +971,7 @@
 /* Orange highlight pills in diagram */
 .my-preview-pills {
     display: flex;
-    flex-wrap: nowrap; /* keep all 4 on one row so card width = pill row width */
+    flex-wrap: wrap;
     /* Intentional fixed gap; token resolves too large */
     gap: 0.375rem;
 }
@@ -878,15 +1013,10 @@
 .my-preview-bar {
     display: block;
     height: 0.5rem;
-    flex: 0 0 auto;
-    /* Intentional shorter width to stay within pill-row bounds */
-    width: 6rem;
+    flex: 1 1 0; /* equal 50/50 columns */
+    min-width: 0;
     border-radius: 0.25rem;
     background: #b8b8b8;
-}
-
-.my-preview-bar_short {
-    width: 3rem;
 }
 
 /* Right: annotation-style descriptions with dashed left connector */
@@ -992,10 +1122,8 @@
 }
 
 /* ── Add field row ── */
-/* ── Allow dropdown to escape card bounds in the detail panel section ── */
-.my-detail-section-card {
-    overflow: visible;
-}
+/* Inherits .my-roles-card radius + overflow:hidden so corners stay consistent.
+   Add-field dropdown opens upward within the card, so it does not need to escape. */
 
 .my-add-field-row {
     display: flex;
@@ -1026,18 +1154,25 @@
     min-width: 14rem;
     /* Zero vertical padding; height governs the row size */
     padding: 0 0.75rem;
-    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    background: #fff;
+    border: 1px solid var(--my-dropdown-border-color, #5c5c5c);
+    border-radius: var(--my-dropdown-radius, 0.5rem);
+    background: var(--slds-g-color-surface-1, #fff);
     cursor: pointer;
     font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-4, 400);
     color: var(--slds-g-color-on-surface-2, #2e2e2e);
     /* Standard SLDS 2 input height; hardcoded — sizing token resolves too large */
     height: 2.25rem;
 }
 
 .my-add-field-trigger:hover {
-    border-color: var(--slds-g-color-border-accent-1, #066afe);
+    border-color: var(--my-dropdown-border-color, #5c5c5c);
+}
+
+.my-add-field-trigger:focus {
+    outline: none;
+    border-color: var(--slds-g-color-border-accent-1, #0176d3);
+    box-shadow: 0 0 0 1px var(--slds-g-color-border-accent-1, #0176d3);
 }
 
 .my-add-field-placeholder {
@@ -1053,10 +1188,11 @@
     left: 0;
     /* Intentional fixed min-width matching trigger */
     min-width: 14rem;
-    background: #fff;
-    border: 1px solid var(--slds-g-color-border-1, #c9c9c9);
-    border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    box-shadow: 0 -0.25rem 1rem rgb(0 0 0 / 15%);
+    background: var(--slds-g-color-surface-1, #fff);
+    border: none !important;
+    outline: none;
+    border-radius: var(--my-dropdown-radius, 0.5rem);
+    box-shadow: var(--my-dropdown-menu-shadow);
     z-index: 200;
     overflow: hidden;
 }
@@ -1079,7 +1215,7 @@
 }
 
 .my-add-field-option:hover {
-    background: #f3f3f3;
+    background: var(--my-dropdown-menu-hover, #e8f4fd);
 }
 
 .my-add-field-empty {
@@ -1104,5 +1240,160 @@
 }
 
 .my-row-menu-item:hover {
-    background: var(--slds-g-color-surface-container-1, #f3f3f3);
+    background: var(--my-dropdown-menu-hover, #e8f4fd);
+}
+
+/* ═══════════════════════════════════════
+   Section 2.3 – AI Recommendations
+   ═══════════════════════════════════════ */
+
+.my-ai-card {
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: var(--slds-g-color-surface-1, #fff);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.5rem);
+    overflow: hidden;
+}
+
+.my-ai-card-title {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-ai-credit-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: #fbf3e0; /* warning surface; token resolves inconsistently */
+    border: var(--slds-g-sizing-border-1, 1px) solid #f5d480;
+}
+
+.my-ai-credit-banner p {
+    margin: 0;
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-ai-credit-icon {
+    flex-shrink: 0;
+    --slds-c-icon-color-foreground-default: #dd7a01;
+    --slds-c-icon-color-foreground: #dd7a01;
+}
+
+/* Lower sections inactive until AI pref is enabled */
+.my-ai-dependent_disabled {
+    opacity: 0.45;
+    pointer-events: none;
+    user-select: none;
+}
+
+.my-ai-feature-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-3, 0.75rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: var(--slds-g-color-accent-light-1, #e8f4fd);
+    color: var(--slds-g-color-on-surface-3, #03234d);
+}
+
+.my-ai-external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: var(--slds-g-color-border-accent-1, #066afe);
+    text-decoration: none;
+}
+
+.my-ai-external-link:hover {
+    text-decoration: underline;
+}
+
+.my-ai-external-icon {
+    flex-shrink: 0;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-border-accent-1, #066afe);
+    --slds-c-icon-color-foreground: var(--slds-g-color-border-accent-1, #066afe);
+}
+
+.my-ai-success-icon {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-success-1, #2e844a);
+    --slds-c-icon-color-foreground: var(--slds-g-color-success-1, #2e844a);
+}
+
+.my-ai-einstein-icon {
+    --slds-c-icon-color-foreground-default: #5867e8;
+    --slds-c-icon-color-foreground: #5867e8;
+}
+
+.my-ai-config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.my-ai-config-body {
+    margin-top: var(--slds-g-spacing-4, 1rem);
+    padding-top: var(--slds-g-spacing-3, 0.75rem);
+    border-top: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.my-ai-meta {
+    margin: 0;
+}
+
+.my-ai-meta-row {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) 0;
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #e5e5e5);
+}
+
+.my-ai-meta-row:last-child {
+    border-bottom: none;
+}
+
+.my-ai-meta-row dt {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-ai-meta-row dd {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.my-ai-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: #f9e3b6;
+    color: #8c4b02;
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+.my-ai-status-badge_active {
+    background: var(--slds-g-color-success-container-1, #cdefc4);
+    color: var(--slds-g-color-success-1, #2e844a);
+}
+
+.my-ai-draft-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    margin-top: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    background: #fbf3e0;
+    border: var(--slds-g-sizing-border-1, 1px) solid #f5d480;
 }

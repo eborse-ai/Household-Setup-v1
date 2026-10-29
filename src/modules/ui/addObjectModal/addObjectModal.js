@@ -3,8 +3,9 @@ import LightningModal from 'lightning/modal';
 
 export default class AddObjectModal extends LightningModal {
 
-    // Colors already assigned to existing timeline objects — passed via open()
+    // Colors / labels already on the timeline — passed via open()
     @api usedColors = [];
+    @api usedLabels = [];
 
     @track selectedObject  = '';
     @track selectedColorClass = 'my-dot-gray';
@@ -14,18 +15,24 @@ export default class AddObjectModal extends LightningModal {
     @track relationshipField = '';
     @track visibleByDefault = true;
 
-    objectChoices = [
+    _objectChoices = [
         { value: 'LifeEvent',       label: 'Life Event',        apiName: 'FinServ__LifeEvent__c',       defaultColorClass: 'my-dot-blue'   },
         { value: 'FinancialGoal',   label: 'Financial Goal',    apiName: 'FinServ__FinancialGoal__c',   defaultColorClass: 'my-dot-orange' },
         { value: 'FinancialProd',   label: 'Financial Product', apiName: 'FinServ__FinancialAccount__c',defaultColorClass: 'my-dot-green'  },
         { value: 'Opportunity',     label: 'Opportunity',       apiName: 'Opportunity',                 defaultColorClass: 'my-dot-purple' },
-        { value: 'Case',            label: 'Case',              apiName: 'Case',                        defaultColorClass: 'my-dot-purple' },
+        { value: 'Case',            label: 'Case',              apiName: 'Case',                        defaultColorClass: 'my-dot-red'    },
         { value: 'Task',            label: 'Task',              apiName: 'Task',                        defaultColorClass: 'my-dot-yellow' },
-        { value: 'Event',           label: 'Event',             apiName: 'Event',                       defaultColorClass: 'my-dot-red'    },
-        { value: 'Lead',            label: 'Lead',              apiName: 'Lead',                        defaultColorClass: 'my-dot-orange' },
-        { value: 'Contact',         label: 'Contact',           apiName: 'Contact',                     defaultColorClass: 'my-dot-blue'   },
+        { value: 'Event',           label: 'Event',             apiName: 'Event',                       defaultColorClass: 'my-dot-navy'   },
+        { value: 'Lead',            label: 'Lead',              apiName: 'Lead',                        defaultColorClass: 'my-dot-teal'   },
+        { value: 'Contact',         label: 'Contact',           apiName: 'Contact',                     defaultColorClass: 'my-dot-navy'   },
         { value: 'CampaignMember',  label: 'Campaign Member',   apiName: 'CampaignMember',              defaultColorClass: 'my-dot-teal'   },
     ];
+
+    // Hide objects already present on the timeline
+    get objectChoices() {
+        const used = new Set((this.usedLabels || []).map(l => l.toLowerCase()));
+        return this._objectChoices.filter(o => !used.has(o.label.toLowerCase()));
+    }
 
     colorPalette = [
         { id: 'c1', colorClass: 'my-dot-blue',   label: 'Blue',   btnClass: 'my-color-swatch my-dot-blue'   },
@@ -54,16 +61,31 @@ export default class AddObjectModal extends LightningModal {
     ];
 
     get selectedObjData() {
-        return this.objectChoices.find(o => o.value === this.selectedObject) || null;
+        return this._objectChoices.find(o => o.value === this.selectedObject) || null;
     }
 
     get selectedSwatchClass() {
         return `my-swatch-dot ${this.selectedColorClass}`;
     }
 
+    get _usedColorSet() {
+        return new Set(this.usedColors || []);
+    }
+
     // Colors already in use are hidden from the palette
     get availableColors() {
-        return this.colorPalette.filter(c => !this.usedColors.includes(c.colorClass));
+        const used = this._usedColorSet;
+        return this.colorPalette.filter(c => !used.has(c.colorClass));
+    }
+
+    /** Prefer the object's default color when free; otherwise first unused swatch. */
+    _resolveAvailableColor(preferred) {
+        const used = this._usedColorSet;
+        if (preferred && preferred !== 'my-dot-gray' && !used.has(preferred)) {
+            return preferred;
+        }
+        const next = this.colorPalette.find(c => !used.has(c.colorClass));
+        return next ? next.colorClass : 'my-dot-gray';
     }
 
     get objPickerClass() {
@@ -96,7 +118,10 @@ export default class AddObjectModal extends LightningModal {
     handleColorPickerToggle(event) {
         event.preventDefault();
         this.colorPickerOpen = !this.colorPickerOpen;
-        this.objectDropdownOpen = false;
+        if (this.objectDropdownOpen) {
+            this.objectDropdownOpen = false;
+            this._setModalBodyOverflow('');
+        }
     }
 
     handleSelectColor(event) {
@@ -109,14 +134,31 @@ export default class AddObjectModal extends LightningModal {
         event.preventDefault();
         this.objectDropdownOpen = !this.objectDropdownOpen;
         this.colorPickerOpen = false;
+        // Modal body clips absolute menus by default — allow overlap while open
+        this._setModalBodyOverflow(this.objectDropdownOpen ? 'visible' : '');
     }
 
     handleSelectObject(event) {
         event.preventDefault();
         this.selectedObject    = event.currentTarget.dataset.value;
         this.objectDropdownOpen = false;
-        const obj = this.objectChoices.find(o => o.value === this.selectedObject);
-        if (obj) this.selectedColorClass = obj.defaultColorClass;
+        this._setModalBodyOverflow('');
+        const obj = this._objectChoices.find(o => o.value === this.selectedObject);
+        const preferred = obj
+            ? obj.defaultColorClass
+            : (event.currentTarget.dataset.colorClass || 'my-dot-gray');
+        this.selectedColorClass = this._resolveAvailableColor(preferred);
+    }
+
+    handleAddObject() {
+        if (!this.selectedObject) return;
+        // Never close with a color already on the timeline
+        const colorClass = this._resolveAvailableColor(this.selectedColorClass);
+        this.close({
+            label:      this.selectedObjData.label,
+            colorClass,
+            visible:    this.visibleByDefault,
+        });
     }
 
     handleDateFieldChange(event)        { this.dateField = event.detail.value; }
@@ -125,12 +167,18 @@ export default class AddObjectModal extends LightningModal {
 
     handleCancel()  { this.close(null); }
 
-    handleAddObject() {
-        if (!this.selectedObject) return;
-        this.close({
-            label:      this.selectedObjData.label,
-            colorClass: this.selectedColorClass,
-            visible:    this.visibleByDefault,
+    _setModalBodyOverflow(value) {
+        // Reach the slotted modal-body content node (shadow part) so the list can overlap
+        requestAnimationFrame(() => {
+            const bodyHost = this.template.querySelector('lightning-modal-body');
+            const content = bodyHost && (
+                bodyHost.shadowRoot?.querySelector('[part="modal-body"]') ||
+                bodyHost.querySelector?.('[part="modal-body"]')
+            );
+            if (content) {
+                content.style.overflow = value || '';
+                content.style.overflowY = value || '';
+            }
         });
     }
 }
